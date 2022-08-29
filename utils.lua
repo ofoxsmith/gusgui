@@ -1,3 +1,8 @@
+-- http://lua-users.org/wiki/StringTrim
+function trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+ end
+ 
 function clone(t)
     local new = {};
     for k,v in pairs(t) do new[k] = v end;
@@ -18,7 +23,9 @@ function validateTableSchema(t, s)
         check[k] = type(v);
     end
     for k, v in pairs(check) do
-        if (v == nil or v ~= s[k]) then return false end;
+        if (v == nil or v ~= s[k]) then
+            if (string.find(s[k], "^%?") ~= 1) then return end
+        end
         if (s[k] == "table") then
             local test = validateTableSchema(t[k], s[k]);
             if (test == false) then return false end;
