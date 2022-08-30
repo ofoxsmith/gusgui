@@ -1,6 +1,4 @@
 -- dofile_once("<path>utils.lua")
-function GuiCreate() return 0 end
-function GuiDestroy(n) return 0 end
 local Gui = {}
 Gui.__metatable = "";
 function Gui:New(data, baseStyle, config)
@@ -40,5 +38,4 @@ function Gui:Destroy()
 end
 
 local g = Gui:New({}, {}, {})
-print(g.elements.a)
-return createGui;
+return Gui;
