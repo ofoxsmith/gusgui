@@ -1,9 +1,9 @@
--- dofile_once("<path>utils.lua")
+-- Gui main table
 local Gui = {}
 Gui.__metatable = "";
-function Gui:New(data, baseStyle, config)
+function Gui:New(data)
     local o = {}
-    o.paused = true
+    o.paused = false
     o.guiobj = GuiCreate()
     o.elements = setmetatable({}, {
         __index = function(t, k) return self:_GetElement(k) end,
@@ -11,8 +11,8 @@ function Gui:New(data, baseStyle, config)
             self._SetElement(k, v)
         end
     })
-    o.baseStyle = baseStyle or {}
-    o.config = config or {}
+    o.baseStyle = data.baseStyle or {}
+    o.config = data.config or {}
     o.guiTree = {};
     setmetatable(o, self)
     self.__index = self
