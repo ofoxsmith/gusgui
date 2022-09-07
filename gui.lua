@@ -11,7 +11,6 @@ function Gui:New(data)
             self._SetElement(k, v)
         end
     })
-    o.baseStyle = data.baseStyle or {}
     o.config = data.config or {}
     o.guiTree = {};
     setmetatable(o, self)
@@ -37,5 +36,11 @@ function Gui:Destroy()
     self.gui = nil;
 end
 
-local g = Gui:New({}, {}, {})
-return Gui;
+function CreateGUI(data, config) 
+    return Gui:New({
+        data = data,
+        config = config
+    })
+end
+
+return CreateGUI;
