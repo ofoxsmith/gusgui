@@ -1,4 +1,5 @@
--- Gui element metatable
+-- Gui element parent class
+-- inherited by all elements 
 local GuiElement = {};
 function GuiElement:New()
     local o = {}

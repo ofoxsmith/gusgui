@@ -1,2 +1,2 @@
 local ElementParent = dofile("GuiElement.lua")
-local Button = {}
+local Text = {}
