@@ -33,3 +33,12 @@ function validateTableSchema(t, s)
     end
     return true;
 end
+
+function findStylePropInTree(prop, node)
+    local at = node
+    while true do
+        local p = at.style[prop]
+        if p ~= nil then return p end
+        at = at.parent;
+    end 
+end
