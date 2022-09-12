@@ -42,3 +42,13 @@ function findStylePropInTree(prop, node)
         at = at.parent;
     end 
 end
+
+function getDepthInTree(node) 
+    local at = node
+    local d = 0;
+    while true do
+        d = d + 1;
+        if (at.rootNode) then return d end;
+        at = at.parent;
+    end
+end
