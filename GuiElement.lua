@@ -1,5 +1,6 @@
 -- Gui element parent class
--- inherited by all elements 
+-- inherited by all elements
+dofile("utils.lua")
 local GuiElement = {};
 
 function GuiElement:AddChild(child)
@@ -7,12 +8,29 @@ function GuiElement:AddChild(child)
     table.insert(self.children, child)
 end
 
-function GuiElement:GetZ()
-    return getDepthInTree() * 100
-end 
+function GuiElement:RemoveChild(childname)
+    for i, v in ipairs(self.children) do 
+        if (v.name == childname) then 
+            table.remove(self.children, i);
+            break;
+        end 
+    end
+end
+
+function GuiElement:Remove()
+    for i, v in ipairs(self.parent.children) do 
+        if (v.name == self.name) then 
+            table.remove(self.parent.children, i);
+            break;
+        end 
+    end
+end
+
 function GuiElement:New()
     local Element = {}
-    Element._z = 0;
+    Element.__metatable = ""
+    Element._z = getDepthInTree() * 10;
+    Element._rawstyle = {};
     Element.style = {};
     Element.children = {};
     Element.parent = {};
