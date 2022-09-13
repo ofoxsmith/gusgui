@@ -20,6 +20,20 @@ function Gui:New(data, state)
     return o
 end
 
+function Gui:GetState(s)
+    local init = nil
+    local s = {}
+    local item = {}
+    for i in string.gmatch(s, "[^/]+") do 
+        if not init then init = i
+        else table.insert(s, i) end 
+    end
+    item = self.state[init]
+    for k=1, #self.tree do local v = self.tree[k]
+        item = item[v];
+    end
+    return item
+end
 function Gui:UpdateState(k, v)
     self.state[k] = v
 end

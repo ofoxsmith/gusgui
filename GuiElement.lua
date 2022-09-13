@@ -19,6 +19,7 @@ local GuiElement = class(function(Element)
     Element.parent = {}
     Element.rootNode = false
 end)
+
 local baseElementConfig = {
     drawBorder = false,
     overrideWidth = false,
@@ -42,6 +43,13 @@ local baseElementConfig = {
         left = 0
     }
 }
+
+function GuiElement:StateValue(s)
+    return {
+        _type = "state",
+        value = s,
+    }
+end
 
 local function getDepthInTree(node) 
     local at = node
