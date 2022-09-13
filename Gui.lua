@@ -13,6 +13,7 @@ function Gui:New(data)
     function o:New()
         return nil
     end
+    for k=1, #data do self:AddElement(self.tree[k]) end
     o:StartRender()
     return o
 end
