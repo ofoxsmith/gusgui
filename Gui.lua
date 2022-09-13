@@ -1,7 +1,6 @@
 local GuiElement = dofile("GuiElement.lua")
 -- Gui main table
 local Gui = {}
-Gui.__metatable = ""
 function Gui:New(data)
     local o = {}
     o.paused = true
@@ -47,6 +46,7 @@ function searchTree(element, id)
     end
     return nil
 end
+
 function Gui:PauseRender()
     self.paused = true
 end
@@ -75,10 +75,7 @@ function Gui:Destroy()
 end
 
 function CreateGUI(data, config) 
-    return Gui:New({
-        data = data,
-        config = config
-    })
+    return Gui:New(data)
 end
 
 return CreateGUI

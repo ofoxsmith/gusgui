@@ -23,10 +23,10 @@ local baseElementConfig = {
     drawBorder = false,
     overrideWidth = false,
     overrideHeight = false,
-    -- place element in top, centre or bottom based on the overrideHeight property
-    verticalAlign = "top",
-    -- place element in left, centre or right based on the overrideWidth property
-    horizontalAlign = "left",
+    -- number between 0 and 1, with 0 being top, 0.5 being centre and 1 being bottom
+    verticalAlign = 0,
+    -- number between 0 and 1, with 0 being left, 0.5 being centre and 1 being right
+    horizontalAlign = 0,
     borderSize = 1,
     colour = {255, 255, 255},
     margin = {
@@ -92,8 +92,8 @@ end
 -- If overrideWidth or overrideHeight have been set, calculate any size offset (if any) using the provided alignment value 
 function GuiElement:GetOverridenWidthAndHeightAlignment()
     local size = self:GetElementSize()
-    return (self.config.horizontalAlign / 2) * (math.max(self.config.overrideWidth or 0, size.width) - size.width),
-        (self.config.verticalAlign / 2) * (math.max(self.config.overrideHeight or 0, size.height) - size.height)
+    return (self.config.horizontalAlign) * (math.max(self.config.overrideWidth or 0, size.width) - size.width),
+        (self.config.verticalAlign) * (math.max(self.config.overrideHeight or 0, size.height) - size.height)
 end
 
 function GuiElement:Remove()
