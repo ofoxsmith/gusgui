@@ -1,13 +1,15 @@
 local GuiElement = dofile("GuiElement.lua")
 -- Gui main table
 local Gui = {}
-function Gui:New(data)
+function Gui:New(data, state)
     local o = {}
     o.paused = true
     o.queueDestroy = false
     o.renderLoopRunning = false
     o.guiobj = GuiCreate()
     o.tree = {}
+    o._state = state or {}
+    o._cstate = o._state
     setmetatable(o, self)
     self.__index = self
     function o:New()
@@ -16,6 +18,14 @@ function Gui:New(data)
     for k=1, #data do self:AddElement(self.tree[k]) end
     o:StartRender()
     return o
+end
+
+function Gui:UpdateState(k, v)
+    self.state[k] = v
+end
+
+function Gui:RemoveState(k) 
+    self.state[k] = nil
 end
 
 function Gui:AddElement(data)
@@ -57,6 +67,7 @@ function Gui:StartRender()
     if (self.renderLoopRunning == false) then 
         self.renderLoopRunning = true
         while not self.paused do
+            o._cstate = o._state
             GuiStartFrame(self.guiobj)
             for k=1, #self.tree do local v = self.tree[k]
                 v:Render(self.guiobj)
