@@ -14,11 +14,17 @@ local function splitString(s, delimiter)
     return result
 end
 
+
 local Text = class(ElementParent, function(o, value, config)
     ElementParent.init(o, config)
     o.value = value
 end)
 
+function Text:Interp(s)
+    return (s:gsub('($%b{})', function(w) w = string.sub(w, 3, -2) 
+        return self.gui:GetState(w)
+    end))
+end
 function Text:GetBaseElementSize()
     local allLines = splitString(self.value, "\\n")
     local totalWidth = 0
@@ -32,7 +38,7 @@ function Text:GetBaseElementSize()
 end
 
 function Text:Draw()
-    local parsedText = self.value
+    local parsedText = self:Interp(self.value)
     local lines = splitString(parsedText, "\\n")
     local lineCount = #lines
     local elementSize = self:GetElementSize()
