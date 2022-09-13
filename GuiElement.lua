@@ -43,6 +43,15 @@ local baseElementConfig = {
     }
 }
 
+local function getDepthInTree(node) 
+    local at = node
+    local d = 0
+    while true do
+        d = d + 1
+        if (at.rootNode) then return d end
+        at = at.parent
+    end
+end
 function GuiElement:AddChild(child)
     if child == nil then
         return error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
@@ -80,8 +89,8 @@ function GuiElement:GetElementSize()
     }
 end
 
--- If overrideWidth or overrideHeight have been set, calculate any size offset (if any) using the provided alignment type 
-function GuiElement:GetOverridenWidthAndHeight()
+-- If overrideWidth or overrideHeight have been set, calculate any size offset (if any) using the provided alignment value 
+function GuiElement:GetOverridenWidthAndHeightAlignment()
     local size = self:GetElementSize()
     return (self.config.horizontalAlign / 2) * (math.max(self.config.overrideWidth or 0, size.width) - size.width),
         (self.config.verticalAlign / 2) * (math.max(self.config.overrideHeight or 0, size.height) - size.height)
@@ -94,10 +103,6 @@ function GuiElement:Remove()
             break
         end
     end
-end
-
-function GetZ()
-    return getDepthInTree * 10
 end
 
 return GuiElement
