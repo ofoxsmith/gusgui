@@ -3,7 +3,7 @@ local Gui = {}
 Gui.__metatable = ""
 function Gui:New(data)
     local o = {}
-    o.paused = false
+    o.paused = true
     o.queueDestroy = false
     o.renderLoopRunning = false
     o.guiobj = GuiCreate()

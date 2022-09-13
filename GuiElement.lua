@@ -1,8 +1,24 @@
 dofile("utils.lua")
--- Gui element parent table that is inherited by all elements
+dofile("class.lua")
+-- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- and a Draw method, which draws the element using the Gui API
-local GuiElement = {}
+local GuiElement = class(function(Element)
+    Element.gui = nil
+    Element._rawconfig = {}
+    Element.config = {}
+    setmetatable(Element.config, {
+        __index = function(t, k)
+            return self._rawconfig[k]
+        end,
+        __newindex = function(t, k, v)
+
+        end
+    })
+    Element.children = {}
+    Element.parent = {}
+    Element.rootNode = false
+end)
 local baseElementConfig = {
     drawBorder = false,
     overrideWidth = false,
@@ -80,26 +96,8 @@ function GuiElement:Remove()
     end
 end
 
-function GuiElement:New(gui)
-    local Element = {}
-    Element.__metatable = ""
-    Element.gui = gui
-    Element.z = getDepthInTree() * 10
-    Element._rawconfig = {}
-    Element.config = {}
-    setmetatable(Element.config, {
-        __index = function(t, k)
-            return self._rawconfig[k]
-        end,
-        __newindex = function(t, k, v)
-
-        end
-    })
-    Element.children = {}
-    Element.parent = {}
-    Element.rootNode = false
-    setmetatable(Element, self)
-    self.__index = self
-    return Element
+function GetZ()
+    return getDepthInTree * 10
 end
+
 return GuiElement
