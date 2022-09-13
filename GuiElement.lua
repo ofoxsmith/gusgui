@@ -2,9 +2,15 @@ dofile("utils.lua")
 -- Gui element parent table that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- and a Draw method, which draws the element using the Gui API
-local GuiElement = {};
+local GuiElement = {}
 local baseElementConfig = {
     drawBorder = false,
+    overrideWidth = false,
+    overrideHeight = false,
+    -- place element in top, centre or bottom based on the overrideHeight property
+    verticalAlign = "top",
+    -- place element in left, centre or right based on the overrideWidth property
+    horizontalAlign = "left",
     borderSize = 1,
     colour = {255, 255, 255},
     margin = {
@@ -18,50 +24,80 @@ local baseElementConfig = {
         right = 0,
         bottom = 0,
         left = 0
-    },
+    }
 }
 
 function GuiElement:AddChild(child)
-    if child == nil then return error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2) end 
+    if child == nil then
+        return error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
+    end
     child.parent = self
     table.insert(self.children, child)
 end
 
-function GuiElement:RemoveChild(childname)
-    if child == nil then return error("bad argument #1 to RemoveChild (string expected, got no value)", 2) end 
-    for i, v in ipairs(self.children) do 
-        if (v.name == childname) then 
-            table.remove(self.children, i);
-            break;
-        end 
+function GuiElement:RemoveChild(childName)
+    if child == nil then
+        return error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
+    end
+    for i, v in ipairs(self.children) do
+        if (v.name == childName) then
+            table.remove(self.children, i)
+            break
+        end
     end
 end
 
+-- Get the element size with padding and border included (no margins)
+function GuiElement:GetElementSize()
+    local baseW, baseH = self:GetBaseElementSize()
+    local borderSize = 0
+    if self.config.drawBorder then
+        borderSize = self.config.borderSize * 2
+    end
+    local width = baseW + self.config.padding.left + self.config.padding.right + borderSize
+    local height = baseH + self.config.padding.top + self.config.padding.bottom + borderSize
+    return {
+        baseW = baseW,
+        baseH = baseH,
+        width = width,
+        height = height
+    }
+end
+
+-- If overrideWidth or overrideHeight have been set, calculate any size offset (if any) using the provided alignment type 
+function GuiElement:GetOverridenWidthAndHeight()
+    local size = self:GetElementSize()
+    return (self.config.horizontalAlign / 2) * (math.max(self.config.overrideWidth or 0, size.width) - size.width),
+        (self.config.verticalAlign / 2) * (math.max(self.config.overrideHeight or 0, size.height) - size.height)
+end
+
 function GuiElement:Remove()
-    for i, v in ipairs(self.parent.children) do 
-        if (v.name == self.name) then 
-            table.remove(self.parent.children, i);
-            break;
-        end 
+    for i, v in ipairs(self.parent.children) do
+        if (v.name == self.name) then
+            table.remove(self.parent.children, i)
+            break
+        end
     end
 end
 
 function GuiElement:New(gui)
     local Element = {}
-    Element.__metatable = "";
+    Element.__metatable = ""
     Element.gui = gui
-    Element.z = getDepthInTree() * 10;
-    Element._rawconfig = {};
-    Element.config = {};
+    Element.z = getDepthInTree() * 10
+    Element._rawconfig = {}
+    Element.config = {}
     setmetatable(Element.config, {
-        __index = function(t, k) return self._rawconfig[k] end,
+        __index = function(t, k)
+            return self._rawconfig[k]
+        end,
         __newindex = function(t, k, v)
-            
+
         end
     })
-    Element.children = {};
-    Element.parent = {};
-    Element.rootNode = false;
+    Element.children = {}
+    Element.parent = {}
+    Element.rootNode = false
     setmetatable(Element, self)
     self.__index = self
     return Element

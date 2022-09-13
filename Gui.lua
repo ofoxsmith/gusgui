@@ -1,10 +1,10 @@
 -- Gui main table
 local Gui = {}
-Gui.__metatable = "";
+Gui.__metatable = ""
 function Gui:New(data)
     local o = {}
     o.paused = false
-    o.queueDestroy = false;
+    o.queueDestroy = false
     o.renderLoopRunning = false
     o.guiobj = GuiCreate()
     o.elements = setmetatable({}, {
@@ -41,11 +41,11 @@ function Gui:StartRender()
         self.renderLoopRunning = true
         while not self.paused do
             GuiStartFrame(self.guiobj)
-            for k=1, #self.elements do local v = self.elements[k];
+            for k=1, #self.elements do local v = self.elements[k]
                 v:Render(self.guiobj)
             end
         end
-        self.renderLoopRunning = false;
+        self.renderLoopRunning = false
         if self.queueDestroy == true then 
             GuiDestroy(self.guiobj)
             self.elements = nil
@@ -54,7 +54,7 @@ function Gui:StartRender()
 end 
 
 function Gui:Destroy()
-    self.queueDestroy = true;
+    self.queueDestroy = true
     return nil
 end
 
@@ -65,4 +65,4 @@ function CreateGUI(data, config)
     })
 end
 
-return CreateGUI;
+return CreateGUI

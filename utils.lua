@@ -4,9 +4,9 @@ function trim(s)
  end
  
 function clone(t)
-    local new = {};
-    for k,v in pairs(t) do new[k] = v end;
-    return new;
+    local new = {}
+    for k,v in pairs(t) do new[k] = v end
+    return new
 end
 
 function freeze(t)
@@ -18,20 +18,20 @@ function freeze(t)
 end
 
 function validateTableSchema(t, s)
-    local check = {};
+    local check = {}
     for k, v in pairs(t) do
-        check[k] = type(v);
+        check[k] = type(v)
     end
     for k, v in pairs(check) do
         if (v == nil or v ~= s[k]) then
             if (string.find(s[k], "^%?") ~= 1) then return end
         end
         if (s[k] == "table") then
-            local test = validateTableSchema(t[k], s[k]);
-            if (test == false) then return false end;
+            local test = validateTableSchema(t[k], s[k])
+            if (test == false) then return false end
         end
     end
-    return true;
+    return true
 end
 
 function findStylePropInTree(prop, node)
@@ -39,16 +39,16 @@ function findStylePropInTree(prop, node)
     while true do
         local p = at.style[prop]
         if p ~= nil then return p end
-        at = at.parent;
+        at = at.parent
     end 
 end
 
 function getDepthInTree(node) 
     local at = node
-    local d = 0;
+    local d = 0
     while true do
-        d = d + 1;
-        if (at.rootNode) then return d end;
-        at = at.parent;
+        d = d + 1
+        if (at.rootNode) then return d end
+        at = at.parent
     end
 end
