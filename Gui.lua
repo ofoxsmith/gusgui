@@ -1,10 +1,17 @@
 local GuiElement = dofile("GuiElement.lua")
 -- Gui main table
 local Gui = {}
+
+function getIdCounter()
+    local id = 1 
+    return function() id = id + 1 return id end
+end
+
 function Gui:New(data, state)
     local o = {}
     o.paused = true
     o.queueDestroy = false
+    o.nextID = getIdCounter()
     o.renderLoopRunning = false
     o.guiobj = GuiCreate()
     o.tree = {}
