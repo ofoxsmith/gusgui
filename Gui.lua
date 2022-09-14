@@ -58,6 +58,7 @@ end
 
 function Gui:AddElement(data)
     if data["is_a"] and data:is_a(GuiElement) then 
+        data.gui = self
         table.insert(self.tree, data)
     else 
         error("bad argument #1 to AddElement (GuiElement object expected, got invalid value)", 2)
