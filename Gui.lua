@@ -115,8 +115,8 @@ function Gui:Destroy()
     return nil
 end
 
-function CreateGUI(data, config) 
-    return Gui:New(data)
+function CreateGUI(data, state) 
+    return Gui:New(data, state)
 end
 
 return CreateGUI
