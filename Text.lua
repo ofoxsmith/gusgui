@@ -51,7 +51,7 @@ function Text:Draw()
     for lineNum, line in ipairs(lines) do
         GuiZSetForNextWidget(self.gui.guiobj, z)
         if self.config.colour then
-            GuiColorSetForNextWidget(self.gui.guiobj, self.config.colour[1], self.config.colour[2], self.config.colour[3])
+            GuiColorSetForNextWidget(self.gui.guiobj, self.config.colour[1]/255, self.config.colour[2]/255, self.config.colour[3]/255)
         end
         GuiText(self.gui.guiobj, x + alignX + border + self.config.padding.let, y + alignY + border + self.style.padding.top + ((lineNum-1) * heightForEachLine), line) 
     end
