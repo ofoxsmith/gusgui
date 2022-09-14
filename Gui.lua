@@ -45,6 +45,13 @@ function Gui:UpdateState(k, v)
     self.state[k] = v
 end
 
+function Gui:StateValue(s)
+    return {
+        _type = "state",
+        value = s,
+    }
+end
+
 function Gui:RemoveState(k) 
     self.state[k] = nil
 end

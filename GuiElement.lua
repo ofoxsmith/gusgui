@@ -44,12 +44,11 @@ local baseElementConfig = {
     }
 }
 
-function GuiElement:StateValue(s)
-    return {
-        _type = "state",
-        value = s,
-    }
-end
+function GuiElement:ResolveStateValue(a) 
+    if type(a) ~= "table" then return a end
+    if a._type ~= "state" or type(a.value) ~= "string" then return error("Failed to resolve invalid state object", 2) end 
+    return self.gui.GetState(a)
+end 
 
 local function getDepthInTree(node) 
     local at = node
