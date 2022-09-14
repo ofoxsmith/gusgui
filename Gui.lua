@@ -108,7 +108,7 @@ function Gui:Render()
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
-        v:Render(self.guiobj)
+        v:Draw(self.guiobj)
     end
 end
 

@@ -21,6 +21,9 @@ local Text = class(ElementParent, function(o, value, config)
 end)
 
 function Text:Interp(s)
+    if (type(s) ~= "string") then return 
+        error("bad argument #1 to Interp (string expected, got " .. type(s) .. ")", 2)
+    end
     return (s:gsub('($%b{})', function(w) w = string.sub(w, 3, -2) 
         return self.gui:GetState(w)
     end))
