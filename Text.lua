@@ -17,6 +17,9 @@ end
 
 local Text = class(ElementParent, function(o, value, config)
     ElementParent.init(o, config)
+    if value == nil then 
+        error("GUI: Invalid construction of Text element (value paramater is required)", 2)
+    end
     o.value = value
 end)
 
