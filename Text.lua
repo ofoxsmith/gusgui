@@ -1,4 +1,4 @@
-local ElementParent = dofile("GuiElement.lua")
+local GuiElement = dofile("GuiElement.lua")
 dofile("class.lua")
 
 local function splitString(s, delimiter)
@@ -15,8 +15,8 @@ local function splitString(s, delimiter)
 end
 
 
-local Text = class(ElementParent, function(o, value, config)
-    ElementParent.init(o, config)
+local Text = class(GuiElement, function(o, value, config)
+    GuiElement.init(o, config)
     if value == nil then 
         error("GUI: Invalid construction of Text element (value paramater is required)", 2)
     end
