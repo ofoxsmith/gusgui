@@ -44,22 +44,27 @@ function Text:GetBaseElementSize()
 end
 
 function Text:Draw()
-    local parsedText = self:Interp(self.value)
+    local parsedText = self:Interp(self:ResolveValue(self.value))
     local lines = splitString(parsedText, "\\n")
     local lineCount = #lines
     local elementSize = self:GetElementSize()
-    local heightForEachLine = (elementSize.baseH - (self.config.padding.top + self.config.padding.bottom)) / lineCount
-    local x = self.config.margin.left
-    local y = self.config.margin.top
+    local paddingLeft = self:ResolveValue(self.config.padding.left)
+    local paddingBottom = self:ResolveValue(self.config.padding.bottom)
+    local paddingTop = self:ResolveValue(self.config.padding.top)
+    local paddingBottom = self:ResolveValue(self.config.padding.bottom)
+    local heightForEachLine = (elementSize.baseH - (paddingTop + paddingBottom)) / lineCount
+    local x = self:ResolveValue(self.config.margin.left)
+    local y = self:ResolveValue(self.config.margin.top)
+    local c = self:ResolveValue(self.config.colour)
     local z = getDepthInTree(self) * 10
-    local border = (self.config.drawBorder and self.config.borderSize or 0)
+    local border = (self:ResolveValue(self.config.drawBorder) and self:ResolveValue(self.config.borderSize) or 0)
     local alignX, alignY = self:GetOverridenWidthAndHeightAlignment()
     for lineNum, line in ipairs(lines) do
         GuiZSetForNextWidget(self.gui.guiobj, z)
         if self.config.colour then
-            GuiColorSetForNextWidget(self.gui.guiobj, self.config.colour[1]/255, self.config.colour[2]/255, self.config.colour[3]/255)
+            GuiColorSetForNextWidget(self.gui.guiobj, c[1]/255, c[2]/255, c[3]/255)
         end
-        GuiText(self.gui.guiobj, x + alignX + border + self.config.padding.let, y + alignY + border + self.style.padding.top + ((lineNum-1) * heightForEachLine), line) 
+        GuiText(self.gui.guiobj, x + alignX + border + paddingLeft, y + alignY + border + paddingTop + ((lineNum-1) * heightForEachLine), line) 
     end
 end
 

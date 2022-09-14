@@ -64,7 +64,7 @@ function Gui:RemoveState(k)
 end
 
 function Gui:AddElement(data)
-    if data["is_a"] and data:is_a(GuiElement) then
+    if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         data.gui = self
         table.insert(self.tree, data)
     else
