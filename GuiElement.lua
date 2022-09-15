@@ -11,7 +11,6 @@ local baseElementConfig = {
     -- number between 0 and 1, with 0 being left, 0.5 being centre and 1 being right
     horizontalAlign = 0,
     borderSize = 1,
-    colour = {255, 255, 255},
     margin = {
         top = 0,
         right = 0,
@@ -26,8 +25,10 @@ local baseElementConfig = {
     }
 }
 
-local GuiElement = class(function(Element, config)
+local GuiElement = class(function(Element, id, config)
     Element.gui = nil
+    if id == nil then error("GUI: Invalid construction of element (id is required)") end
+    Element.id = id
     Element._rawconfig = {}
     Element.config = config or baseElementConfig
     setmetatable(Element.config, {
@@ -46,7 +47,7 @@ end)
 
 function GuiElement:ResolveValue(a) 
     if type(a) ~= "table" then return a end
-    if a._type ~= "state" or type(a.value) ~= "string" then return error("Failed to resolve state object", 2) end 
+    if a._type ~= "state" or type(a.value) ~= "string" then return a end 
     return self.gui.GetState(a)
 end 
 
@@ -55,13 +56,14 @@ local function getDepthInTree(node)
     local d = 0
     while true do
         d = d + 1
-        if (at.rootNode) then return d end
+        if (at.parent == nil) then return d end
         at = at.parent
     end
 end
+
 function GuiElement:AddChild(child)
     if child == nil then
-        return error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
+        error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
     end
     child.parent = self
     table.insert(self.children, child)
@@ -69,7 +71,7 @@ end
 
 function GuiElement:RemoveChild(childName)
     if child == nil then
-        return error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
+        error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
     end
     for i, v in ipairs(self.children) do
         if (v.name == childName) then

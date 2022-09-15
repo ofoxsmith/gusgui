@@ -14,10 +14,11 @@ function Gui:New(data, state)
     data = data or {}
     local o = {}
     o.queueDestroy = false
+    o.ids = {}
     o.nextID = getIdCounter()
     o.guiobj = GuiCreate()
     o.tree = {}
-    o._state = state or {}
+    o.state = state or {}
     o._cstate = o._state
     setmetatable(o, self)
     self.__index = self
@@ -31,25 +32,23 @@ function Gui:New(data, state)
 end
 
 function Gui:GetState(s)
+    s = s or ""
     local init = nil
-    local s = {}
+    local a = {}
     local item = {}
     for i in string.gmatch(s, "[^/]+") do
         if not init then
             init = i
         else
-            table.insert(s, i)
+            table.insert(a, i)
         end
     end
-    item = self.state[init]
-    for k = 1, #self.tree do
-        local v = self.tree[k]
+    item = init and self.state[init] or self.state
+    for k,v in pairs(a) do
+        if (type(item) ~= "table") then error("GUI: Cannot access property of non-table value in state", 2) end
         item = item[v];
     end
     return item
-end
-function Gui:UpdateState(k, v)
-    self.state[k] = v
 end
 
 function Gui:StateValue(s)
@@ -59,13 +58,19 @@ function Gui:StateValue(s)
     }
 end
 
-function Gui:RemoveState(k)
-    self.state[k] = nil
-end
-
 function Gui:AddElement(data)
+    local function testID(i) 
+        for k = 1, #self.ids do
+            if (self.ids[k] == i) then return false end
+        end
+        return true
+    end
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         data.gui = self
+        if not testID(data.id) then 
+            error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)")
+        end
+        table.insert(self.ids, data.id)
         table.insert(self.tree, data)
     else
         error("bad argument #1 to AddElement (GuiElement object expected, got invalid value)", 2)

@@ -15,8 +15,8 @@ local function splitString(s, delimiter)
 end
 
 
-local Text = class(GuiElement, function(o, value, config)
-    GuiElement.init(o, config)
+local Text = class(GuiElement, function(o, id, value, config)
+    GuiElement.init(o, id, config)
     if value == nil then 
         error("GUI: Invalid construction of Text element (value paramater is required)", 2)
     end
@@ -62,7 +62,7 @@ function Text:Draw()
     for lineNum, line in ipairs(lines) do
         GuiZSetForNextWidget(self.gui.guiobj, z)
         if self.config.colour then
-            GuiColorSetForNextWidget(self.gui.guiobj, c[1]/255, c[2]/255, c[3]/255)
+            GuiColorSetForNextWidget(self.gui.guiobj, c[1]/255, c[2]/255, c[3]/255, 1)
         end
         GuiText(self.gui.guiobj, x + alignX + border + paddingLeft, y + alignY + border + paddingTop + ((lineNum-1) * heightForEachLine), line) 
     end
