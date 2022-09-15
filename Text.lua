@@ -17,6 +17,7 @@ end
 
 local Text = class(GuiElement, function(o, id, value, config)
     GuiElement.init(o, id, config)
+    o.type = "Text"
     if value == nil then 
         error("GUI: Invalid construction of Text element (value paramater is required)", 2)
     end

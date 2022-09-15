@@ -27,6 +27,7 @@ local baseElementConfig = {
 
 local GuiElement = class(function(Element, id, config)
     Element.gui = nil
+    Element.allowChildren = false
     if id == nil then error("GUI: Invalid construction of element (id is required)") end
     Element.id = id
     Element._rawconfig = {}
@@ -62,6 +63,7 @@ local function getDepthInTree(node)
 end
 
 function GuiElement:AddChild(child)
+    if not self.allowChildren then error("GUI: " .. self.type .. " cannot have child element") end
     if child == nil then
         error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
     end
