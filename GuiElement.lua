@@ -1,8 +1,4 @@
 dofile("class.lua")
--- Gui element parent class that is inherited by all elements
--- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
--- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
--- and a Draw method, which draws the element using the Gui API
 local baseElementConfig = {
     drawBorder = false,
     overrideWidth = false,
@@ -26,6 +22,10 @@ local baseElementConfig = {
     }
 }
 
+-- Gui element parent class that is inherited by all elements
+-- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
+-- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
+-- and a Draw method, which draws the element using the Gui API
 local GuiElement = class(function(Element, id, config)
     Element.gui = nil
     Element.allowChildren = false
