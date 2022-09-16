@@ -1,48 +1,43 @@
 dofile("class.lua")
-local baseElementConfig = {
-    drawBorder = false,
-    overrideWidth = false,
-    overrideHeight = false,
-    -- number between 0 and 1, with 0 being top, 0.5 being centre and 1 being bottom
-    verticalAlign = 0,
-    -- number between 0 and 1, with 0 being left, 0.5 being centre and 1 being right
-    horizontalAlign = 0,
-    borderSize = 1,
-    margin = {
-        top = 0,
-        right = 0,
-        bottom = 0,
-        left = 0
-    },
-    padding = {
-        top = 0,
-        right = 0,
-        bottom = 0,
-        left = 0
-    }
-}
-
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
 -- and a Draw method, which draws the element using the Gui API
 local GuiElement = class(function(Element, id, config)
+    config = config or {}
+    Element.config = {}
+    Element.config.drawBorder = config.drawBorder or false
+    Element.config.borderSize = config.borderSize or 1
+    Element.config.overrideWidth = config.overrideWidth or false
+    Element.config.overrideHeight = config.overrideHeight or false
+    Element.config.verticalAlign = config.verticalAlign or 0
+    Element.config.horizontalAlign = config.horizontalAlign or 0
+    Element.config.margin = config.margin or {
+        top = 0,
+        right = 0,
+        bottom = 0,
+        left = 0
+    }
+    Element.config.padding = config.padding or {
+        top = 0,
+        right = 0,
+        bottom = 0,
+        left = 0
+    }
     Element.gui = nil
     Element.allowChildren = false
     if id == nil then error("GUI: Invalid construction of element (id is required)") end
     Element.id = id
     Element._rawconfig = {}
-    Element.config = config or baseElementConfig
     setmetatable(Element.config, {
         __index = function(t, k)
-            return self._rawconfig[k]
+            return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
 
         end
     })
     Element.children = {}
-    Element.parent = {}
     Element.rootNode = false
 end)
 
