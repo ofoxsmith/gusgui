@@ -58,6 +58,9 @@ function Text:Draw()
     local y = self:ResolveValue(self.config.margin.top)
     local c = self:ResolveValue(self.config.colour)
     local z = getDepthInTree(self) * 10
+    if self.parent then 
+        x, y = self.parent:GetManagedXY()
+    end 
     local border = (self:ResolveValue(self.config.drawBorder) and self:ResolveValue(self.config.borderSize) or 0)
     local alignX, alignY = self:GetOverridenWidthAndHeightAlignment()
     for lineNum, line in ipairs(lines) do
