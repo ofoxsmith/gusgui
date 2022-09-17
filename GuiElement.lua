@@ -1,4 +1,4 @@
-dofile("class.lua")
+dofile_once(ModSettingGet("ggui_loadpath") .."class.lua")
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config

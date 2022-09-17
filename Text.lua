@@ -1,5 +1,5 @@
-local GuiElement = dofile("GuiElement.lua")
-dofile("class.lua")
+local GuiElement = dofile_once(ModSettingGet("ggui_loadpath") .. "GuiElement.lua")
+dofile_once(ModSettingGet("ggui_loadpath") .."class.lua")
 
 local function splitString(s, delimiter)
     local result = {}
