@@ -1,4 +1,4 @@
-dofile_once(ModSettingGet("ggui_loadpath") .."class.lua")
+dofile_once("[[GUSGUI_PATH]]class.lua")
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
@@ -60,11 +60,17 @@ end
 
 function GuiElement:AddChild(child)
     if not self.allowChildren then error("GUI: " .. self.type .. " cannot have child element") end
-    if child == nil then
+    child.parent = self
+    if child["is_a"] and child["Draw"] and child["GetBaseElementSize"] then
+        child.gui = self.gui
+        if not testID(data.id) then
+            error("GUI: Element ID value must be unique (\"" .. child.id .. "\" is a duplicate)")
+        end
+        table.insert(self.gui.ids, child.id)
+        table.insert(self.children, child)
+    else
         error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
     end
-    child.parent = self
-    table.insert(self.children, child)
 end
 
 function GuiElement:RemoveChild(childName)
@@ -74,12 +80,16 @@ function GuiElement:RemoveChild(childName)
     for i, v in ipairs(self.children) do
         if (v.name == childName) then
             table.remove(self.children, i)
+            local newids = {}
+            for i, a in ipairs(self.ids) do
+                if a ~= v.id then table.insert(newids, a) end
+            end
+            self.ids = newids
             break
         end
     end
 end
 
--- Get the element size with padding and border included (no margins)
 function GuiElement:GetElementSize()
     local baseW, baseH = self:GetBaseElementSize()
     local borderSize = 0
@@ -92,15 +102,10 @@ function GuiElement:GetElementSize()
         baseW = baseW,
         baseH = baseH,
         width = width,
-        height = height
+        height = height,
+        offsetX = (self.config.horizontalAlign) * (math.max(self.config.overrideWidth or 0, width) - width),
+        offsetY = (self.config.verticalAlign) * (math.max(self.config.overrideHeight or 0, height) - height)
     }
-end
-
--- If overrideWidth or overrideHeight have been set, calculate any size offset (if any) using the provided alignment value 
-function GuiElement:GetOverridenWidthAndHeightAlignment()
-    local size = self:GetElementSize()
-    return (self.config.horizontalAlign) * (math.max(self.config.overrideWidth or 0, size.width) - size.width),
-        (self.config.verticalAlign) * (math.max(self.config.overrideHeight or 0, size.height) - size.height)
 end
 
 function GuiElement:Remove()
