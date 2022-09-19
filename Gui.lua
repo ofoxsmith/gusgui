@@ -130,8 +130,11 @@ function CreateGUI(data, state)
 end
 
 local Text = dofile_once("[[GUSGUI_PATH]]Text.lua")
-
+local Button = dofile_once("[[GUSGUI_PATH]]Button.lua")
 return {
     Create = CreateGUI,
-    Text = Text
+    Elements = {
+        Text = Text,
+        Button = Button
+    }
 }
