@@ -25,15 +25,7 @@ function Button:Interp(s)
 end
 
 function Button:GetBaseElementSize()
-    local allLines = splitString(self.value, "\\n")
-    local totalWidth = 0
-    local totalHeight = 0
-    for i, v in ipairs(allLines) do
-        local w, h = GuiGetTextDimensions(self.gui.guiobj, v)
-        totalHeight = totalHeight + h;
-        totalWidth = (totalWidth > w and totalWidth or w)
-    end
-    return totalWidth, totalHeight
+    return GuiGetTextDimensions(self.gui.guiobj, self:Interp(self:ResolveValue(self.value)))
 end
 
 function Button:Draw()
