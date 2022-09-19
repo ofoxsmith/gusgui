@@ -8,8 +8,10 @@ local GuiElement = class(function(Element, id, config)
     Element.config = {}
     Element.config.drawBorder = config.drawBorder or false
     Element.config.borderSize = config.borderSize or 1
+    -- Specify the size of the element. Does not work if the element content is larger than the given size.
     Element.config.overrideWidth = config.overrideWidth or false
     Element.config.overrideHeight = config.overrideHeight or false
+    -- verticalAlign and horizontalAlign allow for elements to be aligned. Must be a number between 0 and 1, Use 0.5 to center.
     Element.config.verticalAlign = config.verticalAlign or 0
     Element.config.horizontalAlign = config.horizontalAlign or 0
     Element.config.margin = config.margin or {
