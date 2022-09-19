@@ -101,8 +101,8 @@ function GuiElement:GetElementSize()
     return {
         baseW = baseW,
         baseH = baseH,
-        width = width,
-        height = height,
+        width = (math.max(self.config.overrideWidth or 0, width)),
+        height = (math.max(self.config.overrideHeight or 0, height)),
         offsetX = (self.config.horizontalAlign) * (math.max(self.config.overrideWidth or 0, width) - width),
         offsetY = (self.config.verticalAlign) * (math.max(self.config.overrideHeight or 0, height) - height)
     }
