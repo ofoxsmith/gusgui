@@ -1,6 +1,6 @@
 return {
     init = function(path)
-        path = string.gsub(path, "/$", "") .. "/"
+        path = path:gsub("/$", "") .. "/"
         local files = {
             "Button.lua",
             "class.lua",
@@ -11,8 +11,8 @@ return {
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)
-            m = string.gsub("[[GUSGUI_PATH]]", path)
-            ModTextFileSetConent(path .. v, m)
+            m = string.gsub(m, "[[GUSGUI_PATH]]", path)
+            ModTextFileSetContent(path .. v, m)
         end
     end
 }
