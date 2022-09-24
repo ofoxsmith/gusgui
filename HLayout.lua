@@ -1,5 +1,5 @@
-local GuiElement = dofile_once("[[GUSGUI_PATH]]GuiElement.lua")
-dofile_once("[[GUSGUI_PATH]]class.lua")
+local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
+dofile_once("GUSGUI_PATHclass.lua")
 
 local HLayout = class(GuiElement, function(o, id, align, config)
     GuiElement.init(o, id, config)
@@ -26,15 +26,11 @@ function HLayout:GetBaseElementSize()
 end
 
 function HLayout:GetManagedXY(elem)
-    local borderSize = 0
     self.nextX = self.nextX or 0
     self.nextY = self.nextY or 0
     local x = self.nextX + self.config.padding.left
     local y = self.nextY + self.config.padding.top
     local h = elem:GetElementSize().height
-    if elem.config.drawBorder then
-        borderSize = elem.config.borderSize * 2
-    end
     local setPos = (self.align * self.height) - h * self.align
     setPos = math.max(elem.config.margin.top, setPos)
     setPos = setPos - math.max(0, elem.config.margin.bottom - (self.height - (setPos + h)))
@@ -53,8 +49,8 @@ function HLayout:Draw()
     end
     self.width = elementSize.width
     self.height = elementSize.height
-    self.nextX = x + elementSize.offsetX + (self.config.borderSize or 0)
-    self.nextY = y + elementSize.offsetY + (self.config.borderSize or 0)
+    self.nextX = x + elementSize.offsetX + (self.config.drawBorder and 1 or 0)
+    self.nextY = y + elementSize.offsetY + (self.config.drawBorder and 1 or 0)
     for i = 1, #self.children do
         local child = self.children[i]
         local size = child:GetElementSize()

@@ -1,4 +1,5 @@
-dofile_once("[[GUSGUI_PATH]]class.lua")
+dofile_once("GUSGUI_PATHclass.lua")
+local validate = dofile_once("GUSGUI_PATHvalidate.lua")
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
@@ -6,37 +7,19 @@ dofile_once("[[GUSGUI_PATH]]class.lua")
 local GuiElement = class(function(Element, id, config)
     config = config or {}
     Element.config = {}
-    Element.config.drawBorder = config.drawBorder or false
-    Element.config.borderSize = config.borderSize or 1
-    -- Specify the size of the element. Does not work if the element content is larger than the given size.
-    Element.config.overrideWidth = config.overrideWidth or false
-    Element.config.overrideHeight = config.overrideHeight or false
-    -- verticalAlign and horizontalAlign allow for elements to be aligned. Must be a number between 0 and 1, Use 0.5 to center.
-    Element.config.verticalAlign = config.verticalAlign or 0
-    Element.config.horizontalAlign = config.horizontalAlign or 0
-    Element.config.margin = config.margin or {
-        top = 0,
-        right = 0,
-        bottom = 0,
-        left = 0
-    }
-    Element.config.padding = config.padding or {
-        top = 0,
-        right = 0,
-        bottom = 0,
-        left = 0
-    }
+    Element._rawconfig = {}
+    validate(Element._rawconfig, id, configSchema, config, false)
     Element.gui = nil
     Element.allowChildren = false
     if id == nil then error("GUI: Invalid construction of element (id is required)") end
     Element.id = id
-    Element._rawconfig = {}
     setmetatable(Element.config, {
         __index = function(t, k)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-
+            if (configSchema[k] == nil) then return end
+            validate(Element._rawconfig, id, configSchema[k], v, true)
         end
     })
     Element.children = {}
@@ -50,8 +33,8 @@ function GuiElement:ResolveValue(a)
     return self.gui.GetState(a)
 end 
 
-local function getDepthInTree(node) 
-    local at = node
+function GuiElement:GetDepthInTree() 
+    local at = self
     local d = 0
     while true do
         d = d + 1
@@ -62,6 +45,14 @@ end
 
 function GuiElement:AddChild(child)
     if not self.allowChildren then error("GUI: " .. self.type .. " cannot have child element") end
+    local function testID(i)
+        for k = 1, #self.gui.ids do
+            if (self.gui.ids[k] == i) then
+                return false
+            end
+        end
+        return true
+    end
     child.parent = self
     if child["is_a"] and child["Draw"] and child["GetBaseElementSize"] then
         child.gui = self.gui
@@ -83,10 +74,10 @@ function GuiElement:RemoveChild(childName)
         if (v.name == childName) then
             table.remove(self.children, i)
             local newids = {}
-            for i, a in ipairs(self.ids) do
+            for i, a in ipairs(self.gui.ids) do
                 if a ~= v.id then table.insert(newids, a) end
             end
-            self.ids = newids
+            self.gui.ids = newids
             break
         end
     end
@@ -96,7 +87,7 @@ function GuiElement:GetElementSize()
     local baseW, baseH = self:GetBaseElementSize()
     local borderSize = 0
     if self.config.drawBorder then
-        borderSize = self.config.borderSize * 2
+        borderSize = 2
     end
     local width = baseW + self.config.padding.left + self.config.padding.right + borderSize
     local height = baseH + self.config.padding.top + self.config.padding.bottom + borderSize
@@ -110,6 +101,13 @@ function GuiElement:GetElementSize()
     }
 end
 
+function GuiElement:RenderBorder(x, y, w, h)
+      local width = math.max((self.config.overrideWidth or 0) - 2, w + self.config.padding.left + self.config.padding.right)
+      local height = math.max((self.config.overrideHeight or 0) - 2, h + self.config.padding.top + self.config.padding.bottom)
+      GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
+      GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
+end
+
 function GuiElement:Remove()
     for i, v in ipairs(self.parent.children) do
         if (v.name == self.name) then
@@ -118,5 +116,65 @@ function GuiElement:Remove()
         end
     end
 end
+
+configSchema = {
+    {
+        name = "drawBorder",
+        type = "boolean",
+        default = false
+    },
+    -- Specify the size of the element. Does not work if the element content is larger than the given size.
+    {
+        name = "overrideWidth",
+        type = "number",
+        default = 0
+    },
+    {
+        name = "overrideHeight",
+        type = "number",
+        default = 0
+    },
+    -- verticalAlign and horizontalAlign allow for elements to be aligned. Must be a number between 0 and 1, Use 0.5 to center.
+    {
+        name = "verticalAlign",
+        type = "number",
+        default = 0,
+    },
+    {
+        name = "horizontalAlign",
+        type = "number",
+        default = 0,
+    },
+    {
+        name = "margin",
+        type = {
+            top = "number",
+            bottom = "number",
+            left = "number",
+            right = "number"
+        },
+        default = {
+            top = 0,
+            bottom = 0,
+            left = 0,
+            right = 0
+        }
+    },
+    {
+        name = "padding",
+        type = {
+            top = "number",
+            bottom = "number",
+            left = "number",
+            right = "number"
+        },
+        default = {
+            top = 0,
+            bottom = 0,
+            left = 0,
+            right = 0
+        }
+    }
+}
 
 return GuiElement

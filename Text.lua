@@ -1,5 +1,5 @@
-local GuiElement = dofile_once("[[GUSGUI_PATH]]GuiElement.lua")
-dofile_once("[[GUSGUI_PATH]]class.lua")
+local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
+dofile_once("GUSGUI_PATHclass.lua")
 
 local function splitString(s, delimiter)
     local result = {}
@@ -33,11 +33,12 @@ function Text:Interp(s)
     end))
 end
 function Text:GetBaseElementSize()
-    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:ResolveValue(self.value))
+    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self:ResolveValue(self.value)))
     return w, h
 end
 
 function Text:Draw()
+    self.z = self:GetDepthInTree() * 10
     local parsedText = self:Interp(self:ResolveValue(self.value))
     local elementSize = self:GetElementSize()
     local paddingLeft = self:ResolveValue(self.config.padding.left)
@@ -45,12 +46,14 @@ function Text:Draw()
     local x = self:ResolveValue(self.config.margin.left)
     local y = self:ResolveValue(self.config.margin.top)
     local c = self:ResolveValue(self.config.colour)
-    local z = getDepthInTree(self) * 10
     if self.parent then
         x, y = self.parent:GetManagedXY()
     end
-    local border = (self:ResolveValue(self.config.drawBorder) and self:ResolveValue(self.config.borderSize) or 0)
-    GuiZSetForNextWidget(self.gui.guiobj, z)
+    local border = (self:ResolveValue(self.config.drawBorder) and 1 or 0)
+    if border > 0 then
+        self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
+    end
+    GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self.config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end

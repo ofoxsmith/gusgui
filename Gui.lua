@@ -129,8 +129,8 @@ function CreateGUI(data, state)
     return Gui:New(data, state)
 end
 
-local Text = dofile_once("[[GUSGUI_PATH]]Text.lua")
-local Button = dofile_once("[[GUSGUI_PATH]]Button.lua")
+local Text = dofile_once("GUSGUI_PATHText.lua")
+local Button = dofile_once("GUSGUI_PATHButton.lua")
 return {
     Create = CreateGUI,
     Elements = {

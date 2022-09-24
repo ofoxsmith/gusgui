@@ -11,7 +11,7 @@ return {
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)
-            m = string.gsub(m, "[[GUSGUI_PATH]]", path)
+            m = m:gsub("GUSGUI_PATH", path)
             ModTextFileSetContent(path .. v, m)
         end
     end
