@@ -2,6 +2,7 @@ local function validate(applyTo, id, s, elem, o)
     if o then
         local typeof = type(elem)
         if (typeof == "nil" and s.default == nil) or (typeof ~= s.type and typeof ~= "nil" and type(s.type) ~= "table") then
+            if type(s.type == "table") then error("GUI: Invalid value for " .. s.name .. " on element \"" .. id .."\"", 2)            end
             error("GUI: Invalid value for " .. s.name .. " on element \"" .. id .."\" (" .. s.type .. " expected, got " .. typeof .. ")", 2)
         end
         if (typeof == "nil") then
@@ -21,6 +22,7 @@ local function validate(applyTo, id, s, elem, o)
         local value = elem[v.name]
         local typeof = type(value)
         if (typeof == "nil" and v.default == nil) or (typeof ~= v.type and typeof ~= "nil" and type(v.type) ~= "table") then
+            if type(v.type == "table") then error("GUI: Invalid value for " .. v.name .. " on element \"" .. id .."\"", 2)            end
             error("GUI: Invalid value for " .. v.name .. " on element \"" .. id .."\" (" .. v.type .. " expected, got " .. typeof .. ")", 2)
         end
         if (typeof == "nil") then
