@@ -38,7 +38,7 @@ function Text:GetBaseElementSize()
 end
 
 function Text:Draw()
-    self.z = self:GetDepthInTree() * 10
+    self.z = self:GetDepthInTree() * -100
     local parsedText = self:Interp(self:ResolveValue(self.value))
     local elementSize = self:GetElementSize()
     local paddingLeft = self:ResolveValue(self.config.padding.left)
@@ -52,6 +52,9 @@ function Text:Draw()
     local border = (self:ResolveValue(self.config.drawBorder) and 1 or 0)
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
+    end
+    if self:ResolveValue(self.config.drawBackground) then 
+        self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self.config.colour then

@@ -29,7 +29,7 @@ function Button:GetBaseElementSize()
 end
 
 function Button:Draw()
-    self.z = self:GetDepthInTree() * 10
+    self.z = self:GetDepthInTree() * -100
     local parsedText = self:Interp(self:ResolveValue(self.text))
     local elementSize = self:GetElementSize()
     local paddingLeft = self:ResolveValue(self.config.padding.left)
@@ -46,8 +46,11 @@ function Button:Draw()
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
+    if self:ResolveValue(self.config.drawBackground) then 
+        self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
+    end
     -- Draw an invisible image to act as the button
-    GuiZSetForNextWidget(self.gui.guiobj, self.z + 2)
+    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
     GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then

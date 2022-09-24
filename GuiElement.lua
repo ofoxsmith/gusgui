@@ -108,6 +108,15 @@ function GuiElement:RenderBorder(x, y, w, h)
       GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
 end
 
+function GuiElement:RenderBackground(x, y, w, h)
+    local border = (self:ResolveValue(self.config.drawBorder) and 2 or 0)
+    local width = math.max((self.config.overrideWidth or 0) - border, w + self.config.padding.left + self.config.padding.right) - 1
+    local height = math.max((self.config.overrideHeight or 0) - border, h + self.config.padding.top + self.config.padding.bottom) - 1
+    GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
+    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + (border/2), y + (border/2), width, height, 1, "GUSGUI_PATHbg.png")
+end
+
+
 function GuiElement:Remove()
     for i, v in ipairs(self.parent.children) do
         if (v.name == self.name) then
@@ -120,6 +129,11 @@ end
 configSchema = {
     {
         name = "drawBorder",
+        type = "boolean",
+        default = false
+    },
+    {
+        name = "drawBackground",
         type = "boolean",
         default = false
     },
