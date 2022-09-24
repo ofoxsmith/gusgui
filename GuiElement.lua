@@ -4,22 +4,22 @@ local validate = dofile_once("GUSGUI_PATHvalidate.lua")
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
 -- and a Draw method, which draws the element using the Gui API
-local GuiElement = class(function(Element, id, config)
-    config = config or {}
+local GuiElement = class(function(Element, config)
+    if config.id == nil then error("GUI: Invalid construction of element (id is required)") end
+    Element.id = config.id
+    config.id = nil;
     Element.config = {}
     Element._rawconfig = {}
-    validate(Element._rawconfig, id, configSchema, config, false)
+    validate(Element._rawconfig, Element.id, configSchema, config, false)
     Element.gui = nil
     Element.allowChildren = false
-    if id == nil then error("GUI: Invalid construction of element (id is required)") end
-    Element.id = id
     setmetatable(Element.config, {
         __index = function(t, k)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
             if (configSchema[k] == nil) then return end
-            validate(Element._rawconfig, id, configSchema[k], v, true)
+            validate(Element._rawconfig, Element.id, configSchema[k], v, true)
         end
     })
     Element.children = {}

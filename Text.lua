@@ -14,8 +14,8 @@ local function splitString(s, delimiter)
     return result
 end
 
-local Text = class(GuiElement, function(o, id, value, config)
-    GuiElement.init(o, id, config)
+local Text = class(GuiElement, function(o, value, config)
+    GuiElement.init(o, config)
     o.type = "Text"
     if value == nil then
         error("GUI: Invalid construction of Text element (value paramater is required)", 2)

@@ -1,8 +1,8 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
-local Button = class(GuiElement, function(o, id, text, onClick, config)
-    GuiElement.init(o, id, config)
+local Button = class(GuiElement, function(o, text, onClick, config)
+    GuiElement.init(o, config)
     o.type = "Button"
     if onClick == nil then
         error("GUI: Invalid construction of Button element (onClick paramater is required)", 2)
