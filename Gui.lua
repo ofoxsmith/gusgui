@@ -133,12 +133,14 @@ end
 local Text = dofile_once("GUSGUI_PATHText.lua")
 local Button = dofile_once("GUSGUI_PATHButton.lua")
 local Image = dofile_once("GUSGUI_PATHImage.lua")
+local ImageButton = dofile_once("GUSGUI_PATHImageButton.lua")
 return {
     Create = CreateGUI,
     Elements = {
         Text = Text,
         Button = Button,
-        Image = Image
+        Image = Image,
+        ImageButton = ImageButton
     },
     State = StateValue,
     Global = GlobalValue
