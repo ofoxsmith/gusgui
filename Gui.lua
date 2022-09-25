@@ -51,13 +51,6 @@ function Gui:GetState(s)
     return item
 end
 
-function Gui:StateValue(s)
-    return {
-        _type = "state",
-        value = s
-    }
-end
-
 function Gui:AddElement(data)
     local function testID(i)
         for k = 1, #self.ids do
@@ -129,6 +122,20 @@ function CreateGUI(data, state)
     return Gui:New(data, state)
 end
 
+function StateValue(s)
+    return {
+        _type = "state",
+        value = s
+    }
+end
+
+function GlobalValue(s)
+    return {
+        _type = "global",
+        value = s
+    }
+end
+
 local Text = dofile_once("GUSGUI_PATHText.lua")
 local Button = dofile_once("GUSGUI_PATHButton.lua")
 local Image = dofile_once("GUSGUI_PATHImage.lua")
@@ -138,5 +145,7 @@ return {
         Text = Text,
         Button = Button,
         Image = Image
-    }
+    },
+    State = StateValue,
+    Global = GlobalValue
 }
