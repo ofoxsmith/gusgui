@@ -22,7 +22,7 @@ local GuiElement = class(function(Element, config)
     Element.allowChildren = false
     setmetatable(Element.config, {
         __index = function(t, k)
-            return Element._rawconfig[k]
+            return Element:ResolveValue(Element._rawconfig[k])
         end,
         __newindex = function(t, k, v)
             local valid, nv, err = self.baseValidator[k].validate(v)
@@ -139,7 +139,7 @@ function GuiElement:RenderBorder(x, y, w, h)
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
-    local border = (self:ResolveValue(self.config.drawBorder) and 2 or 0)
+    local border = (self.config.drawBorder and 2 or 0)
     local width = math.max((self.config.overrideWidth or 0),
         w + self.config.padding.left + self.config.padding.right)
     local height = math.max((self.config.overrideHeight or 0),

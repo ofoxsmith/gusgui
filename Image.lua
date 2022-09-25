@@ -13,26 +13,26 @@ local Image = class(GuiElement, function(o, config)
 end)
 
 function Image:GetBaseElementSize()
-    local w, h = GuiGetImageDimensions(self.gui.guiobj, self:ResolveValue(self.path))
+    local w, h = GuiGetImageDimensions(self.gui.guiobj, self.path)
     return w * self.scaleX, h * self.scaleY  
 end
 
 function Image:Draw()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
-    local paddingLeft = self:ResolveValue(self.config.padding.left)
-    local paddingTop = self:ResolveValue(self.config.padding.top)
-    local x = self:ResolveValue(self.config.margin.left)
-    local y = self:ResolveValue(self.config.margin.top)
-    local c = self:ResolveValue(self.config.colour)
-    local border = (self:ResolveValue(self.config.drawBorder) and 1 or 0)
+    local paddingLeft = self.config.padding.left
+    local paddingTop = self.config.padding.top
+    local x = self.config.margin.left
+    local y = self.config.margin.top
+    local c = self.config.colour
+    local border = (self.config.drawBorder and 1 or 0)
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self:ResolveValue(self.config.drawBackground) then 
+    if self.config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)

@@ -33,27 +33,27 @@ function Text:Interp(s)
     end))
 end
 function Text:GetBaseElementSize()
-    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self:ResolveValue(self.value)))
+    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self.value))
     return w, h
 end
 
 function Text:Draw()
     self.z = self:GetDepthInTree() * -100
-    local parsedText = self:Interp(self:ResolveValue(self.value))
+    local parsedText = self:Interp(self.value)
     local elementSize = self:GetElementSize()
-    local paddingLeft = self:ResolveValue(self.config.padding.left)
-    local paddingTop = self:ResolveValue(self.config.padding.top)
-    local x = self:ResolveValue(self.config.margin.left)
-    local y = self:ResolveValue(self.config.margin.top)
-    local c = self:ResolveValue(self.config.colour)
+    local paddingLeft = self.config.padding.left
+    local paddingTop = self.config.padding.top
+    local x = self.config.margin.left
+    local y = self.config.margin.top
+    local c = self.config.colour
     if self.parent then
         x, y = self.parent:GetManagedXY()
     end
-    local border = (self:ResolveValue(self.config.drawBorder) and 1 or 0)
+    local border = (self.config.drawBorder and 1 or 0)
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self:ResolveValue(self.config.drawBackground) then 
+    if self.config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
