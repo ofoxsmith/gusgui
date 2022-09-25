@@ -24,7 +24,7 @@ local GuiElement = class(function(Element, config)
 end)
 
 
-function GuiElement:ResolveValue(a) 
+function GuiElement:ResolveValue(a, t) 
     if type(a) ~= "table" then return a end
     if a._type == "state" and type(a.value) == "string" then return self.gui.GetState(a) end
     if a._type == "global" and type(a.value) == "string" then return GlobalsGetValue(a.value) end

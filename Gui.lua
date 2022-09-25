@@ -17,7 +17,6 @@ function Gui:New(data, state)
     o.guiobj = GuiCreate()
     o.tree = {}
     o.state = state or {}
-    o._cstate = o._state
     setmetatable(o, self)
     self.__index = self
     function o:New()
@@ -41,7 +40,7 @@ function Gui:GetState(s)
             table.insert(a, i)
         end
     end
-    item = init and self.state[init] or self.state
+    item = init and self._cstate[init] or self._cstate
     for k, v in pairs(a) do
         if (type(item) ~= "table") then
             error("GUI: Cannot access property of non-table value in state", 2)
@@ -104,7 +103,7 @@ end
 
 function Gui:Render()
     self.paused = false
-    self._cstate = self._state
+    self._cstate = self.state
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
