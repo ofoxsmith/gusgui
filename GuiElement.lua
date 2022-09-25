@@ -47,7 +47,10 @@ function GuiElement:ResolveValue(a, t)
         return self.gui.GetState(a)
     end
     if a._type == "global" and type(a.value) == "string" then
-        return GlobalsGetValue(a.value)
+        local v = GlobalsGetValue(a.value)
+        if t == "number" then return tonumber(v) end
+        if t == "boolean" then return (v == "true") and true or false end
+        return v
     end
     return a
 end
