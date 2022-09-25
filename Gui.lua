@@ -1,5 +1,4 @@
-local Gui = {}
-
+dofile_once("GUSGUI_PATHclass.lua")
 function getIdCounter()
     local id = 1
     return function()
@@ -8,25 +7,19 @@ function getIdCounter()
     end
 end
 
-function Gui:New(data, state)
+local Gui = class(function(newGUI, data, state)
     data = data or {}
-    local o = {}
-    o.queueDestroy = false
-    o.ids = {}
-    o.nextID = getIdCounter()
-    o.guiobj = GuiCreate()
-    o.tree = {}
-    o.state = state or {}
-    setmetatable(o, self)
-    self.__index = self
-    function o:New()
-        return nil
-    end
+    state = state or {}
+    newGUI.ids = {}
+    newGUI.nextID = getIdCounter()
+    newGUI.guiobj = GuiCreate()
+    newGUI.tree = {}
+    newGUI.state = state
+    newGUI._cstate = {}
     for k = 1, #data do
         self:AddElement(self.tree[k])
     end
-    return o
-end
+end)
 
 function Gui:GetState(s)
     s = s or ""
@@ -102,7 +95,7 @@ function searchTree(element, id)
 end
 
 function Gui:Render()
-    self.paused = false
+    if (self.destroyed == true) then return end
     self._cstate = self.state
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
@@ -112,13 +105,15 @@ function Gui:Render()
 end
 
 function Gui:Destroy()
+    self.destroyed = true
+    self.tree = nil
+    self.state = nil
     GuiDestroy(self.guiobj)
-    self.elements = nil
     return
 end
 
 function CreateGUI(data, state)
-    return Gui:New(data, state)
+    return Gui(data, state)
 end
 
 function StateValue(s)
