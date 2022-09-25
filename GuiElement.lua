@@ -11,8 +11,8 @@ local GuiElement = class(function(Element, config)
     config.id = nil;
     Element.config = {}
     Element._rawconfig = {}
-    for k = 1, #self.baseValidator do
-        local v = self.baseValidator[k]
+    for k = 1, #Element.baseValidator do
+        local v = Element.baseValidator[k]
         local valid, nv, err = v.validate(config[v.name])
         if valid and (nv ~= nil) then Element._rawconfig[v.name] = nv 
         elseif valid then Element._rawconfig[v.name] = config[v.name]
@@ -127,9 +127,9 @@ function GuiElement:GetElementSize()
 end
 
 function GuiElement:RenderBorder(x, y, w, h)
-    local width = math.max((self.config.overrideWidth or 0) - 2,
+    local width = math.max((self.config.overrideWidth or 0),
         w + self.config.padding.left + self.config.padding.right)
-    local height = math.max((self.config.overrideHeight or 0) - 2,
+    local height = math.max((self.config.overrideHeight or 0),
         h + self.config.padding.top + self.config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
@@ -137,12 +137,12 @@ end
 
 function GuiElement:RenderBackground(x, y, w, h)
     local border = (self:ResolveValue(self.config.drawBorder) and 2 or 0)
-    local width = math.max((self.config.overrideWidth or 0) - border,
-        w + self.config.padding.left + self.config.padding.right) - 1
-    local height = math.max((self.config.overrideHeight or 0) - border,
-        h + self.config.padding.top + self.config.padding.bottom) - 1
+    local width = math.max((self.config.overrideWidth or 0),
+        w + self.config.padding.left + self.config.padding.right)
+    local height = math.max((self.config.overrideHeight or 0),
+        h + self.config.padding.top + self.config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + (border / 2), y + (border / 2), width, height, 1,
+    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + border, y + border, width - border, height - border, 1,
         "GUSGUI_PATHbg.png")
 end
 
@@ -155,7 +155,7 @@ function GuiElement:Remove()
     end
 end
 
-Gui.baseValidator = {{
+GuiElement.baseValidator = {{
     name = "drawBorder",
     validate = function(o)
         local t = type(o)
