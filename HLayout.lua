@@ -1,10 +1,10 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
-local HLayout = class(GuiElement, function(o, align, config)
+local HLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "HLayout"
-    o.align = align or 0
+    o.align = config.align or 0
     o.height = 0
     o.width = 0
 end)

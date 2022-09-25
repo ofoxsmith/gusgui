@@ -14,13 +14,13 @@ local function splitString(s, delimiter)
     return result
 end
 
-local Text = class(GuiElement, function(o, value, config)
+local Text = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "Text"
-    if value == nil then
+    if config.value == nil then
         error("GUI: Invalid construction of Text element (value paramater is required)", 2)
     end
-    o.value = value
+    o.value = config.value
 end)
 
 function Text:Interp(s)

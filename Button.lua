@@ -1,17 +1,17 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
-local Button = class(GuiElement, function(o, text, onClick, config)
+local Button = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "Button"
-    if onClick == nil then
+    if config.onClick == nil then
         error("GUI: Invalid construction of Button element (onClick paramater is required)", 2)
     end
-    if text == nil then
+    if config.text == nil then
         error("GUI: Invalid construction of Button element (text paramater is required)", 2)
     end
-    o.onClick = onClick
-    o.text = text
+    o.onClick = config.onClick
+    o.text = config.text
 end)
 
 function Button:Interp(s)
@@ -33,9 +33,7 @@ function Button:Draw()
     local parsedText = self:Interp(self:ResolveValue(self.text))
     local elementSize = self:GetElementSize()
     local paddingLeft = self:ResolveValue(self.config.padding.left)
-    local paddingBottom = self:ResolveValue(self.config.padding.bottom)
     local paddingTop = self:ResolveValue(self.config.padding.top)
-    local paddingBottom = self:ResolveValue(self.config.padding.bottom)
     local x = self:ResolveValue(self.config.margin.left)
     local y = self:ResolveValue(self.config.margin.top)
     local c = self:ResolveValue(self.config.colour)

@@ -1,5 +1,4 @@
 dofile_once("GUSGUI_PATHclass.lua")
-local validate = dofile_once("GUSGUI_PATHvalidate.lua")
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
@@ -9,8 +8,7 @@ local GuiElement = class(function(Element, config)
     Element.id = config.id
     config.id = nil;
     Element.config = {}
-    Element._rawconfig = {}
-    validate(Element._rawconfig, Element.id, configSchema, config, false)
+    Element._rawconfig = config
     Element.gui = nil
     Element.allowChildren = false
     setmetatable(Element.config, {
@@ -18,8 +16,7 @@ local GuiElement = class(function(Element, config)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            if (configSchema[k] == nil) then return end
-            validate(Element._rawconfig, Element.id, configSchema[k], v, true)
+            Element._rawconfig[k] = v
         end
     })
     Element.children = {}
@@ -125,70 +122,5 @@ function GuiElement:Remove()
         end
     end
 end
-
-configSchema = {
-    {
-        name = "drawBorder",
-        type = "boolean",
-        default = false
-    },
-    {
-        name = "drawBackground",
-        type = "boolean",
-        default = false
-    },
-    -- Specify the size of the element. Does not work if the element content is larger than the given size.
-    {
-        name = "overrideWidth",
-        type = "number",
-        default = 0
-    },
-    {
-        name = "overrideHeight",
-        type = "number",
-        default = 0
-    },
-    -- verticalAlign and horizontalAlign allow for elements to be aligned. Must be a number between 0 and 1, Use 0.5 to center.
-    {
-        name = "verticalAlign",
-        type = "number",
-        default = 0,
-    },
-    {
-        name = "horizontalAlign",
-        type = "number",
-        default = 0,
-    },
-    {
-        name = "margin",
-        type = {
-            top = "number",
-            bottom = "number",
-            left = "number",
-            right = "number"
-        },
-        default = {
-            top = 0,
-            bottom = 0,
-            left = 0,
-            right = 0
-        }
-    },
-    {
-        name = "padding",
-        type = {
-            top = "number",
-            bottom = "number",
-            left = "number",
-            right = "number"
-        },
-        default = {
-            top = 0,
-            bottom = 0,
-            left = 0,
-            right = 0
-        }
-    }
-}
 
 return GuiElement
