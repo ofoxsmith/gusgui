@@ -140,6 +140,7 @@ local Image = dofile_once("GUSGUI_PATHImage.lua")
 local ImageButton = dofile_once("GUSGUI_PATHImageButton.lua")
 local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
 local VLayout = dofile_once("GUSGUI_PATHVLayout.lua")
+local Slider = dofile_once("GUSGUI_PATHSlider.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -148,7 +149,8 @@ return {
         Image = Image,
         ImageButton = ImageButton,
         HLayout = HLayout,
-        VLayout = VLayout
+        VLayout = VLayout,
+        Slider = Slider
     },
     State = StateValue,
     Global = GlobalValue
