@@ -55,7 +55,7 @@ function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         data.gui = self
         if not testID(data.id) then
-            error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)")
+            error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)", 2)
         end
         for k = 1, #data._rawchildren do
             data:AddChild(data._rawchildren[k])
@@ -139,6 +139,7 @@ local Button = dofile_once("GUSGUI_PATHButton.lua")
 local Image = dofile_once("GUSGUI_PATHImage.lua")
 local ImageButton = dofile_once("GUSGUI_PATHImageButton.lua")
 local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
+local VLayout = dofile_once("GUSGUI_PATHVLayout.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -146,7 +147,8 @@ return {
         Button = Button,
         Image = Image,
         ImageButton = ImageButton,
-        HLayout = HLayout
+        HLayout = HLayout,
+        VLayout = VLayout
     },
     State = StateValue,
     Global = GlobalValue

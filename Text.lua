@@ -50,7 +50,6 @@ function Text:Draw()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
-    GamePrint(tostring(x) .. " " .. tostring(y))
     local border = (self.config.drawBorder and 1 or 0)
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)

@@ -1,7 +1,7 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
-local HLayout = class(GuiElement, function(o, config)
+local VLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "HLayout"
     o.allowsChildren = true
@@ -10,7 +10,7 @@ local HLayout = class(GuiElement, function(o, config)
     o.align = config.align or 0
 end)
 
-function HLayout:GetBaseElementSize()
+function VLayout:GetBaseElementSize()
     local totalW = 0
     local totalH = 0
     for i = 1, #self.children do
@@ -18,23 +18,23 @@ function HLayout:GetBaseElementSize()
         local size = child:GetElementSize()
         local w = math.max(size.width + child.config.margin.left + child.config.margin.right, child.config.overrideWidth)
         local h = math.max(size.height + child.config.margin.top + child.config.margin.bottom, child.config.overrideHeight)
-        totalW = totalW + w
-        totalH = totalH > size.height and totalH or h
+        totalW = math.max(totalW, w)
+        totalH = totalH + h
     end
     return totalW, totalH
 end
 
-function HLayout:GetManagedXY(elem)
+function VLayout:GetManagedXY(elem)
     self.nextX = self.nextX or self.baseX + self.config.padding.left + (self.config.drawBorder and 2 or 0)
     self.nextY = self.nextY or self.baseY + self.config.padding.top + (self.config.drawBorder and 2 or 0)
     local elemsize = elem:GetElementSize()
     local x = self.nextX + elem.config.margin.left
     local y = self.nextY + elem.config.margin.top
-    self.nextX = self.nextX + elemsize.width + elem.config.margin.left + elem.config.margin.right
+    self.nextY = self.nextY + elemsize.height + elem.config.margin.top + elem.config.margin.bottom
     return x, y
 end
 
-function HLayout:Draw()
+function VLayout:Draw()
     self.nextX = nil
     self.nextY = nil
     self.z = self:GetDepthInTree() * -100
@@ -57,4 +57,4 @@ function HLayout:Draw()
     end
 end
 
-return HLayout
+return VLayout
