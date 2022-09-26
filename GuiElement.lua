@@ -235,7 +235,7 @@ GuiElement.baseValidator = {{
             return true, nil, nil
         end
         if t == "number" then
-            if 0 < o and o < 1 then
+            if not (0 <= o and o <= 1) then
                 return false, nil,
                     "GUI: Invalid value for verticalAlign on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
             end
@@ -255,7 +255,7 @@ GuiElement.baseValidator = {{
             return true, nil, nil
         end
         if t == "number" then
-            if 0 < o and o < 1 then
+            if not (0 <= o and o <= 1) then
                 return false, nil,
                     "GUI: Invalid value for horizontalAlign on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
             end
