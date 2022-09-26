@@ -57,6 +57,10 @@ function Gui:AddElement(data)
         if not testID(data.id) then
             error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)")
         end
+        for k = 1, #data._rawchildren do
+            data:AddChild(data._rawchildren[k])
+        end
+        data.childrenResolved = true
         table.insert(self.ids, data.id)
         table.insert(self.tree, data)
     else
@@ -134,13 +138,15 @@ local Text = dofile_once("GUSGUI_PATHText.lua")
 local Button = dofile_once("GUSGUI_PATHButton.lua")
 local Image = dofile_once("GUSGUI_PATHImage.lua")
 local ImageButton = dofile_once("GUSGUI_PATHImageButton.lua")
+local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
 return {
     Create = CreateGUI,
     Elements = {
         Text = Text,
         Button = Button,
         Image = Image,
-        ImageButton = ImageButton
+        ImageButton = ImageButton,
+        HLayout = HLayout
     },
     State = StateValue,
     Global = GlobalValue

@@ -4,6 +4,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 local Image = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "Image"
+    o.allowsChildren = false
     o.scaleX = config.scaleX or 1
     o.scaleY = config.scaleY or 1 
     if config.path == nil then

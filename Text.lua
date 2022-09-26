@@ -17,6 +17,7 @@ end
 local Text = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "Text"
+    o.allowsChildren = false
     if config.value == nil then
         error("GUI: Invalid construction of Text element (value paramater is required)", 2)
     end
@@ -47,14 +48,22 @@ function Text:Draw()
     local y = self.config.margin.top
     local c = self.config.colour
     if self.parent then
-        x, y = self.parent:GetManagedXY()
+        x, y = self.parent:GetManagedXY(self)
     end
+    GamePrint(tostring(x) .. " " .. tostring(y))
     local border = (self.config.drawBorder and 1 or 0)
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
     if self.config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
+    end
+    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
+    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
+    if hovered then 
+        GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
+        GuiImage(self.gui.guiobj, self.gui.nextID(), x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self.config.colour then

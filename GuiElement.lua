@@ -11,6 +11,7 @@ local GuiElement = class(function(Element, config)
     config.id = nil;
     Element.config = {}
     Element._rawconfig = {}
+    Element._rawchildren = {}
     for k = 1, #Element.baseValidator do
         local v = Element.baseValidator[k]
         local valid, nv, err = v.validate(config[v.name])
@@ -19,7 +20,6 @@ local GuiElement = class(function(Element, config)
         elseif err then error(err:format(Element.id), 4) end
     end
     Element.gui = nil
-    Element.allowChildren = false
     setmetatable(Element.config, {
         __index = function(t, k)
             return Element:ResolveValue(Element._rawconfig[k])
@@ -68,7 +68,7 @@ function GuiElement:GetDepthInTree()
 end
 
 function GuiElement:AddChild(child)
-    if not self.allowChildren then
+    if not self.allowsChildren then
         error("GUI: " .. self.type .. " cannot have child element")
     end
     local function testID(i)
@@ -82,7 +82,7 @@ function GuiElement:AddChild(child)
     child.parent = self
     if child["is_a"] and child["Draw"] and child["GetBaseElementSize"] then
         child.gui = self.gui
-        if not testID(data.id) then
+        if not testID(child.id) then
             error("GUI: Element ID value must be unique (\"" .. child.id .. "\" is a duplicate)")
         end
         table.insert(self.gui.ids, child.id)
@@ -115,7 +115,7 @@ function GuiElement:GetElementSize()
     local baseW, baseH = self:GetBaseElementSize()
     local borderSize = 0
     if self.config.drawBorder then
-        borderSize = 2
+        borderSize = 4
     end
     local width = baseW + self.config.padding.left + self.config.padding.right + borderSize
     local height = baseH + self.config.padding.top + self.config.padding.bottom + borderSize

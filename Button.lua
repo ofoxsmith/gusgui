@@ -3,6 +3,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 
 local Button = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
+    o.allowsChildren = false
     o.type = "Button"
     if config.onClick == nil then
         error("GUI: Invalid construction of Button element (onClick paramater is required)", 2)

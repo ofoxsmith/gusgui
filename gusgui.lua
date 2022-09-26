@@ -9,7 +9,8 @@ return {
             "Text.lua",
             "HLayout.lua",
             "Image.lua",
-            "ImageButton.lua"
+            "ImageButton.lua",
+            "HLayout.lua"
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)
