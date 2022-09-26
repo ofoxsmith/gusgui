@@ -3,7 +3,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 
 local VLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
-    o.type = "HLayout"
+    o.type = "VLayout"
     o.allowsChildren = true
     o.childrenResolved = false
     o._rawchildren = config.children or {}

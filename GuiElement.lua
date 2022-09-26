@@ -9,6 +9,7 @@ local GuiElement = class(function(Element, config)
     end
     Element.id = config.id
     config.id = nil;
+    Element.name = config.name or nil
     Element.config = {}
     Element._rawconfig = {}
     Element._rawchildren = {}
