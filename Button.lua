@@ -30,6 +30,8 @@ function Button:GetBaseElementSize()
 end
 
 function Button:Draw()
+    self.maskID = self.maskID or self.gui.nextID()
+    self.buttonID = self.buttonID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local parsedText = self:Interp(self.text)
     local elementSize = self:GetElementSize()
@@ -50,14 +52,14 @@ function Button:Draw()
     end
     -- Draw an invisible image to act as the button
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self.onClick(self)
     end
     if hovered then 
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
-        GuiImage(self.gui.guiobj, self.gui.nextID(), x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
+        GuiImage(self.gui.guiobj, self.maskID, x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self.config.colour then

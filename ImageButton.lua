@@ -23,6 +23,8 @@ function ImageButton:GetBaseElementSize()
 end
 
 function ImageButton:Draw()
+    self.imageID = self.imageID or self.gui.nextID()
+    self.buttonID = self.buttonID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
     local paddingLeft = self.config.padding.left
@@ -41,7 +43,7 @@ function ImageButton:Draw()
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self.onClick(self)
@@ -50,7 +52,7 @@ function ImageButton:Draw()
     if self.config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
-    GuiImage(self.gui.guiobj, self.gui.nextID(), x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + paddingTop + border, self.path, 1, self.scaleX, self.scaleY)
+    GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + paddingTop + border, self.path, 1, self.scaleX, self.scaleY)
 end
 
 return ImageButton

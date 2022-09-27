@@ -131,22 +131,24 @@ function GuiElement:GetElementSize()
 end
 
 function GuiElement:RenderBorder(x, y, w, h)
+    self.borderID = self.borderID or self.gui.nextID()
     local width = math.max((self.config.overrideWidth or 0),
         w + self.config.padding.left + self.config.padding.right)
     local height = math.max((self.config.overrideHeight or 0),
         h + self.config.padding.top + self.config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
+    GuiImageNinePiece(self.gui.guiobj, self.borderID, x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
+    self.bgID = self.bgID or self.gui.nextID()
     local border = (self.config.drawBorder and 2 or 0)
     local width = math.max((self.config.overrideWidth or 0),
         w + self.config.padding.left + self.config.padding.right)
     local height = math.max((self.config.overrideHeight or 0),
         h + self.config.padding.top + self.config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-    GuiImageNinePiece(self.gui.guiobj, self.gui.nextID(), x + border, y + border, width - border, height - border, 1,
+    GuiImageNinePiece(self.gui.guiobj, self.bgID, x + border, y + border, width - border, height - border, 1,
         "GUSGUI_PATHbg.png")
 end
 
