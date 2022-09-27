@@ -20,6 +20,7 @@ end
 
 function Image:Draw()
     self.imageID = self.imageID or self.gui.nextID()
+    self.maskID = self.maskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
     local paddingLeft = self.config.padding.left
@@ -37,6 +38,10 @@ function Image:Draw()
     if self.config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
+    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
+    if hovered and self.config.onHover then self.config.onHover(self) end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self.config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
