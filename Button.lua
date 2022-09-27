@@ -59,6 +59,7 @@ function Button:Draw()
     end
     if hovered then 
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
+        if self.config.onHover then self.config.onHover(self) end
         GuiImage(self.gui.guiobj, self.maskID, x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)

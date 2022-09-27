@@ -367,6 +367,15 @@ GuiElement.baseValidator = {{
         end
         return false, nil, "GUI: Invalid value for colour on element \"%s\""
     end
+}, {
+    name = "onHover",
+    validate = function(o)
+        if o == nil then
+            return true, nil, nil
+        end
+        if type(o) == "function" then return true, nil, nil end
+        return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+    end
 }}
 
 return GuiElement

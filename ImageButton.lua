@@ -48,6 +48,7 @@ function ImageButton:Draw()
     if clicked then
         self.onClick(self)
     end
+    if hovered and self.config.onHover then self.config.onHover(self) end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self.config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)

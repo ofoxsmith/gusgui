@@ -62,7 +62,8 @@ function Text:Draw()
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    if hovered then 
+    if hovered then
+        if self.config.onHover then self.config.onHover(self) end
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
         GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
     end
