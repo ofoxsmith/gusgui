@@ -16,9 +16,13 @@ local GuiElement = class(function(Element, config)
     for k = 1, #Element.baseValidator do
         local v = Element.baseValidator[k]
         local valid, nv, err = v.validate(config[v.name])
-        if valid and (nv ~= nil) then Element._rawconfig[v.name] = nv 
-        elseif valid then Element._rawconfig[v.name] = config[v.name]
-        elseif err then error(err:format(Element.id), 4) end
+        if valid and (nv ~= nil) then
+            Element._rawconfig[v.name] = nv
+        elseif valid then
+            Element._rawconfig[v.name] = config[v.name]
+        elseif err then
+            error(err:format(Element.id), 4)
+        end
     end
     Element.gui = nil
     setmetatable(Element.config, {
@@ -49,8 +53,12 @@ function GuiElement:ResolveValue(a, t)
     end
     if a._type == "global" and type(a.value) == "string" then
         local v = GlobalsGetValue(a.value)
-        if t == "number" then return tonumber(v) end
-        if t == "boolean" then return (v == "true") and true or false end
+        if t == "number" then
+            return tonumber(v)
+        end
+        if t == "boolean" then
+            return (v == "true") and true or false
+        end
         return v
     end
     return a
@@ -132,10 +140,8 @@ end
 
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
-    local width = math.max((self.config.overrideWidth or 0),
-        w + self.config.padding.left + self.config.padding.right)
-    local height = math.max((self.config.overrideHeight or 0),
-        h + self.config.padding.top + self.config.padding.bottom)
+    local width = math.max((self.config.overrideWidth or 0), w + self.config.padding.left + self.config.padding.right)
+    local height = math.max((self.config.overrideHeight or 0), h + self.config.padding.top + self.config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.borderID, x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
 end
@@ -143,10 +149,8 @@ end
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
     local border = (self.config.drawBorder and 2 or 0)
-    local width = math.max((self.config.overrideWidth or 0),
-        w + self.config.padding.left + self.config.padding.right)
-    local height = math.max((self.config.overrideHeight or 0),
-        h + self.config.padding.top + self.config.padding.bottom)
+    local width = math.max((self.config.overrideWidth or 0), w + self.config.padding.left + self.config.padding.right)
+    local height = math.max((self.config.overrideHeight or 0), h + self.config.padding.top + self.config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
     GuiImageNinePiece(self.gui.guiobj, self.bgID, x + border, y + border, width - border, height - border, 1,
         "GUSGUI_PATHbg.png")
@@ -248,7 +252,6 @@ GuiElement.baseValidator = {{
     end
 }, {
     name = "horizontalAlign",
-    type = "number",
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -347,6 +350,22 @@ GuiElement.baseValidator = {{
             return true, m, nil;
         end
         return false, nil, "GUI: Invalid value for padding on element \"%s\""
+    end
+}, {
+    name = "colour",
+    validate = function(o)
+        if o == nil then
+            return true, nil, nil
+        end
+        if type(o) == "table" then
+            if not (type(o.r) == "number" or (type(o.r) == "table" and o.r["value"] ~= nil and o.r["_type"] ~= nil) and
+                type(o.g) == "number" or (type(o.g) == "table" and o.g["value"] ~= nil and o.g["_type"] ~= nil) and
+                type(o.b) == "number" or (type(o.b) == "table" and o.b["value"] ~= nil and o.b["_type"] ~= nil)) then
+                return false, nil, "GUI: Invalid value for colour on element \"%s\""
+            end
+            return true, nil, nil
+        end
+        return false, nil, "GUI: Invalid value for colour on element \"%s\""
     end
 }}
 
