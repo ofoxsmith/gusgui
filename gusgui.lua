@@ -13,7 +13,7 @@ return {
             "HLayout.lua",
             "VLayout.lua",
             "Slider.lua",
-            "TabContainer.lua"
+            "TextInput.lua",
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)

@@ -6,7 +6,7 @@ local Slider = class(GuiElement, function(o, config)
     o.type = "Slider"
     o.allowsChildren = false
     if config.width == nil then
-        error("GUI: Invalid construction of Slider element (length paramater is required)", 2)
+        error("GUI: Invalid construction of Slider element (width paramater is required)", 2)
     end
     o.width = config.width
     if config.min == nil then
