@@ -36,19 +36,19 @@ function Slider:Draw()
     self.renderID = self.renderID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
-    local paddingLeft = self.config.padding.left
-    local paddingTop = self.config.padding.top
-    local x = self.config.margin.left
-    local y = self.config.margin.top
-    local c = self.config.colour
-    local border = self.config.drawBorder and 1 or 0
+    local paddingLeft = self._config.padding.left
+    local paddingTop = self._config.padding.top
+    local x = self._config.margin.left
+    local y = self._config.margin.top
+    local c = self._config.colour
+    local border = self._config.drawBorder and 1 or 0
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
-    if self.config.drawBorder then
+    if self._config.drawBorder then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self.config.drawBackground then 
+    if self._config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     local old = self.value

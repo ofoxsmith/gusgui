@@ -27,19 +27,19 @@ function ImageButton:Draw()
     self.buttonID = self.buttonID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
-    local paddingLeft = self.config.padding.left
-    local paddingTop = self.config.padding.top
-    local x = self.config.margin.left
-    local y = self.config.margin.top
-    local c = self.config.colour
-    local border = (self.config.drawBorder and 1 or 0)
+    local paddingLeft = self._config.padding.left
+    local paddingTop = self._config.padding.top
+    local x = self._config.margin.left
+    local y = self._config.margin.top
+    local c = self._config.colour
+    local border = (self._config.drawBorder and 1 or 0)
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self.config.drawBackground then 
+    if self._config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
@@ -48,9 +48,9 @@ function ImageButton:Draw()
     if clicked then
         self.onClick(self)
     end
-    if hovered and self.config.onHover then self.config.onHover(self) end
+    if hovered and self._config.onHover then self._config.onHover(self) end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
-    if self.config.colour then
+    if self._config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
     GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + paddingTop + border, self.path, 1, self.scaleX, self.scaleY)

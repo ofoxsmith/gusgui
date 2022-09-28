@@ -44,31 +44,31 @@ function Text:Draw()
     self.z = self:GetDepthInTree() * -100
     local parsedText = self:Interp(self.value)
     local elementSize = self:GetElementSize()
-    local paddingLeft = self.config.padding.left
-    local paddingTop = self.config.padding.top
-    local x = self.config.margin.left
-    local y = self.config.margin.top
-    local c = self.config.colour
+    local paddingLeft = self._config.padding.left
+    local paddingTop = self._config.padding.top
+    local x = self._config.margin.left
+    local y = self._config.margin.top
+    local c = self._config.colour
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
-    local border = (self.config.drawBorder and 1 or 0)
+    local border = (self._config.drawBorder and 1 or 0)
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self.config.drawBackground then 
+    if self._config.drawBackground then 
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
-        if self.config.onHover then self.config.onHover(self) end
+        if self._config.onHover then self._config.onHover(self) end
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
         GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
-    if self.config.colour then
+    if self._config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
     GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft,

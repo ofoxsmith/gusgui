@@ -13,31 +13,31 @@ local TextInput = class(GuiElement, function(o, config)
     self.onEdit = config.onEdit
 end)
 
-function TextInput:GetBaseElementSize() return math.max(25, self.width - (self.config.drawBorder and 4 or 0)), 10 end
+function TextInput:GetBaseElementSize() return math.max(25, self.width - (self._config.drawBorder and 4 or 0)), 10 end
 function TextInput:Draw()
     self.value = self.value or " "
     self.inputID = self.inputID or self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
-    local paddingLeft = self.config.padding.left
-    local paddingTop = self.config.padding.top
-    local x = self.config.margin.left
-    local y = self.config.margin.top
-    local c = self.config.colour
-    local border = (self.config.drawBorder and 1 or 0)
+    local paddingLeft = self._config.padding.left
+    local paddingTop = self._config.padding.top
+    local x = self._config.margin.left
+    local y = self._config.margin.top
+    local c = self._config.colour
+    local border = (self._config.drawBorder and 1 or 0)
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self.config.drawBackground then
+    if self._config.drawBackground then
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self:GetDepthInTree() * -100)
-    local n = GuiTextInput(self.gui.guiobj, self.inputID, x + elementSize.offsetX + border + self.config.padding.left,
-        y + elementSize.offsetY + border + self.config.padding.top, self.value, self.width, self.maxLength,
+    local n = GuiTextInput(self.gui.guiobj, self.inputID, x + elementSize.offsetX + border + self._config.padding.left,
+        y + elementSize.offsetY + border + self._config.padding.top, self.value, self.width, self.maxLength,
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
     if self.value ~= n then
         self.value = n

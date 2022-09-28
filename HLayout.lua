@@ -16,8 +16,8 @@ function HLayout:GetBaseElementSize()
     for i = 1, #self.children do
         local child = self.children[i]
         local size = child:GetElementSize()
-        local w = math.max(size.width + child.config.margin.left + child.config.margin.right, child.config.overrideWidth)
-        local h = math.max(size.height + child.config.margin.top + child.config.margin.bottom, child.config.overrideHeight)
+        local w = math.max(size.width + child._config.margin.left + child._config.margin.right, child._config.overrideWidth)
+        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom, child._config.overrideHeight)
         totalW = totalW + w
         totalH = totalH > size.height and totalH or h
     end
@@ -25,12 +25,12 @@ function HLayout:GetBaseElementSize()
 end
 
 function HLayout:GetManagedXY(elem)
-    self.nextX = self.nextX or self.baseX + self.config.padding.left + (self.config.drawBorder and 2 or 0)
-    self.nextY = self.nextY or self.baseY + self.config.padding.top + (self.config.drawBorder and 2 or 0)
+    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0)
+    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0)
     local elemsize = elem:GetElementSize()
-    local x = self.nextX + elem.config.margin.left
-    local y = self.nextY + elem.config.margin.top
-    self.nextX = self.nextX + elemsize.width + elem.config.margin.left + elem.config.margin.right
+    local x = self.nextX + elem._config.margin.left
+    local y = self.nextY + elem._config.margin.top
+    self.nextX = self.nextX + elemsize.width + elem._config.margin.left + elem._config.margin.right
     return x, y
 end
 
@@ -38,26 +38,26 @@ function HLayout:Draw()
     self.nextX = nil
     self.nextY = nil
     local elementSize = self:GetElementSize()
-    local border = (self.config.drawBorder and 1 or 0)
+    local border = (self._config.drawBorder and 1 or 0)
     self.z = self:GetDepthInTree() * -100
-    local x = self.config.margin.left
-    local y = self.config.margin.top
+    local x = self._config.margin.left
+    local y = self._config.margin.top
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
     self.baseX = x
     self.baseY = y
-    if self.config.drawBorder then
+    if self._config.drawBorder then
         self:RenderBorder(x, y, size.baseW, size.baseH)
     end
-    if self.config.drawBackground then 
+    if self._config.drawBackground then 
         self:RenderBackground(x, y, size.baseW, size.baseH)
     end
     self.maskID = self.maskID or self.gui.nextID()
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    if hovered and self.config.onHover then self.config.onHover(self) end
+    if hovered and self._config.onHover then self._config.onHover(self) end
     for i = 1, #self.children do
         self.children[i]:Draw()
     end

@@ -12,10 +12,12 @@ local GuiElement = class(function(Element, config)
     Element.name = config.name or nil
     Element.config = {}
     Element._rawconfig = {}
+    Element.useHoverConfigForNextFrame = false
     Element._rawchildren = {}
+    Element._config = {}
     for k = 1, #Element.baseValidator do
         local v = Element.baseValidator[k]
-        local valid, nv, err = v.validate(config[v.name])
+        local valid, nv, err = v.validate(config[v.name], self.baseValidator)
         if valid and (nv ~= nil) then
             Element._rawconfig[v.name] = nv
         elseif valid then
@@ -25,12 +27,21 @@ local GuiElement = class(function(Element, config)
         end
     end
     Element.gui = nil
+    setmetatable(Element._config, {
+        __index = function(t, k)
+            if Element.useHoverConfigForNextFrame == true then 
+                return Element:ResolveValue((Element._rawconfig.hover[k] or Element._rawconfig[k]), k)
+            end
+            return Element:ResolveValue(Element._rawconfig[k], k)
+        end,
+        __newindex = function(t, k, v) error("_config is readonly") end
+    })
     setmetatable(Element.config, {
         __index = function(t, k)
-            return Element:ResolveValue(Element._rawconfig[k])
+            return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            local valid, nv, err = self.baseValidator[k].validate(v)
+            local valid, nv, err = self.baseValidator[k].validate(v, self.baseValidator)
             if valid and (nv ~= nil) then
                 Element._rawconfig[v.name] = nv
             elseif valid then
@@ -44,7 +55,8 @@ local GuiElement = class(function(Element, config)
     Element.rootNode = false
 end)
 
-function GuiElement:ResolveValue(a, t)
+function GuiElement:ResolveValue(a, k)
+    local fs = self.baseValidator[k].fromString
     if type(a) ~= "table" then
         return a
     end
@@ -52,7 +64,7 @@ function GuiElement:ResolveValue(a, t)
         return self.gui.GetState(a)
     end
     if a._type == "global" and type(a.value) == "string" then
-        local v = GlobalsGetValue(a.value)
+        local v = fs(GlobalsGetValue(a.value))
         if t == "number" then
             return tonumber(v)
         end
@@ -123,34 +135,34 @@ end
 function GuiElement:GetElementSize()
     local baseW, baseH = self:GetBaseElementSize()
     local borderSize = 0
-    if self.config.drawBorder then
+    if self._config.drawBorder then
         borderSize = 4
     end
-    local width = baseW + self.config.padding.left + self.config.padding.right + borderSize
-    local height = baseH + self.config.padding.top + self.config.padding.bottom + borderSize
+    local width = baseW + self._config.padding.left + self._config.padding.right + borderSize
+    local height = baseH + self._config.padding.top + self._config.padding.bottom + borderSize
     return {
         baseW = baseW,
         baseH = baseH,
-        width = (math.max(self.config.overrideWidth or 0, width)),
-        height = (math.max(self.config.overrideHeight or 0, height)),
-        offsetX = (self.config.horizontalAlign) * (math.max(self.config.overrideWidth or 0, width) - width),
-        offsetY = (self.config.verticalAlign) * (math.max(self.config.overrideHeight or 0, height) - height)
+        width = (math.max(self._config.overrideWidth or 0, width)),
+        height = (math.max(self._config.overrideHeight or 0, height)),
+        offsetX = (self._config.horizontalAlign) * (math.max(self._config.overrideWidth or 0, width) - width),
+        offsetY = (self._config.verticalAlign) * (math.max(self._config.overrideHeight or 0, height) - height)
     }
 end
 
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
-    local width = math.max((self.config.overrideWidth or 0), w + self.config.padding.left + self.config.padding.right)
-    local height = math.max((self.config.overrideHeight or 0), h + self.config.padding.top + self.config.padding.bottom)
+    local width = math.max((self._config.overrideWidth or 0), w + self._config.padding.left + self._config.padding.right)
+    local height = math.max((self._config.overrideHeight or 0), h + self._config.padding.top + self._config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.borderID, x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
-    local border = (self.config.drawBorder and 2 or 0)
-    local width = math.max((self.config.overrideWidth or 0), w + self.config.padding.left + self.config.padding.right)
-    local height = math.max((self.config.overrideHeight or 0), h + self.config.padding.top + self.config.padding.bottom)
+    local border = (self._config.drawBorder and 2 or 0)
+    local width = math.max((self._config.overrideWidth or 0), w + self._config.padding.left + self._config.padding.right)
+    local height = math.max((self._config.overrideHeight or 0), h + self._config.padding.top + self._config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
     GuiImageNinePiece(self.gui.guiobj, self.bgID, x + border, y + border, width - border, height - border, 1,
         "GUSGUI_PATHbg.png")
@@ -167,6 +179,9 @@ end
 
 GuiElement.baseValidator = {{
     name = "drawBorder",
+    fromString = function(s) 
+        return s == "true"
+    end,
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -182,6 +197,9 @@ GuiElement.baseValidator = {{
     end
 }, {
     name = "drawBackground",
+    fromString = function(s) 
+        return s == "true"
+    end,
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -197,6 +215,9 @@ GuiElement.baseValidator = {{
     end
 }, {
     name = "overrideWidth",
+    fromString = function(s) 
+        return tonumber(s)
+    end,
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -215,6 +236,9 @@ GuiElement.baseValidator = {{
     end
 }, {
     name = "overrideHeight",
+    fromString = function(s) 
+        return tonumber(s)
+    end,
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -233,6 +257,9 @@ GuiElement.baseValidator = {{
     end
 }, {
     name = "verticalAlign",
+    fromString = function(s) 
+        return tonumber(s)
+    end,
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -252,6 +279,9 @@ GuiElement.baseValidator = {{
     end
 }, {
     name = "horizontalAlign",
+    fromString = function(s) 
+        return tonumber(s)
+    end,
     validate = function(o)
         local t = type(o)
         if o == nil then
@@ -375,6 +405,11 @@ GuiElement.baseValidator = {{
         end
         if type(o) == "function" then return true, nil, nil end
         return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+    end
+}, {
+    name = "hover",
+    validate = function(o, self)
+        return true, nil, nil
     end
 }}
 
