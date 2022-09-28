@@ -52,6 +52,12 @@ function VLayout:Draw()
     if self.config.drawBackground then 
         self:RenderBackground(x, y, size.baseW, size.baseH)
     end
+    local elementSize = self:GetElementSize()
+    local border = (self.config.drawBorder and 1 or 0)
+    self.maskID = self.maskID or self.gui.nextID()
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
+    if hovered and self.config.onHover then self.config.onHover(self) end
     for i = 1, #self.children do
         self.children[i]:Draw()
     end
