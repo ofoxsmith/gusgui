@@ -8,6 +8,7 @@ end)
 
 function TextInput:GetBaseElementSize() return math.max(25, self.width - (self._config.drawBorder and 4 or 0)), 10 end
 function TextInput:Draw()
+    if self._config.hidden then return end
     self.value = self.value or " "
     self.inputID = self.inputID or self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()

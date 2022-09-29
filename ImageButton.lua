@@ -13,6 +13,7 @@ function ImageButton:GetBaseElementSize()
 end
 
 function ImageButton:Draw()
+    if self._config.hidden then return end
     self.imageID = self.imageID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100

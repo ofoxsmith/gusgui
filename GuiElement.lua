@@ -1,7 +1,8 @@
 dofile_once("GUSGUI_PATHclass.lua")
-local function mergeTable(...)
+local function mergeTable(a, b)
     local new = {}
-    for i=1, #arg do for _=1, #(arg[i]) do table.insert(new, arg[i][_]) end end
+    local ar = {a,b}
+    for i=1, #ar do for _=1, #(ar[i]) do table.insert(new, ar[i][_]) end end
 end
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
@@ -419,6 +420,24 @@ GuiElement.baseValidator = {{
             end
         end
         return true, t, nil
+    end
+}, {
+    name = "hidden",
+    fromString = function(s) 
+        return s == "true"
+    end,
+    validate = function(o)
+        local t = type(o)
+        if o == nil then
+            return true, false, nil
+        end
+        if t == "table" and o["_type"] ~= nil and o["value"] then
+            return true, nil, nil
+        end
+        if t == "boolean" then
+            return true, nil, nil
+        end
+        return false, nil, "GUI: Invalid value for hidden on element \"%s\""
     end
 }}
 

@@ -13,6 +13,7 @@ function Image:GetBaseElementSize()
 end
 
 function Image:Draw()
+    if self._config.hidden then return end
     self.imageID = self.imageID or self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100

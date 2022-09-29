@@ -12,6 +12,7 @@ function Slider:GetBaseElementSize()
 end
 
 function Slider:Draw()
+    if self._config.hidden then return end
     self.value = self.value or self.defaultValue
     self.renderID = self.renderID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100

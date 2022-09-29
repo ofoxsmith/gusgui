@@ -39,6 +39,7 @@ function Text:GetBaseElementSize()
 end
 
 function Text:Draw()
+    if self._config.hidden then return end
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100

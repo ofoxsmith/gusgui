@@ -12,8 +12,9 @@ end)
 function VLayout:GetBaseElementSize()
     local totalW = 0
     local totalH = 0
-    for i = 1, #self.children do
-        local child = self.children[i]
+    local c = self.children
+    for i = 1, #c do
+        local child = c[i]
         local size = child:GetElementSize()
         local w = math.max(size.width + child._config.margin.left + child._config.margin.right, child._config.overrideWidth)
         local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom, child._config.overrideHeight)
@@ -34,6 +35,7 @@ function VLayout:GetManagedXY(elem)
 end
 
 function VLayout:Draw()
+    if self._config.hidden then return end
     self.nextX = nil
     self.nextY = nil
     self.z = self:GetDepthInTree() * -100
@@ -57,8 +59,9 @@ function VLayout:Draw()
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered and self._config.onHover then self._config.onHover(self) end
-    for i = 1, #self.children do
-        self.children[i]:Draw()
+    local c = self.children
+    for i = 1, #c do
+        c[i]:Draw()
     end
 end
 

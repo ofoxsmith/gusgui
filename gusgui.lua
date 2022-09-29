@@ -11,7 +11,9 @@ return {
             "Image.lua",
             "ImageButton.lua",
             "HLayout.lua",
+            "HLayoutForEach.lua",
             "VLayout.lua",
+            "VLayoutForEach.lua",
             "Slider.lua",
             "TextInput.lua",
         }

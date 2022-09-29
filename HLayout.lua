@@ -34,6 +34,7 @@ function HLayout:GetManagedXY(elem)
 end
 
 function HLayout:Draw()
+    if self._config.hidden then return end
     self.nextX = nil
     self.nextY = nil
     local elementSize = self:GetElementSize()

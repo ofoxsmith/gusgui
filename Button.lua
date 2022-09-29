@@ -22,6 +22,7 @@ function Button:GetBaseElementSize()
 end
 
 function Button:Draw()
+    if self._config.hidden then return end
     self.maskID = self.maskID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100

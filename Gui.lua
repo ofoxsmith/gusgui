@@ -155,6 +155,8 @@ local Button = dofile_once("GUSGUI_PATHButton.lua")
 local Image = dofile_once("GUSGUI_PATHImage.lua")
 local ImageButton = dofile_once("GUSGUI_PATHImageButton.lua")
 local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
+local HLayoutForEach = dofile_once("GUSGUI_PATHHLayoutForEach.lua")
+local VLayoutForEach = dofile_once("GUSGUI_PATHVLayoutForEach.lua")
 local VLayout = dofile_once("GUSGUI_PATHVLayout.lua")
 local Slider = dofile_once("GUSGUI_PATHSlider.lua")
 local TextInput = dofile_once("GUSGUI_PATHSTextInput.lua")
@@ -166,7 +168,9 @@ return {
         Image = Image,
         ImageButton = ImageButton,
         HLayout = HLayout,
+        HLayoutForEach = HLayoutForEach,
         VLayout = VLayout,
+        VLayoutForEach = VLayoutForEach,
         Slider = Slider,
         TextInput = TextInput
     },
