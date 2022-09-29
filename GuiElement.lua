@@ -68,12 +68,9 @@ function GuiElement:ResolveValue(a, k)
     if type(a) ~= "table" then
         return a
     end
-    if a._type == "state" and type(a.value) == "string" then
-        return self.gui.GetState(a)
-    end
-    if a._type == "global" and type(a.value) == "string" then
-        local v = fs(GlobalsGetValue(a.value))
-        return v
+    if (a._type == "state" or a._type == "global") and type(a.value) == "string" then
+        if a._type == "global" then return fs(self.gui.cachedValues[a.id]) end
+        return self.gui.GetState(self.gui.cachedValues[a.id])
     end
     return a
 end

@@ -11,11 +11,13 @@ local Gui = class(function(newGUI, data, state)
     data = data or {}
     state = state or {}
     newGUI.ids = {}
+    newGUI.activeStates = {}
     newGUI.nextID = getIdCounter()
+    newGUI.stateID = getIdCounter()
     newGUI.guiobj = GuiCreate()
     newGUI.tree = {}
+    newGUI.cachedValues = {}
     newGUI.state = state
-    newGUI._cstate = {}
     for k = 1, #data do
         self:AddElement(self.tree[k])
     end
@@ -33,7 +35,7 @@ function Gui:GetState(s)
             table.insert(a, i)
         end
     end
-    item = init and self._cstate[init] or self._cstate
+    item = init and self.state[init] or self.state
     for k, v in pairs(a) do
         if (type(item) ~= "table") then
             error("GUI: Cannot access property of non-table value in state", 2)
@@ -100,7 +102,13 @@ end
 
 function Gui:Render()
     if (self.destroyed == true) then return end
-    self._cstate = self.state
+    for _=1, #self.activeStates do local v = self.activeStates[_] 
+        if v.__type == "global" then 
+            self.cachedValues[v.id] = GlobalsGetValue(v.value)
+        elseif v.__type == "state" then 
+            self.cachedValues[v.id] = self:GetState(v.value)
+        end
+    end
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
@@ -120,18 +128,26 @@ function CreateGUI(data, state)
     return Gui(data, state)
 end
 
-function StateValue(s)
-    return {
+function Gui:StateValue(s)
+    local i = self.stateID()
+    local o = {
         _type = "state",
-        value = s
+        value = s,
+        id = i
     }
+    table.insert(self.activeStates, o)
+    return o
 end
 
-function GlobalValue(s)
-    return {
+function Gui:GlobalValue(s)
+    local i = self.stateID()
+    local o = {
         _type = "global",
-        value = s
+        value = s,
+        id = i
     }
+    table.insert(self.activeStates, o)
+    return o
 end
 
 local Text = dofile_once("GUSGUI_PATHText.lua")
@@ -154,6 +170,4 @@ return {
         Slider = Slider,
         TextInput = TextInput
     },
-    State = StateValue,
-    Global = GlobalValue
 }
