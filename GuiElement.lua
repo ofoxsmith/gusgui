@@ -3,6 +3,7 @@ local function mergeTable(a, b)
     local new = {}
     local ar = {a,b}
     for i=1, #ar do for _=1, #(ar[i]) do table.insert(new, ar[i][_]) end end
+    return new
 end
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions

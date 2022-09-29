@@ -1,14 +1,64 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 local TextInput = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, extendedValid)
+    GuiElement.init(o, config, {{
+        name = "maxLength",
+        fromString = function(s)
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then
+                return true, 50, nil
+            end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then
+                return true, nil, nil
+            end
+        end
+    }, {
+        name = "width",
+        fromString = function(o)
+            return tonumber(o)
+        end,
+        validate = function(o)
+            if o == nil then
+                return true, 25, nil
+            end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then
+                return true, nil, nil
+            end
+        end
+    }, {
+        name = "onEdit",
+        canHover = false,
+        validate = function(o)
+            if o == nil then
+                return false, nil, "GUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
+            end
+            if type(o) == "function" then
+                return true, nil, nil
+            end
+            return false, nil, "GUI: Invalid value for onEdit on element \"%s\""
+        end
+    }})
     o.type = "TextInput"
     o.allowsChildren = false
 end)
 
-function TextInput:GetBaseElementSize() return math.max(25, self.width - (self._config.drawBorder and 4 or 0)), 10 end
+function TextInput:GetBaseElementSize()
+    return math.max(25, self.width - (self._config.drawBorder and 4 or 0)), 10
+end
 function TextInput:Draw()
-    if self._config.hidden then return end
+    if self._config.hidden then
+        return
+    end
     self.value = self.value or " "
     self.inputID = self.inputID or self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
@@ -31,52 +81,12 @@ function TextInput:Draw()
     end
     GuiZSetForNextWidget(self.gui.guiobj, self:GetDepthInTree() * -100)
     local n = GuiTextInput(self.gui.guiobj, self.inputID, x + elementSize.offsetX + border + self._config.padding.left,
-        y + elementSize.offsetY + border + self._config.padding.top, self.value, self._config.width, self._config.maxLength,
-        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        y + elementSize.offsetY + border + self._config.padding.top, self.value, self._config.width,
+        self._config.maxLength, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
     if self.value ~= n then
         self.value = n
         self.onEdit(self)
     end
 end
-
-extendedValid = {
-    {
-        name = "maxLength",
-        fromString = function(s) 
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if o == nil then return true, 50, nil end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then return true, nil, nil end
-        end    
-    },
-    {
-        name = "width",
-        fromString = function(o) return tonumber(o) end,
-        validate = function(o)
-            if o == nil then return true, 25, nil end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then return true, nil, nil end
-        end    
-    },
-    {
-        name = "onEdit",
-        canHover = false,
-        validate = function(o)
-            if o == nil then
-                return false, nil, "GUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
-            end
-            if type(o) == "function" then return true, nil, nil end
-            return false, nil, "GUI: Invalid value for onEdit on element \"%s\""
-        end    
-    }
-}
 
 return TextInput

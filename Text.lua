@@ -15,7 +15,21 @@ local function splitString(s, delimiter)
 end
 
 local Text = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, extendedValid)
+    GuiElement.init(o, config, {{
+        name = "value",
+        validate = function(o)
+            if o == nil then
+                return false, nil, "GUI: Invalid value for value on element \"%s\" (value is required)"
+            end
+            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if type(o) == "string" then
+                return true, nil, nil
+            end
+            return false, nil, "GUI: Invalid value for value on element \"%s\""
+        end
+    }})
     o.type = "Text"
     o.allowsChildren = false
     if config.value == nil then
@@ -39,7 +53,9 @@ function Text:GetBaseElementSize()
 end
 
 function Text:Draw()
-    if self._config.hidden then return end
+    if self._config.hidden then
+        return
+    end
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
@@ -57,16 +73,20 @@ function Text:Draw()
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self._config.drawBackground then 
+    if self._config.drawBackground then
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
+        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
-        if self._config.onHover then self._config.onHover(self) end
+        if self._config.onHover then
+            self._config.onHover(self)
+        end
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
-        GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
+        GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0,
+            (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self._config.colour then
@@ -75,22 +95,5 @@ function Text:Draw()
     GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft,
         y + elementSize.offsetY + border + paddingTop, parsedText)
 end
-
-extendedValid = {
-    {
-        name = "value",
-        validate = function(o)
-            if o == nil then
-                return false, nil,  "GUI: Invalid value for value on element \"%s\" (value is required)"
-            end
-            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if type(o) == "string" then return true, nil, nil end
-            return false, nil, "GUI: Invalid value for value on element \"%s\""
-        end    
-    },
-}
-
 
 return Text

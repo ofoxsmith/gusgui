@@ -2,7 +2,32 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local Button = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, extendedValid)
+    GuiElement.init(o, config, {{
+        name = "onClick",
+        validate = function(o)
+            if o == nil then
+                return false, nil, "GUI: Invalid value for onClick on element \"%s\" (onClick is required)"
+            end
+            if type(o) == "function" then
+                return true, nil, nil
+            end
+            return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+        end
+    }, {
+        name = "text",
+        validate = function(o)
+            if o == nil then
+                return false, nil, "GUI: Invalid value for text on element \"%s\" (text is required)"
+            end
+            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if type(o) == "string" then
+                return true, nil, nil
+            end
+            return false, nil, "GUI: Invalid value for text on element \"%s\""
+        end
+    }})
     o.allowsChildren = false
     o.type = "Button"
 end)
@@ -22,7 +47,9 @@ function Button:GetBaseElementSize()
 end
 
 function Button:Draw()
-    if self._config.hidden then return end
+    if self._config.hidden then
+        return
+    end
     self.maskID = self.maskID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
@@ -40,53 +67,31 @@ function Button:Draw()
     if border > 0 then
         self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
     end
-    if self._config.drawBackground then 
+    if self._config.drawBackground then
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     -- Draw an invisible image to act as the button
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x + border, y + border, elementSize.width - border - border,
+        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self._config.onClick(self)
     end
-    if hovered then 
+    if hovered then
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
-        if self._config.onHover then self._config.onHover(self) end
-        GuiImage(self.gui.guiobj, self.maskID, x + border, y + border, "data/debug/whitebox.png", 0, (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
+        if self._config.onHover then
+            self._config.onHover(self)
+        end
+        GuiImage(self.gui.guiobj, self.maskID, x + border, y + border, "data/debug/whitebox.png", 0,
+            (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self._config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
-    GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft, y + elementSize.offsetY + border + paddingTop, parsedText)
+    GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft,
+        y + elementSize.offsetY + border + paddingTop, parsedText)
 end
-
-extendedValid = {
-    {
-        name = "onClick",
-        validate = function(o)
-            if o == nil then
-                return false, nil,  "GUI: Invalid value for onClick on element \"%s\" (onClick is required)"
-            end
-            if type(o) == "function" then return true, nil, nil end
-            return false, nil, "GUI: Invalid value for onHover on element \"%s\""
-        end    
-    },
-    {
-        name = "text",
-        validate = function(o)
-            if o == nil then
-                return false, nil,  "GUI: Invalid value for text on element \"%s\" (text is required)"
-            end
-            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if type(o) == "string" then return true, nil, nil end
-            return false, nil, "GUI: Invalid value for text on element \"%s\""
-        end    
-    },
-}
-
 
 return Button
