@@ -73,7 +73,7 @@ extendedValid = {
                 return false, nil, "GUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
             end
             if type(o) == "function" then return true, nil, nil end
-            return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+            return false, nil, "GUI: Invalid value for onEdit on element \"%s\""
         end    
     }
 }

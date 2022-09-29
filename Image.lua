@@ -2,20 +2,14 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local Image = class(GuiElement, function(o, config)
-    GuiElement.init(o, config)
+    GuiElement.init(o, config, extendedValid)
     o.type = "Image"
     o.allowsChildren = false
-    o.scaleX = config.scaleX or 1
-    o.scaleY = config.scaleY or 1 
-    if config.path == nil then
-        error("GUI: Invalid construction of Image element (path paramater is required)", 2)
-    end
-    o.path = config.path
 end)
 
 function Image:GetBaseElementSize()
-    local w, h = GuiGetImageDimensions(self.gui.guiobj, self.path)
-    return w * self.scaleX, h * self.scaleY  
+    local w, h = GuiGetImageDimensions(self.gui.guiobj, self._config.src)
+    return w * self._config.scaleX, h * self._config.scaleY  
 end
 
 function Image:Draw()
@@ -46,7 +40,51 @@ function Image:Draw()
     if self._config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
-    GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + paddingTop + border, self.path, 1, self.scaleX, self.scaleY)
+    GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + paddingTop + border, self._config.src, 1, self._config.scaleX, self._config.scaleY)
 end
+
+extendedValid = {
+    {
+        name = "scaleX",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 1, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "scaleY",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 1, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "src",
+        fromString = function(s) return s end,
+        validate = function(o)
+            if o == nil then return false, nil, "GUI: Invalid value for src on element \"%s\" (src paramater is required)" end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "string" then return true, nil, nil end
+        end
+    }
+}
+
 
 return Image

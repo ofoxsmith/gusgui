@@ -15,7 +15,7 @@ local function splitString(s, delimiter)
 end
 
 local Text = class(GuiElement, function(o, config)
-    GuiElement.init(o, config)
+    GuiElement.init(o, config, extendedValid)
     o.type = "Text"
     o.allowsChildren = false
     if config.value == nil then
@@ -34,7 +34,7 @@ function Text:Interp(s)
     end))
 end
 function Text:GetBaseElementSize()
-    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self.value))
+    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self._config.value))
     return w, h
 end
 
@@ -42,7 +42,7 @@ function Text:Draw()
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
-    local parsedText = self:Interp(self.value)
+    local parsedText = self:Interp(self._config.value)
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
     local paddingTop = self._config.padding.top
@@ -74,5 +74,22 @@ function Text:Draw()
     GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft,
         y + elementSize.offsetY + border + paddingTop, parsedText)
 end
+
+extendedValid = {
+    {
+        name = "value",
+        validate = function(o)
+            if o == nil then
+                return false, nil,  "GUI: Invalid value for value on element \"%s\" (value is required)"
+            end
+            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if type(o) == "string" then return true, nil, nil end
+            return false, nil, "GUI: Invalid value for value on element \"%s\""
+        end    
+    },
+}
+
 
 return Text

@@ -7,7 +7,6 @@ local VLayout = class(GuiElement, function(o, config)
     o.allowsChildren = true
     o.childrenResolved = false
     o._rawchildren = config.children or {}
-    o.align = config.align or 0
 end)
 
 function VLayout:GetBaseElementSize()

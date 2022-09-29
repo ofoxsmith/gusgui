@@ -2,29 +2,9 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local Slider = class(GuiElement, function(o, config)
-    GuiElement.init(o, config)
+    GuiElement.init(o, config, extendedValid)
     o.type = "Slider"
     o.allowsChildren = false
-    if config.width == nil then
-        error("GUI: Invalid construction of Slider element (width paramater is required)", 2)
-    end
-    o.width = config.width
-    if config.min == nil then
-        error("GUI: Invalid construction of Slider element (min paramater is required)", 2)
-    end
-    o.min = config.min
-    if config.max == nil then
-        error("GUI: Invalid construction of Slider element (max paramater is required)", 2)
-    end
-    o.max = config.max
-    if config.defaultValue == nil then 
-        error("GUI: Invalid construction of Slider element (defaultValue paramater is required)", 2)
-    end
-    o.defaultValue = config.defaultValue
-    if config.onChange == nil then 
-        error("GUI: Invalid construction of Slider element (onChange paramater is required)", 2)
-    end
-    o.onChange = config.onChange
 end)
 
 function Slider:GetBaseElementSize()
@@ -54,11 +34,79 @@ function Slider:Draw()
     local old = self.value
     GamePrint("min" .. tostring(self.min))
     GamePrint("max" .. tostring(self.max))
-    local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + border + paddingTop, "", self.value, self.min, self.max, self.defaultValue, 1, " ", self.width)
+    local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + paddingLeft + border, y + elementSize.offsetY + border + paddingTop, "", self.value, self._config.min, self._config.max, self._config.defaultValue, 1, " ", self._config.width)
     self.value = math.floor(nv)
     if nv ~= old then
-        self.onChange(self)
+        self._config.onChange(self)
     end 
 end
 
+extendedValid = {
+    {
+        name = "min",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 1, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "max",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 1, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "width",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 1, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "defaultValue",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 1, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "onChange",
+        validate = function(o)
+            if o == nil then
+                return false, nil,  "GUI: Invalid value for onChange on element \"%s\" (onChange is required)"
+            end
+            if type(o) == "function" then return true, nil, nil end
+            return false, nil, "GUI: Invalid value for onChange on element \"%s\""
+        end    
+    },
+}
 return Slider
