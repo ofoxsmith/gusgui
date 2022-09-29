@@ -1,9 +1,7 @@
 dofile_once("GUSGUI_PATHclass.lua")
 local function mergeTable(...)
     local new = {}
-    for _, t in ipairs(arg) do
-        for i, v in ipairs(t) do table.insert(new, v) end
-    end
+    for i=1, #arg do for _=1, #(arg[i]) do table.insert(new, arg[i][_]) end end
 end
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
@@ -23,7 +21,7 @@ local GuiElement = class(function(Element, config)
     Element._config = {}
     for k = 1, #Element.baseValidator do
         local v = Element.baseValidator[k]
-        local valid, nv, err = v.validate(config[v.name], self.baseValidator)
+        local valid, nv, err = v.validate(config[v.name], mergeTable(self.baseValidator, self.extendedValidator))
         if valid and (nv ~= nil) then
             Element._rawconfig[v.name] = nv
         elseif valid then
@@ -35,10 +33,11 @@ local GuiElement = class(function(Element, config)
     Element.gui = nil
     setmetatable(Element._config, {
         __index = function(t, k)
+            local value = (Element.useHoverConfigForNextFrame == true and Element._rawconfig.hover[k] or nil) or Element._rawconfig[k]
             if Element.useHoverConfigForNextFrame == true then 
-                return Element:ResolveValue((Element._rawconfig.hover[k] or Element._rawconfig[k]), k)
+                return Element:ResolveValue(value, k)
             end
-            return Element:ResolveValue(Element._rawconfig[k], k)
+            return Element:ResolveValue(value, k)
         end,
         __newindex = function(t, k, v) error("_config is readonly") end
     })
@@ -47,7 +46,8 @@ local GuiElement = class(function(Element, config)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            local valid, nv, err = self.baseValidator[k].validate(v, self.baseValidator)
+            local validator = mergeTable(self.baseValidator, self.extendedValidator)
+            local valid, nv, err = validator[k].validate(v, validator)
             if valid and (nv ~= nil) then
                 Element._rawconfig[v.name] = nv
             elseif valid then
@@ -62,7 +62,7 @@ local GuiElement = class(function(Element, config)
 end)
 
 function GuiElement:ResolveValue(a, k)
-    local fs = self.baseValidator[k].fromString
+    local fs = mergeTable(self.baseValidator, self.extendedValidator)[k].fromString
     if type(a) ~= "table" then
         return a
     end
@@ -71,12 +71,6 @@ function GuiElement:ResolveValue(a, k)
     end
     if a._type == "global" and type(a.value) == "string" then
         local v = fs(GlobalsGetValue(a.value))
-        if t == "number" then
-            return tonumber(v)
-        end
-        if t == "boolean" then
-            return (v == "true") and true or false
-        end
         return v
     end
     return a
