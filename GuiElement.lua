@@ -7,11 +7,12 @@ end
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
 -- and a Draw method, which draws the element using the Gui API
-local GuiElement = class(function(Element, config)
+local GuiElement = class(function(Element, config, extended)
     if config.id == nil then
         error("GUI: Invalid construction of element (id is required)")
     end
     Element.id = config.id
+    Element.extendedValidator = extended
     config.id = nil;
     Element.name = config.name or nil
     Element.config = {}
@@ -19,9 +20,10 @@ local GuiElement = class(function(Element, config)
     Element.useHoverConfigForNextFrame = false
     Element._rawchildren = {}
     Element._config = {}
-    for k = 1, #Element.baseValidator do
-        local v = Element.baseValidator[k]
-        local valid, nv, err = v.validate(config[v.name], mergeTable(self.baseValidator, self.extendedValidator))
+    local merged = mergeTable(Element.baseValidator, Element.extendedValidator)
+    for k = 1, #merged do
+        local v = merged[k]
+        local valid, nv, err = v.validate(config[v.name], merged)
         if valid and (nv ~= nil) then
             Element._rawconfig[v.name] = nv
         elseif valid then
@@ -187,7 +189,7 @@ GuiElement.baseValidator = {{
         if o == nil then
             return true, false, nil
         end
-        if t == "table" and t["_type"] ~= nil and t["value"] then
+        if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
         end
         if t == "boolean" then
@@ -205,7 +207,7 @@ GuiElement.baseValidator = {{
         if o == nil then
             return true, false, nil
         end
-        if t == "table" and t["_type"] ~= nil and t["value"] then
+        if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
         end
         if t == "boolean" then
@@ -223,7 +225,7 @@ GuiElement.baseValidator = {{
         if o == nil then
             return true, 0, nil
         end
-        if t == "table" and t["_type"] ~= nil and t["value"] then
+        if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
         end
         if t == "number" then
@@ -244,7 +246,7 @@ GuiElement.baseValidator = {{
         if o == nil then
             return true, 0, nil
         end
-        if t == "table" and t["_type"] ~= nil and t["value"] then
+        if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
         end
         if t == "number" then
@@ -265,7 +267,7 @@ GuiElement.baseValidator = {{
         if o == nil then
             return true, 0, nil
         end
-        if t == "table" and t["_type"] ~= nil and t["value"] then
+        if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
         end
         if t == "number" then
@@ -287,7 +289,7 @@ GuiElement.baseValidator = {{
         if o == nil then
             return true, 0, nil
         end
-        if t == "table" and t["_type"] ~= nil and t["value"] then
+        if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
         end
         if t == "number" then
@@ -412,9 +414,11 @@ GuiElement.baseValidator = {{
         if o == nil then return true, {}, nil end
         local t = {}
         for k, v in pairs(o) do
-            local valid, nv, err = self[k].validate(v, self)
-            if valid then 
-                t[k] = nv or v
+            if (self[k].canHover ~= false) then 
+                local valid, nv, err = self[k].validate(v, self)
+                if valid then 
+                    o[k] = nv or v
+                end    
             end
         end
         return true, t, nil

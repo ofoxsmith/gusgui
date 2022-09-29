@@ -1,16 +1,9 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
 local TextInput = class(GuiElement, function(o, config)
-    GuiElement.init(o, config)
+    GuiElement.init(o, config, extendedValid)
     o.type = "TextInput"
     o.allowsChildren = false
-    o.maxLength = config.maxLength or 50
-    o.width = config.width or 25
-    if config.onEdit == nil then
-        error("GUI: Invalid construction of TextInput element (onEdit paramater is required)", 2)
-    end
-    self.onEdit = config.onEdit
 end)
 
 function TextInput:GetBaseElementSize() return math.max(25, self.width - (self._config.drawBorder and 4 or 0)), 10 end
@@ -37,12 +30,52 @@ function TextInput:Draw()
     end
     GuiZSetForNextWidget(self.gui.guiobj, self:GetDepthInTree() * -100)
     local n = GuiTextInput(self.gui.guiobj, self.inputID, x + elementSize.offsetX + border + self._config.padding.left,
-        y + elementSize.offsetY + border + self._config.padding.top, self.value, self.width, self.maxLength,
+        y + elementSize.offsetY + border + self._config.padding.top, self.value, self._config.width, self._config.maxLength,
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
     if self.value ~= n then
         self.value = n
         self.onEdit(self)
     end
 end
+
+extendedValid = {
+    {
+        name = "maxLength",
+        fromString = function(s) 
+            return tonumber(s)
+        end,
+        validate = function(o)
+            if o == nil then return true, 50, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "width",
+        fromString = function(o) return tonumber(o) end,
+        validate = function(o)
+            if o == nil then return true, 25, nil end
+            local t = type(o)
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then return true, nil, nil end
+        end    
+    },
+    {
+        name = "onEdit",
+        canHover = false,
+        validate = function(o)
+            if o == nil then
+                return false, nil, "GUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
+            end
+            if type(o) == "function" then return true, nil, nil end
+            return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+        end    
+    }
+}
 
 return TextInput
