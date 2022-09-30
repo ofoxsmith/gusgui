@@ -66,12 +66,11 @@ local GuiElement = class(function(Element, config, extended)
 end)
 
 function GuiElement:ResolveValue(a, k)
-    local fs = mergeTable(self.baseValidator, self.extendedValidator)[k].fromString
     if type(a) ~= "table" then
         return a
     end
     if (a._type == "state" or a._type == "global") and type(a.value) == "string" then
-        if a._type == "global" then return fs(self.gui.cachedValues[a.id]) end
+        if a._type == "global" then return (mergeTable(self.baseValidator, self.extendedValidator)[k].fromString)(self.gui.cachedValues[a.id]) end
         return self.gui.GetState(self.gui.cachedValues[a.id])
     end
     return a

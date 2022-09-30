@@ -1,7 +1,7 @@
 local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
-local VLayoutForEach = class(HLayout, function(o, config)
+local HLayoutForEach = class(HLayout, function(o, config)
     GuiElement.init(o, config)
     o.stateVal = (type(config.stateVal) == "string") and config.stateVal or error("GUI: Invalid value for stateVal on element \"%s\"")
     o.func = (type(config.func) == "function") and config.func or error("GUI: Invalid value for func on element \"%s\"")
@@ -20,4 +20,4 @@ local VLayoutForEach = class(HLayout, function(o, config)
     })
 end)
 
-return VLayoutForEach
+return HLayoutForEach

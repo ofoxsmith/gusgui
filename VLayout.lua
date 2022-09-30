@@ -12,7 +12,7 @@ end)
 function VLayout:GetBaseElementSize()
     local totalW = 0
     local totalH = 0
-    local c = self.children
+    local c = self.type ~= "VLayoutForEach" and self.children or self._
     for i = 1, #c do
         local child = c[i]
         local size = child:GetElementSize()
@@ -59,7 +59,7 @@ function VLayout:Draw()
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered and self._config.onHover then self._config.onHover(self) end
-    local c = self.children
+    local c = self.type ~= "VLayoutForEach" and self.children or self._
     for i = 1, #c do
         c[i]:Draw()
     end
