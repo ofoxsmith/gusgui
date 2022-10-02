@@ -61,6 +61,7 @@ function TextInput:Draw()
     end
     self.value = self.value or " "
     self.inputID = self.inputID or self.gui.nextID()
+    self.hoverMaskID = self.hoverMaskID self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
@@ -79,6 +80,15 @@ function TextInput:Draw()
     if self._config.drawBackground then
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
+    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
+        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
+    if hovered then
+        if self._config.onHover then
+            self._config.onHover(self)
+        end
+    end
     GuiZSetForNextWidget(self.gui.guiobj, self:GetDepthInTree() * -100)
     local n = GuiTextInput(self.gui.guiobj, self.inputID, x + elementSize.offsetX + border + self._config.padding.left,
         y + elementSize.offsetY + border + self._config.padding.top, self.value, self._config.width,
@@ -87,6 +97,8 @@ function TextInput:Draw()
         self.value = n
         self.onEdit(self)
     end
+    if hovered then self.useHoverConfigForNextFrame = true 
+    else self.useHoverConfigForNextFrame = false end
 end
 
 return TextInput

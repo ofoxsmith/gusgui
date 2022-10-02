@@ -94,6 +94,8 @@ function Text:Draw()
     end
     GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft,
         y + elementSize.offsetY + border + paddingTop, parsedText)
+    if hovered then self.useHoverConfigForNextFrame = true 
+    else self.useHoverConfigForNextFrame = false end
 end
 
 return Text

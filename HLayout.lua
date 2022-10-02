@@ -16,8 +16,10 @@ function HLayout:GetBaseElementSize()
     for i = 1, #c do
         local child = c[i]
         local size = child:GetElementSize()
-        local w = math.max(size.width + child._config.margin.left + child._config.margin.right, child._config.overrideWidth)
-        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom, child._config.overrideHeight)
+        local w = math.max(size.width + child._config.margin.left + child._config.margin.right,
+            child._config.overrideWidth)
+        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom,
+            child._config.overrideHeight)
         totalW = totalW + w
         totalH = totalH > size.height and totalH or h
     end
@@ -35,7 +37,9 @@ function HLayout:GetManagedXY(elem)
 end
 
 function HLayout:Draw()
-    if self._config.hidden then return end
+    if self._config.hidden then
+        return
+    end
     self.nextX = nil
     self.nextY = nil
     local elementSize = self:GetElementSize()
@@ -52,16 +56,24 @@ function HLayout:Draw()
     if self._config.drawBorder then
         self:RenderBorder(x, y, size.baseW, size.baseH)
     end
-    if self._config.drawBackground then 
+    if self._config.drawBackground then
         self:RenderBackground(x, y, size.baseW, size.baseH)
     end
     self.maskID = self.maskID or self.gui.nextID()
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
+        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    if hovered and self._config.onHover then self._config.onHover(self) end
     local c = self.type ~= "HLayoutForEach" and self.children or self._
     for i = 1, #c do
         c[i]:Draw()
+    end
+    if hovered then
+        if self._config.onHover then
+            self._config.onHover(self)
+        end
+        self.useHoverConfigForNextFrame = true
+    else
+        self.useHoverConfigForNextFrame = false
     end
 end
 

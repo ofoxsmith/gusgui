@@ -113,6 +113,8 @@ function ImageButton:Draw()
     end
     GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border,
         y + elementSize.offsetY + paddingTop + border, self._config.path, 1, self._config.scaleX, self._config.scaleY)
+    if hovered then self.useHoverConfigForNextFrame = true 
+    else self.useHoverConfigForNextFrame = false end
 end
 
 return ImageButton

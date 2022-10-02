@@ -99,6 +99,11 @@ function Image:Draw()
     end
     GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border,
         y + elementSize.offsetY + paddingTop + border, self._config.src, 1, self._config.scaleX, self._config.scaleY)
+    if hovered then
+        self.useHoverConfigForNextFrame = true
+    else
+        self.useHoverConfigForNextFrame = false
+    end
 end
 
 return Image

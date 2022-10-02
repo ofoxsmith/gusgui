@@ -96,6 +96,7 @@ function Slider:Draw()
     end
     self.value = self.value or self.defaultValue
     self.renderID = self.renderID or self.gui.nextID()
+    self.maskID = self.maskID or self.gui.nextID()
     self.z = self:GetDepthInTree() * -100
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
@@ -114,6 +115,10 @@ function Slider:Draw()
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
     local old = self.value
+    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
+        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     GamePrint("min" .. tostring(self.min))
     GamePrint("max" .. tostring(self.max))
     local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + paddingLeft + border,
@@ -123,6 +128,12 @@ function Slider:Draw()
     if nv ~= old then
         self._config.onChange(self)
     end
+    if hovered then
+        if self._config.onHover then
+            self._config.onHover(self)
+        end
+        self.useHoverConfigForNextFrame = true
+    else self.useHoverConfigForNextFrame = false end
 end
 
 return Slider

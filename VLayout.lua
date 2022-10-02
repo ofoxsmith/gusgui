@@ -56,9 +56,16 @@ function VLayout:Draw()
     local elementSize = self:GetElementSize()
     local border = (self._config.drawBorder and 1 or 0)
     self.maskID = self.maskID or self.gui.nextID()
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border, elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
+        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    if hovered and self._config.onHover then self._config.onHover(self) end
+    if hovered then
+        if self._config.onHover then
+            self._config.onHover(self)
+        end
+        self.useHoverConfigForNextFrame = true
+    end
     local c = self.type ~= "VLayoutForEach" and self.children or self._
     for i = 1, #c do
         c[i]:Draw()
