@@ -150,16 +150,16 @@ function Gui:GlobalValue(s)
     return o
 end
 
-local Text = dofile_once("GUSGUI_PATHText.lua")
-local Button = dofile_once("GUSGUI_PATHButton.lua")
-local Image = dofile_once("GUSGUI_PATHImage.lua")
-local ImageButton = dofile_once("GUSGUI_PATHImageButton.lua")
-local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
-local HLayoutForEach = dofile_once("GUSGUI_PATHHLayoutForEach.lua")
-local VLayoutForEach = dofile_once("GUSGUI_PATHVLayoutForEach.lua")
-local VLayout = dofile_once("GUSGUI_PATHVLayout.lua")
-local Slider = dofile_once("GUSGUI_PATHSlider.lua")
-local TextInput = dofile_once("GUSGUI_PATHSTextInput.lua")
+local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
+local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
+local Image = dofile_once("GUSGUI_PATHIelems/Image.lua")
+local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
+local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
+local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
+local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
+local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
+local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
+local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
 return {
     Create = CreateGUI,
     Elements = {

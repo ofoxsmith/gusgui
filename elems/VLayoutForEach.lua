@@ -1,11 +1,11 @@
-local HLayout = dofile_once("GUSGUI_PATHHLayout.lua")
+local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
-local HLayoutForEach = class(HLayout, function(o, config)
+local VLayoutForEach = class(VLayout, function(o, config)
     GuiElement.init(o, config)
     o.stateVal = (type(config.stateVal) == "string") and config.stateVal or error("GUI: Invalid value for stateVal on element \"%s\"")
     o.func = (type(config.func) == "function") and config.func or error("GUI: Invalid value for func on element \"%s\"")
-    o.type = "HLayoutForEach"
+    o.type = "VLayoutForEach"
     o.allowsChildren = false
     o.children = {}
     setmetatable(o._, {
@@ -20,4 +20,4 @@ local HLayoutForEach = class(HLayout, function(o, config)
     })
 end)
 
-return HLayoutForEach
+return VLayoutForEach
