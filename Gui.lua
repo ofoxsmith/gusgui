@@ -152,7 +152,7 @@ end
 
 local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
 local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
-local Image = dofile_once("GUSGUI_PATHIelems/Image.lua")
+local Image = dofile_once("GUSGUI_PATHelems/Image.lua")
 local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
 local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
 local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
