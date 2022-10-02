@@ -2,20 +2,19 @@ return {
     init = function(path)
         path = path:gsub("/$", "") .. "/"
         local files = {
-            "Button.lua",
+            "elems/Button.lua",
             "class.lua",
             "Gui.lua",
             "GuiElement.lua",
-            "Text.lua",
-            "HLayout.lua",
-            "Image.lua",
-            "ImageButton.lua",
-            "HLayout.lua",
-            "HLayoutForEach.lua",
-            "VLayout.lua",
-            "VLayoutForEach.lua",
-            "Slider.lua",
-            "TextInput.lua",
+            "elems/Text.lua",
+            "elems/Image.lua",
+            "elems/ImageButton.lua",
+            "elems/HLayout.lua",
+            "elems/HLayoutForEach.lua",
+            "elems/VLayout.lua",
+            "elems/VLayoutForEach.lua",
+            "elems/Slider.lua",
+            "elems/TextInput.lua",
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)
