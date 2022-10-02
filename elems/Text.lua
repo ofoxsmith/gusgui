@@ -1,6 +1,5 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
 local function splitString(s, delimiter)
     local result = {}
     local from = 1
@@ -38,15 +37,6 @@ local Text = class(GuiElement, function(o, config)
     o.value = config.value
 end)
 
-function Text:Interp(s)
-    if (type(s) ~= "string") then
-        return error("bad argument #1 to Interp (string expected, got " .. type(s) .. ")", 2)
-    end
-    return (s:gsub('($%b{})', function(w)
-        w = string.sub(w, 3, -2)
-        return self.gui:GetState(w)
-    end))
-end
 function Text:GetBaseElementSize()
     local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self._config.value))
     return w, h

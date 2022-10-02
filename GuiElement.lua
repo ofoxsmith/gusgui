@@ -1,10 +1,4 @@
 dofile_once("GUSGUI_PATHclass.lua")
-local function mergeTable(a, b)
-    local new = {}
-    local ar = {a,b}
-    for i=1, #ar do for _=1, #(ar[i]) do table.insert(new, ar[i][_]) end end
-    return new
-end
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
@@ -14,7 +8,6 @@ local GuiElement = class(function(Element, config, extended)
         error("GUI: Invalid construction of element (id is required)")
     end
     Element.id = config.id
-    Element.extendedValidator = extended
     config.id = nil;
     Element.name = config.name or nil
     Element.config = {}
@@ -22,10 +15,13 @@ local GuiElement = class(function(Element, config, extended)
     Element.useHoverConfigForNextFrame = false
     Element._rawchildren = {}
     Element._config = {}
-    local merged = mergeTable(Element.baseValidator, Element.extendedValidator)
-    for k = 1, #merged do
-        local v = merged[k]
-        local valid, nv, err = v.validate(config[v.name], merged)
+    Element.validator = Element.baseValidator
+    for _,v in ipairs(extended) do 
+        table.insert(Element.validator, v)
+    end
+    for k = 1, #Element.validator do
+        local v = Element.validator[k]
+        local valid, nv, err = v.validate(config[v.name], Element.validator)
         if valid and (nv ~= nil) then
             Element._rawconfig[v.name] = nv
         elseif valid then
@@ -50,8 +46,7 @@ local GuiElement = class(function(Element, config, extended)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            local validator = mergeTable(self.baseValidator, self.extendedValidator)
-            local valid, nv, err = validator[k].validate(v, validator)
+            local valid, nv, err = self.validator[k].validate(v, self.validator)
             if valid and (nv ~= nil) then
                 Element._rawconfig[v.name] = nv
             elseif valid then
@@ -65,13 +60,30 @@ local GuiElement = class(function(Element, config, extended)
     Element.rootNode = false
 end)
 
+function GuiElement:Interp(s)
+    if (type(s) ~= "string") then
+        return error("bad argument #1 to Interp (string expected, got " .. type(s) .. ")", 2)
+    end
+    return (s:gsub('($%b{})', function(w)
+        w = string.sub(w, 3, -2)
+        return self.gui:GetState(w)
+    end))
+end
+
 function GuiElement:ResolveValue(a, k)
     if type(a) ~= "table" then
         return a
     end
     if (a._type == "state" or a._type == "global") and type(a.value) == "string" then
-        if a._type == "global" then return (mergeTable(self.baseValidator, self.extendedValidator)[k].fromString)(self.gui.cachedValues[a.id]) end
-        return self.gui.GetState(self.gui.cachedValues[a.id])
+        if a._type == "global" then
+            local t = nil
+            for _=1, #self.validator do
+                GamePrint(tostring(self.validator[_].name == k))
+                if (self.validator[_].name == k ) then t = self.validator[_].fromString end
+            end
+            return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
+        end
+        return self.gui:GetState(a.value)
     end
     return a
 end

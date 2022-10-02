@@ -7,7 +7,7 @@ function getIdCounter()
     end
 end
 
-local Gui = class(function(newGUI, data, state)
+local Gui = class(function(newGUI, state)
     data = data or {}
     state = state or {}
     newGUI.ids = {}
@@ -18,24 +18,21 @@ local Gui = class(function(newGUI, data, state)
     newGUI.tree = {}
     newGUI.cachedValues = {}
     newGUI.state = state
-    for k = 1, #data do
-        self:AddElement(self.tree[k])
-    end
+    newGUI._state = {}
 end)
 
 function Gui:GetState(s)
-    s = s or ""
     local init = nil
     local a = {}
     local item = {}
-    for i in string.gmatch(s, "[^/]+") do
+    for i in s:gmatch("[^/]+") do
         if not init then
             init = i
         else
             table.insert(a, i)
         end
     end
-    item = init and self.state[init] or self.state
+    item = init and self._state[init] or self._state
     for k, v in pairs(a) do
         if (type(item) ~= "table") then
             error("GUI: Cannot access property of non-table value in state", 2)
@@ -101,12 +98,11 @@ function searchTree(element, id)
 end
 
 function Gui:Render()
+    self._state = self.state
     if (self.destroyed == true) then return end
     for _=1, #self.activeStates do local v = self.activeStates[_] 
-        if v.__type == "global" then 
+        if v._type == "global" then 
             self.cachedValues[v.id] = GlobalsGetValue(v.value)
-        elseif v.__type == "state" then 
-            self.cachedValues[v.id] = self:GetState(v.value)
         end
     end
     GuiStartFrame(self.guiobj)
@@ -120,6 +116,7 @@ function Gui:Destroy()
     self.destroyed = true
     self.tree = nil
     self.state = nil
+    self._state = nil
     GuiDestroy(self.guiobj)
     return
 end
@@ -129,13 +126,10 @@ function CreateGUI(data, state)
 end
 
 function Gui:StateValue(s)
-    local i = self.stateID()
     local o = {
         _type = "state",
         value = s,
-        id = i
     }
-    table.insert(self.activeStates, o)
     return o
 end
 
