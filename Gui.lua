@@ -43,31 +43,23 @@ function Gui:GetState(s)
 end
 
 function Gui:AddElement(data)
-    local function testID(i)
-        for k = 1, #self.ids do
-            if (self.ids[k] == i) then
-                return false
-            end
-        end
-        return true
-    end
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         data.gui = self
-        if not testID(data.id) then
+        if data.id and self.ids[data.id] then
             error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)", 2)
         end
+        if data.id then self.ids[data.id] = true end 
         for k = 1, #data._rawchildren do
             data:AddChild(data._rawchildren[k])
         end
         data.childrenResolved = true
-        table.insert(self.ids, data.id)
         table.insert(self.tree, data)
     else
         error("bad argument #1 to AddElement (GuiElement object expected, got invalid value)", 2)
     end
 end
 
-function Gui:GetElement(id)
+function Gui:GetElementById(id)
     for k = 1, #self.tree do
         local v = self.tree[k]
         if v.id == id then
@@ -85,7 +77,7 @@ end
 function searchTree(element, id)
     for k = 1, #element.children do
         local v = element.children[k]
-        if v.id == id then
+        if id and v.id == id then
             return v
         else
             local search = searchTree(v, id)

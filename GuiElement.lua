@@ -4,9 +4,6 @@ dofile_once("GUSGUI_PATHclass.lua")
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
 -- and a Draw method, which draws the element using the Gui API
 local GuiElement = class(function(Element, config, extended)
-    if config.id == nil then
-        error("GUI: Invalid construction of element (id is required)")
-    end
     Element.id = config.id
     config.id = nil;
     Element.name = config.name or nil
@@ -27,7 +24,7 @@ local GuiElement = class(function(Element, config, extended)
         elseif valid then
             Element._rawconfig[v.name] = config[v.name]
         elseif err then
-            error(err:format(Element.id), 4)
+            error(err:format(Element.id or "NO ELEMENT ID"), 4)
         end
     end
     Element.gui = nil
@@ -52,7 +49,7 @@ local GuiElement = class(function(Element, config, extended)
             elseif valid then
                 Element._rawconfig[v.name] = v
             elseif err then
-                error(err:format(Element.id), 2)
+                error(err:format(Element.id or "NO ELEMENT ID"), 2)
             end
         end
     })
@@ -104,21 +101,15 @@ function GuiElement:AddChild(child)
     if not self.allowsChildren then
         error("GUI: " .. self.type .. " cannot have child element")
     end
-    local function testID(i)
-        for k = 1, #self.gui.ids do
-            if (self.gui.ids[k] == i) then
-                return false
-            end
-        end
-        return true
-    end
     child.parent = self
     if child["is_a"] and child["Draw"] and child["GetBaseElementSize"] then
         child.gui = self.gui
-        if not testID(child.id) then
-            error("GUI: Element ID value must be unique (\"" .. child.id .. "\" is a duplicate)")
+        if child.id then 
+            if not self.gui.ids[child.id] then
+                error("GUI: Element ID value must be unique (\"" .. child.id .. "\" is a duplicate)")
+            end
+            self.gui.ids[child.id] = true
         end
-        table.insert(self.gui.ids, child.id)
         table.insert(self.children, child)
     else
         error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
@@ -132,13 +123,7 @@ function GuiElement:RemoveChild(childName)
     for i, v in ipairs(self.children) do
         if (v.name == childName) then
             table.remove(self.children, i)
-            local newids = {}
-            for i, a in ipairs(self.gui.ids) do
-                if a ~= v.id then
-                    table.insert(newids, a)
-                end
-            end
-            self.gui.ids = newids
+            if v.id then self.gui.ids[v.id] = nil end
             break
         end
     end
@@ -181,6 +166,7 @@ function GuiElement:RenderBackground(x, y, w, h)
 end
 
 function GuiElement:Remove()
+    if self.id then self.gui.ids[self.id] = nil end
     for i, v in ipairs(self.parent.children) do
         if (v.name == self.name) then
             table.remove(self.parent.children, i)
