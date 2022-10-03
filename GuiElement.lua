@@ -13,7 +13,7 @@ local GuiElement = class(function(Element, config, extended)
     Element._rawchildren = {}
     Element._config = {}
     Element.validator = Element.baseValidator
-    for _,v in ipairs(extended) do 
+    for _,v in ipairs(extended or {}) do 
         table.insert(Element.validator, v)
     end
     for k = 1, #Element.validator do

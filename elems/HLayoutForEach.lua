@@ -7,17 +7,6 @@ local HLayoutForEach = class(HLayout, function(o, config)
     o.func = (type(config.func) == "function") and config.func or error("GUI: Invalid value for func on element \"%s\"")
     o.type = "HLayoutForEach"
     o.allowsChildren = false
-    o.children = {}
-    setmetatable(o._, {
-        __index = function(t, k)
-            local elems = {}
-            local data = (o.gui:GetState(o.stateVal))
-            for i=1, #data do 
-                table.insert(elems, o.func(data[i]))
-            end
-            return elems
-        end
-    })
 end)
 
 return HLayoutForEach

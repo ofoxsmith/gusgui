@@ -10,11 +10,22 @@ local VLayout = class(GuiElement, function(o, config)
 end)
 
 function VLayout:GetBaseElementSize()
+    if self.type == "VLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
+        local elems = {}
+        local data = (self.gui:GetState(self.stateVal))
+        for i=1, #data do
+            local c = self.func(data[i])
+            c.gui = self.gui
+            c.parent = self
+            table.insert(elems, c)
+        end
+        self.children = elems
+        self.lastChildRefresh = self.gui.framenum
+    end 
     local totalW = 0
     local totalH = 0
-    local c = self.type ~= "VLayoutForEach" and self.children or self._
-    for i = 1, #c do
-        local child = c[i]
+    for i = 1, #self.children do
+        local child = self.children[i]
         local size = child:GetElementSize()
         local w = math.max(size.width + child._config.margin.left + child._config.margin.right, child._config.overrideWidth)
         local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom, child._config.overrideHeight)
@@ -25,6 +36,18 @@ function VLayout:GetBaseElementSize()
 end
 
 function VLayout:GetManagedXY(elem)
+    if self.type == "VLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
+        local elems = {}
+        local data = (self.gui:GetState(self.stateVal))
+        for i=1, #data do
+            local c = self.func(data[i])
+            c.gui = self.gui
+            c.parent = self
+            table.insert(elems, c)
+        end
+        self.children = elems
+        self.lastChildRefresh = self.gui.framenum
+    end 
     self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0)
     self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0)
     local elemsize = elem:GetElementSize()
@@ -35,6 +58,18 @@ function VLayout:GetManagedXY(elem)
 end
 
 function VLayout:Draw()
+    if self.type == "VLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
+        local elems = {}
+        local data = (self.gui:GetState(self.stateVal))
+        for i=1, #data do
+            local c = self.func(data[i])
+            c.gui = self.gui
+            c.parent = self
+            table.insert(elems, c)
+        end
+        self.children = elems
+        self.lastChildRefresh = self.gui.framenum
+    end 
     if self._config.hidden then return end
     self.nextX = nil
     self.nextY = nil
@@ -60,15 +95,14 @@ function VLayout:Draw()
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
         elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
+    for i = 1, #self.children do
+        self.children[i]:Draw()
+    end
     if hovered then
         if self._config.onHover then
             self._config.onHover(self)
         end
         self.useHoverConfigForNextFrame = true
-    end
-    local c = self.type ~= "VLayoutForEach" and self.children or self._
-    for i = 1, #c do
-        c[i]:Draw()
     end
 end
 

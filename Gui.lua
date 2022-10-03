@@ -91,6 +91,7 @@ end
 
 function Gui:Render()
     self._state = self.state
+    self.framenum = GameGetFrameNum()
     if (self.destroyed == true) then return end
     for _=1, #self.activeStates do local v = self.activeStates[_] 
         if v._type == "global" then 
