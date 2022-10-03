@@ -31,10 +31,6 @@ local Text = class(GuiElement, function(o, config)
     }})
     o.type = "Text"
     o.allowsChildren = false
-    if config.value == nil then
-        error("GUI: Invalid construction of Text element (value paramater is required)", 2)
-    end
-    o.value = config.value
 end)
 
 function Text:GetBaseElementSize()

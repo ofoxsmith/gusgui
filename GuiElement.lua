@@ -4,6 +4,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
 -- and a Draw method, which draws the element using the Gui API
 local GuiElement = class(function(Element, config, extended)
+    extended = extended or {}
     Element.id = config.id
     config.id = nil;
     Element.name = config.name or nil
@@ -12,8 +13,9 @@ local GuiElement = class(function(Element, config, extended)
     Element.useHoverConfigForNextFrame = false
     Element._rawchildren = {}
     Element._config = {}
-    Element.validator = Element.baseValidator
-    for _,v in ipairs(extended or {}) do 
+    Element.validator = {}
+    for _=1,#baseValidator do Element.validator[_] = baseValidator[_] end
+    for _,v in ipairs(extended) do 
         table.insert(Element.validator, v)
     end
     for k = 1, #Element.validator do
@@ -24,6 +26,9 @@ local GuiElement = class(function(Element, config, extended)
         elseif valid then
             Element._rawconfig[v.name] = config[v.name]
         elseif err then
+            for _,v in ipairs(baseValidator) do 
+                print(v.name)
+            end        
             error(err:format(Element.id or "NO ELEMENT ID"), 4)
         end
     end
@@ -105,7 +110,7 @@ function GuiElement:AddChild(child)
     if child["is_a"] and child["Draw"] and child["GetBaseElementSize"] then
         child.gui = self.gui
         if child.id then 
-            if not self.gui.ids[child.id] then
+            if self.gui.ids[child.id] then
                 error("GUI: Element ID value must be unique (\"" .. child.id .. "\" is a duplicate)")
             end
             self.gui.ids[child.id] = true
@@ -175,7 +180,7 @@ function GuiElement:Remove()
     end
 end
 
-GuiElement.baseValidator = {{
+baseValidator = {{
     name = "drawBorder",
     fromString = function(s) 
         return s == "true"

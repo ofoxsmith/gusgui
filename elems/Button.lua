@@ -11,7 +11,7 @@ local Button = class(GuiElement, function(o, config)
             if type(o) == "function" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+            return false, nil, "GUI: Invalid value for onClick on element \"%s\""
         end
     }, {
         name = "text",
