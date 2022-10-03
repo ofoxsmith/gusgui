@@ -119,8 +119,6 @@ function Slider:Draw()
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
         elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    GamePrint("min" .. tostring(self.min))
-    GamePrint("max" .. tostring(self.max))
     local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + paddingLeft + border,
         y + elementSize.offsetY + border + paddingTop, "", self.value, self._config.min, self._config.max,
         self._config.defaultValue, 1, " ", self._config.width)

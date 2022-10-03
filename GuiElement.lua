@@ -88,7 +88,6 @@ function GuiElement:ResolveValue(a, k)
         if a._type == "global" then
             local t = nil
             for _ = 1, #self.validator do
-                GamePrint(tostring(self.validator[_].name == k))
                 if (self.validator[_].name == k) then
                     t = self.validator[_].fromString
                 end
