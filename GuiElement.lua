@@ -6,6 +6,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 local GuiElement = class(function(Element, config, extended)
     extended = extended or {}
     Element.id = config.id
+    Element.uid = GetNextUID()
     config.id = nil;
     Element.name = config.name or nil
     Element.config = {}
@@ -14,8 +15,10 @@ local GuiElement = class(function(Element, config, extended)
     Element._rawchildren = {}
     Element._config = {}
     Element.validator = {}
-    for _=1,#baseValidator do Element.validator[_] = baseValidator[_] end
-    for _,v in ipairs(extended) do 
+    for _ = 1, #baseValidator do
+        Element.validator[_] = baseValidator[_]
+    end
+    for _, v in ipairs(extended) do
         table.insert(Element.validator, v)
     end
     for k = 1, #Element.validator do
@@ -26,30 +29,30 @@ local GuiElement = class(function(Element, config, extended)
         elseif valid then
             Element._rawconfig[v.name] = config[v.name]
         elseif err then
-            for _,v in ipairs(baseValidator) do 
-                print(v.name)
-            end        
             error(err:format(Element.id or "NO ELEMENT ID"), 4)
         end
     end
     Element.gui = nil
     setmetatable(Element._config, {
         __index = function(t, k)
-            local value = (Element.useHoverConfigForNextFrame == true and Element._rawconfig.hover[k] or nil) or Element._rawconfig[k]
-            if Element.useHoverConfigForNextFrame == true then 
+            local value = (Element.useHoverConfigForNextFrame == true and Element._rawconfig.hover[k] or nil) or
+                              Element._rawconfig[k]
+            if Element.useHoverConfigForNextFrame == true then
                 return Element:ResolveValue(value, k)
             end
             return Element:ResolveValue(value, k)
         end,
-        __newindex = function(t, k, v) error("_config is readonly") end
+        __newindex = function(t, k, v)
+            error("_config is readonly")
+        end
     })
     setmetatable(Element.config, {
         __index = function(t, k)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            for _=1, #Element.validator do
-                if (Element.validator[_].name == k ) then 
+            for _ = 1, #Element.validator do
+                if (Element.validator[_].name == k) then
                     local valid, nv, err = Element.validator[_].validate(v, Element.validator)
                     if valid and (nv ~= nil) then
                         Element._rawconfig[k] = nv
@@ -58,7 +61,7 @@ local GuiElement = class(function(Element, config, extended)
                     elseif err then
                         error(err:format(Element.id or "NO ELEMENT ID"), 2)
                     end
-                    break;        
+                    break
                 end
             end
         end
@@ -84,9 +87,11 @@ function GuiElement:ResolveValue(a, k)
     if (a._type == "state" or a._type == "global") and type(a.value) == "string" then
         if a._type == "global" then
             local t = nil
-            for _=1, #self.validator do
+            for _ = 1, #self.validator do
                 GamePrint(tostring(self.validator[_].name == k))
-                if (self.validator[_].name == k ) then t = self.validator[_].fromString end
+                if (self.validator[_].name == k) then
+                    t = self.validator[_].fromString
+                end
             end
             return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
         end
@@ -111,32 +116,25 @@ function GuiElement:AddChild(child)
     if not self.allowsChildren then
         error("GUI: " .. self.type .. " cannot have child element")
     end
-    child.parent = self
-    if child["is_a"] and child["Draw"] and child["GetBaseElementSize"] then
-        child.gui = self.gui
-        if child.id then 
-            if self.gui.ids[child.id] then
-                error("GUI: Element ID value must be unique (\"" .. child.id .. "\" is a duplicate)")
-            end
-            self.gui.ids[child.id] = true
-        end
-        table.insert(self.children, child)
-    else
-        error("bad argument #1 to AddChild (GuiElement object expected, got invalid value)", 2)
-    end
+    child:OnEnterTree(self, false)
 end
 
-function GuiElement:RemoveChild(childName)
-    if child == nil then
+function GuiElement:RemoveChild(childID)
+    if childID == nil then
         error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
     end
     for i, v in ipairs(self.children) do
-        if (v.name == childName) then
-            table.remove(self.children, i)
-            if v.id then self.gui.ids[v.id] = nil end
+        if (v.id == childID) then
+            v:OnExitTree()
             break
         end
     end
+end
+
+local _uid_ = 1
+function GetNextUID()
+    _uid_ = _uid_ + 1
+    return _uid_     
 end
 
 function GuiElement:GetElementSize()
@@ -159,8 +157,10 @@ end
 
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
-    local width = math.max((self._config.overrideWidth or 0), w + self._config.padding.left + self._config.padding.right)
-    local height = math.max((self._config.overrideHeight or 0), h + self._config.padding.top + self._config.padding.bottom)
+    local width =
+        math.max((self._config.overrideWidth or 0), w + self._config.padding.left + self._config.padding.right)
+    local height = math.max((self._config.overrideHeight or 0),
+        h + self._config.padding.top + self._config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.borderID, x + 1, y + 1, width, height, 1, "GUSGUI_PATHborder.png")
 end
@@ -168,26 +168,72 @@ end
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
     local border = (self._config.drawBorder and 2 or 0)
-    local width = math.max((self._config.overrideWidth or 0), w + self._config.padding.left + self._config.padding.right)
-    local height = math.max((self._config.overrideHeight or 0), h + self._config.padding.top + self._config.padding.bottom)
+    local width =
+        math.max((self._config.overrideWidth or 0), w + self._config.padding.left + self._config.padding.right)
+    local height = math.max((self._config.overrideHeight or 0),
+        h + self._config.padding.top + self._config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
     GuiImageNinePiece(self.gui.guiobj, self.bgID, x + border, y + border, width - border, height - border, 1,
         "GUSGUI_PATHbg.png")
 end
 
 function GuiElement:Remove()
-    if self.id then self.gui.ids[self.id] = nil end
+    self:OnExitTree()
+end
+
+function GuiElement:OnEnterTree(parent, isroot, gui)
+    if isroot then 
+        self.gui = gui
+        if self.id then
+            if self.gui.ids[self.id] then
+                self.parent = nil
+                error("GUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
+            end
+            self.gui.ids[self.id] = true
+        end
+        for i=1, #self._rawchildren do
+            self._rawchildren[i]:OnEnterTree(self)
+        end    
+        return    
+    end 
+    self.parent = parent
+    self.gui = parent.gui
+    if self.id then
+        if self.gui.ids[self.id] then
+            self.parent = nil
+            error("GUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
+        end
+        self.gui.ids[self.id] = true
+    end
+    for i=1, #self._rawchildren do
+        self._rawchildren[i]:OnEnterTree(self)
+    end
+    self._rawchildren = nil
+    table.insert(parent.children, self)
+end
+
+function GuiElement:OnExitTree()
+    for i = 1, #self.children do
+        local c = self.children[i]
+        c:OnExitTree()
+    end
     for i, v in ipairs(self.parent.children) do
-        if (v.name == self.name) then
+        if (v.uid == self.uid) then
             table.remove(self.parent.children, i)
             break
         end
     end
+    self.parent = nil
+    self.children = nil
+    if self.id then
+        self.gui.ids[self.id] = nil
+    end
+    self.gui = nil
 end
 
 baseValidator = {{
     name = "drawBorder",
-    fromString = function(s) 
+    fromString = function(s)
         return s == "true"
     end,
     validate = function(o)
@@ -205,7 +251,7 @@ baseValidator = {{
     end
 }, {
     name = "drawBackground",
-    fromString = function(s) 
+    fromString = function(s)
         return s == "true"
     end,
     validate = function(o)
@@ -223,7 +269,7 @@ baseValidator = {{
     end
 }, {
     name = "overrideWidth",
-    fromString = function(s) 
+    fromString = function(s)
         return tonumber(s)
     end,
     validate = function(o)
@@ -244,7 +290,7 @@ baseValidator = {{
     end
 }, {
     name = "overrideHeight",
-    fromString = function(s) 
+    fromString = function(s)
         return tonumber(s)
     end,
     validate = function(o)
@@ -265,7 +311,7 @@ baseValidator = {{
     end
 }, {
     name = "verticalAlign",
-    fromString = function(s) 
+    fromString = function(s)
         return tonumber(s)
     end,
     validate = function(o)
@@ -287,7 +333,7 @@ baseValidator = {{
     end
 }, {
     name = "horizontalAlign",
-    fromString = function(s) 
+    fromString = function(s)
         return tonumber(s)
     end,
     validate = function(o)
@@ -411,27 +457,31 @@ baseValidator = {{
         if o == nil then
             return true, nil, nil
         end
-        if type(o) == "function" then return true, nil, nil end
+        if type(o) == "function" then
+            return true, nil, nil
+        end
         return false, nil, "GUI: Invalid value for onHover on element \"%s\""
     end
 }, {
     name = "hover",
     validate = function(o, self)
-        if o == nil then return true, {}, nil end
+        if o == nil then
+            return true, {}, nil
+        end
         local t = {}
         for k, v in pairs(o) do
-            if (self[k].canHover ~= false) then 
+            if (self[k].canHover ~= false) then
                 local valid, nv, err = self[k].validate(v, self)
-                if valid then 
+                if valid then
                     o[k] = nv or v
-                end    
+                end
             end
         end
         return true, t, nil
     end
 }, {
     name = "hidden",
-    fromString = function(s) 
+    fromString = function(s)
         return s == "true"
     end,
     validate = function(o)

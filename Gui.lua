@@ -47,16 +47,8 @@ function Gui:AddElement(data)
         if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~= "VLayoutForEach" then 
             error("GUI: Gui root nodes must be a Layout element.")
         end
-        data.gui = self
-        if data.id and self.ids[data.id] then
-            error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)", 2)
-        end
-        if data.id then self.ids[data.id] = true end 
-        for k = 1, #data._rawchildren do
-            data:AddChild(data._rawchildren[k])
-        end
-        data.childrenResolved = true
         table.insert(self.tree, data)
+        data:OnEnterTree(nil, true, self)
     else
         error("bad argument #1 to AddElement (GuiElement object expected, got invalid value)", 2)
     end
