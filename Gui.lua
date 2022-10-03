@@ -44,6 +44,9 @@ end
 
 function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
+        if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~= "VLayoutForEach" then 
+            error("GUI: Gui root nodes must be a Layout element.")
+        end
         data.gui = self
         if data.id and self.ids[data.id] then
             error("GUI: Element ID value must be unique (\"" .. data.id .. "\" is a duplicate)", 2)

@@ -48,13 +48,18 @@ local GuiElement = class(function(Element, config, extended)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            local valid, nv, err = self.validator[k].validate(v, self.validator)
-            if valid and (nv ~= nil) then
-                Element._rawconfig[v.name] = nv
-            elseif valid then
-                Element._rawconfig[v.name] = v
-            elseif err then
-                error(err:format(Element.id or "NO ELEMENT ID"), 2)
+            for _=1, #Element.validator do
+                if (Element.validator[_].name == k ) then 
+                    local valid, nv, err = Element.validator[_].validate(v, Element.validator)
+                    if valid and (nv ~= nil) then
+                        Element._rawconfig[k] = nv
+                    elseif valid then
+                        Element._rawconfig[k] = v
+                    elseif err then
+                        error(err:format(Element.id or "NO ELEMENT ID"), 2)
+                    end
+                    break;        
+                end
             end
         end
     })
