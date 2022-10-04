@@ -5,23 +5,13 @@ local HLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config)
     o.type = "HLayout"
     o.allowsChildren = true
-    o.lastChildRefresh = 0
     o.childrenResolved = false
     o._rawchildren = config.children or {}
 end)
 
 function HLayout:GetBaseElementSize()
-    if self.type == "HLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
-        local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
-        for i=1, #data do
-            local c = self.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
-        end
-        self.children = elems
-        self.lastChildRefresh = self.gui.framenum
+    if self.type == "HLayoutForEach" then 
+        self:CreateElements()
     end 
     local totalW = 0
     local totalH = 0
@@ -39,17 +29,8 @@ function HLayout:GetBaseElementSize()
 end
 
 function HLayout:GetManagedXY(elem)
-    if self.type == "HLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
-        local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
-        for i=1, #data do
-            local c = self.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
-        end
-        self.children = elems
-        self.lastChildRefresh = self.gui.framenum
+    if self.type == "HLayoutForEach" then 
+        self:CreateElements()
     end 
     self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0)
     self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0)
@@ -61,17 +42,8 @@ function HLayout:GetManagedXY(elem)
 end
 
 function HLayout:Draw()
-    if self.type == "HLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
-        local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
-        for i=1, #data do
-            local c = self.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
-        end
-        self.children = elems
-        self.lastChildRefresh = self.gui.framenum
+    if self.type == "HLayoutForEach" then 
+        self:CreateElements()
     end 
     if self._config.hidden then
         return

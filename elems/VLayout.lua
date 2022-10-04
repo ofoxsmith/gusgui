@@ -10,17 +10,8 @@ local VLayout = class(GuiElement, function(o, config)
 end)
 
 function VLayout:GetBaseElementSize()
-    if self.type == "VLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
-        local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
-        for i=1, #data do
-            local c = self.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
-        end
-        self.children = elems
-        self.lastChildRefresh = self.gui.framenum
+    if self.type == "VLayoutForEach" then 
+        self:CreateElements()
     end 
     local totalW = 0
     local totalH = 0
@@ -36,17 +27,8 @@ function VLayout:GetBaseElementSize()
 end
 
 function VLayout:GetManagedXY(elem)
-    if self.type == "VLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
-        local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
-        for i=1, #data do
-            local c = self.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
-        end
-        self.children = elems
-        self.lastChildRefresh = self.gui.framenum
+    if self.type == "VLayoutForEach" then 
+        self:CreateElements()
     end 
     self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0)
     self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0)
@@ -58,17 +40,8 @@ function VLayout:GetManagedXY(elem)
 end
 
 function VLayout:Draw()
-    if self.type == "VLayoutForEach" and self.lastChildRefresh ~= self.gui.framenum then 
-        local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
-        for i=1, #data do
-            local c = self.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
-        end
-        self.children = elems
-        self.lastChildRefresh = self.gui.framenum
+    if self.type == "VLayoutForEach" then 
+        self:CreateElements()
     end 
     if self._config.hidden then return end
     self.nextX = nil
