@@ -103,7 +103,7 @@ function VLayout:Draw()
             self._config.onHover(self)
         end
         self.useHoverConfigForNextFrame = true
-    end
+    else self.useHoverConfigForNextFrame = false end 
 end
 
 return VLayout

@@ -35,11 +35,10 @@ local GuiElement = class(function(Element, config, extended)
     Element.gui = nil
     setmetatable(Element._config, {
         __index = function(t, k)
-            local value = (Element.useHoverConfigForNextFrame == true and Element._rawconfig.hover[k] or nil) or
-                              Element._rawconfig[k]
-            if Element.useHoverConfigForNextFrame == true then
-                return Element:ResolveValue(value, k)
-            end
+            local value = nil
+            if Element.useHoverConfigForNextFrame then 
+                value = Element._rawconfig.hover[k] or Element._rawconfig[k]
+            else value = Element._rawconfig[k] end
             return Element:ResolveValue(value, k)
         end,
         __newindex = function(t, k, v)
@@ -140,7 +139,7 @@ function GuiElement:GetElementSize()
     local baseW, baseH = self:GetBaseElementSize()
     local borderSize = 0
     if self._config.drawBorder then
-        borderSize = 4
+        borderSize = 6
     end
     local width = baseW + self._config.padding.left + self._config.padding.right + borderSize
     local height = baseH + self._config.padding.top + self._config.padding.bottom + borderSize
@@ -162,9 +161,9 @@ end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
-    local b = self._config.drawBorder and 2 or 0
+    local b = self._config.drawBorder and 0 or 2
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-    GuiImageNinePiece(self.gui.guiobj, self.bgID, x+1, y+1, w + self._config.padding.left + self._config.padding.right, h + self._config.padding.top + self._config.padding.bottom, 1,
+    GuiImageNinePiece(self.gui.guiobj, self.bgID, x+1, y+1, w + self._config.padding.left + self._config.padding.right-b, h + self._config.padding.top + self._config.padding.bottom-b, 1,
         "GUSGUI_PATHbg.png")
 end
 
@@ -433,9 +432,9 @@ baseValidator = {{
             return true, nil, nil
         end
         if type(o) == "table" then
-            if not (type(o.r) == "number" or (type(o.r) == "table" and o.r["value"] ~= nil and o.r["_type"] ~= nil) and
-                type(o.g) == "number" or (type(o.g) == "table" and o.g["value"] ~= nil and o.g["_type"] ~= nil) and
-                type(o.b) == "number" or (type(o.b) == "table" and o.b["value"] ~= nil and o.b["_type"] ~= nil)) then
+            if not (type(o[1]) == "number" or (type(o[1]) == "table" and o[1]["value"] ~= nil and o[1]["_type"] ~= nil) and
+                type(o[2]) == "number" or (type(o[2]) == "table" and o[2]["value"] ~= nil and o[2]["_type"] ~= nil) and
+                type(o[3]) == "number" or (type(o[3]) == "table" and o[3]["value"] ~= nil and o[3]["_type"] ~= nil)) then
                 return false, nil, "GUI: Invalid value for colour on element \"%s\""
             end
             return true, nil, nil
@@ -455,16 +454,23 @@ baseValidator = {{
     end
 }, {
     name = "hover",
-    validate = function(o, self)
+    validate = function(o, s)
         if o == nil then
             return true, {}, nil
         end
+        function findSchema(n)
+            for i=1, #s do
+                local v = s[i]
+                if v.name == n then return v end 
+            end
+        end
         local t = {}
         for k, v in pairs(o) do
-            if (self[k].canHover ~= false) then
-                local valid, nv, err = self[k].validate(v, self)
+            local f = findSchema(k)
+            if (f.canHover == nil) then
+                local valid, nv, err = f.validate(v, s)
                 if valid then
-                    o[k] = nv or v
+                    t[k] = nv or v
                 end
             end
         end
