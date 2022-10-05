@@ -15,6 +15,7 @@ return {
             "elems/VLayoutForEach.lua",
             "elems/Slider.lua",
             "elems/TextInput.lua",
+            "elems/ProgressBar.lua"
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)

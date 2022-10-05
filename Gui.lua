@@ -142,6 +142,7 @@ local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
 local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
 local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
 local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
+local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -154,6 +155,7 @@ return {
         VLayout = VLayout,
         VLayoutForEach = VLayoutForEach,
         Slider = Slider,
-        TextInput = TextInput
+        TextInput = TextInput,
+        ProgressBar = ProgressBar
     },
 }

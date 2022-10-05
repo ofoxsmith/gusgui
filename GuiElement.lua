@@ -150,8 +150,8 @@ function GuiElement:GetElementSize()
         baseH = baseH,
         width = width,
         height = height,
-        offsetX = self._config.horizontalAlign * baseW - iW,
-        offsetY = self._config.verticalAlign * baseH - iH
+        offsetX = self._config.horizontalAlign * (baseW - iW),
+        offsetY = self._config.verticalAlign * (baseH - iH)
     }
 end
 
