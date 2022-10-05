@@ -1,5 +1,5 @@
 # GUSGUI
-A GUI framework for Noita, with properties and behaviors similar to HTML and CSS, and with rendering like the [CSS box model](https://www.w3schools.com/css/css_boxmodel.asp).
+A GUI framework for Noita, with properties and behaviors similar to HTML and CSS, and with rendering like the [CSS box model](https://www.geeksforgeeks.org/css-box-model/).
 
 ## Installation
 
@@ -19,7 +19,7 @@ dofile_once("mods/YOUR-MOD-ID/PATH-TO-GUSGUI/gusgui.lua").init("mods/YOUR-MOD-ID
 ### Without Git:
 
 Download the [latest release](https://github.com/ofoxsmith/gusgui/releases), and extract it into your mod folder. 
-Updating must be done manually by downloading the newest release from https://github.com/ofoxsmith/gusgui/releases.
+Updating must be done manually by downloading the newest release.
 
 At the top of `init.lua`, call the initialisation function:
 ```lua
