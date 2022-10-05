@@ -98,6 +98,18 @@ function GuiElement:ResolveValue(a, k)
     return a
 end
 
+function GuiElement:GetMouseData()
+    local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]
+    local mx, my = ComponentGetValue2(component, "mMousePosition")
+    local screen_w, screen_h = GuiGetScreenDimensions(g)
+    local cx, cy = GameGetCameraPos()
+    local vx = MagicNumbersGetValue("VIRTUAL_RESOLUTION_X")
+    local vy = MagicNumbersGetValue("VIRTUAL_RESOLUTION_Y")
+    local gmx = ((mx - cx) * screen_w / vx + screen_w / 2)
+    local gmy = ((my - cy) * screen_h / vy + screen_h / 2)
+    return gmx, gmy, ComponentGetValue2(component, "mButtonDownFire")
+end
+
 function GuiElement:GetDepthInTree()
     local at = self
     local d = 0
