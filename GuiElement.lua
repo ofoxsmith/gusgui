@@ -136,7 +136,9 @@ function GetNextUID()
 end
 
 function GuiElement:GetElementSize()
-    local baseW, baseH = self:GetBaseElementSize()
+    local iW, iH = self:GetBaseElementSize()
+    local baseW = math.max(self._config.overrideWidth, iW)
+    local baseH = math.max(self._config.overrideHeight, iH)
     local borderSize = 0
     if self._config.drawBorder then
         borderSize = 6
@@ -146,10 +148,10 @@ function GuiElement:GetElementSize()
     return {
         baseW = baseW,
         baseH = baseH,
-        width = (math.max(self._config.overrideWidth or 0, width)),
-        height = (math.max(self._config.overrideHeight or 0, height)),
-        offsetX = (self._config.horizontalAlign) * (math.max(self._config.overrideWidth or 0, width) - width),
-        offsetY = (self._config.verticalAlign) * (math.max(self._config.overrideHeight or 0, height) - height)
+        width = width,
+        height = height,
+        offsetX = self._config.horizontalAlign * baseW - iW,
+        offsetY = self._config.verticalAlign * baseH - iH
     }
 end
 

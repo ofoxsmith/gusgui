@@ -18,10 +18,8 @@ function HLayout:GetBaseElementSize()
     for i = 1, #self.children do
         local child = self.children[i]
         local size = child:GetElementSize()
-        local w = math.max(size.width + child._config.margin.left + child._config.margin.right,
-            child._config.overrideWidth)
-        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom,
-            child._config.overrideHeight)
+        local w = math.max(size.width + child._config.margin.left + child._config.margin.right)
+        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom)
         totalW = totalW + w
         totalH = totalH > size.height and totalH or h
     end
