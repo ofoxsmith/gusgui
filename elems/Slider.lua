@@ -114,6 +114,7 @@ function Slider:Draw()
     if self._config.drawBackground then
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
+    self:PropagateInteractableBounds(x, y, elementSize.baseW + paddingLeft + self._config.padding.right, elementSize.baseH + paddingTop + self._config.padding.bottom)
     local old = self.value
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,

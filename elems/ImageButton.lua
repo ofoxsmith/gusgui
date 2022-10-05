@@ -97,6 +97,7 @@ function ImageButton:Draw()
     if self._config.drawBackground then
         self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
     end
+    self:PropagateInteractableBounds(x, y, elementSize.baseW + paddingLeft + self._config.padding.right, elementSize.baseH + paddingTop + self._config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
     GuiImageNinePiece(self.gui.guiobj, self.buttonID, x + border, y + border, elementSize.width - border - border,
         elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")

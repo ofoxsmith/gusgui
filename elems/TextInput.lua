@@ -83,6 +83,7 @@ function TextInput:Draw()
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
         elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    self:PropagateInteractableBounds(x, y, elementSize.baseW + paddingLeft + self._config.padding.right, elementSize.baseH + paddingTop + self._config.padding.bottom)
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
         if self._config.onHover then
