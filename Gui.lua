@@ -16,6 +16,7 @@ local Gui = class(function(newGUI, state)
     newGUI.stateID = getIdCounter()
     newGUI.guiobj = GuiCreate()
     newGUI.tree = {}
+    newGUI.cachedData = {}
     newGUI.cachedValues = {}
     newGUI.state = state
     newGUI._state = {}
@@ -85,6 +86,7 @@ function searchTree(element, id)
 end
 
 function Gui:Render()
+    self.cachedData = {}
     self._state = self.state
     self.framenum = GameGetFrameNum()
     if (self.destroyed == true) then return end
@@ -107,6 +109,18 @@ function Gui:Destroy()
     self._state = nil
     GuiDestroy(self.guiobj)
     return
+end
+
+function Gui:GetMouseData()
+    local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]
+    local mx, my = ComponentGetValue2(component, "mMousePosition")
+    local screen_w, screen_h = GuiGetScreenDimensions(self.guiobj)
+    local cx, cy = GameGetCameraPos()
+    local vx = MagicNumbersGetValue("VIRTUAL_RESOLUTION_X")
+    local vy = MagicNumbersGetValue("VIRTUAL_RESOLUTION_Y")
+    local gmx = ((mx - cx) * screen_w / vx + screen_w / 2)
+    local gmy = ((my - cy) * screen_h / vy + screen_h / 2)
+    return math.floor(gmx), math.floor(gmy), ComponentGetValue2(component, "mButtonDownLeftClick")
 end
 
 function CreateGUI(data, state)
@@ -143,6 +157,7 @@ local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
 local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
 local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
 local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
+local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -156,6 +171,7 @@ return {
         VLayoutForEach = VLayoutForEach,
         Slider = Slider,
         TextInput = TextInput,
-        ProgressBar = ProgressBar
+        ProgressBar = ProgressBar,
+        DraggableElement = DraggableElement
     },
 }
