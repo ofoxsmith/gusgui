@@ -63,7 +63,7 @@ function ProgressBar:Draw()
     end
     self.sbgID = self.sbgID or self.gui.nextID()
     self.barID = self.barID or self.gui.nextID()
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
     local paddingTop = self._config.padding.top

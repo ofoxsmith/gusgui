@@ -60,7 +60,7 @@ function Checkbox:Draw()
     self.value = self.value or self._config.defaultValue
     self.maskID = self.maskID or self.gui.nextID()
     self.imageID = self.imageID or self.gui.nextID()
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
     local paddingTop = self._config.padding.top
@@ -89,10 +89,13 @@ function Checkbox:Draw()
             self._config.onToggle(self)
         end    
         if hovered then
+            GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
+            GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0,
+                (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
             if self._config.onHover then
                 self._config.onHover(self)
             end
-            GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
+            GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
             GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0,
                 (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)
         end
@@ -109,7 +112,7 @@ function Checkbox:Draw()
         end
     else
         GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-        GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
+        GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.width - border - border,
             elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
         local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
         if clicked then
@@ -122,6 +125,9 @@ function Checkbox:Draw()
             if self._config.onHover then
                 self._config.onHover(self)
             end
+            GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
+            GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0,
+                (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z)
         local path = nil

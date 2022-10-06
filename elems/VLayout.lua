@@ -29,10 +29,11 @@ end
 function VLayout:GetManagedXY(elem)
     if self.type == "VLayoutForEach" then 
         self:CreateElements()
-    end 
-    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0)
-    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0)
+    end
     local elemsize = elem:GetElementSize()
+    local offsets = self:GetElementSize()
+    self.nextX = self.nextX or (self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0) + offsets.offsetX)
+    self.nextY = self.nextY or (self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0) + offsets.offsetY)
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextY = self.nextY + elemsize.height + elem._config.margin.top + elem._config.margin.bottom
@@ -46,7 +47,7 @@ function VLayout:Draw()
     if self._config.hidden then return end
     self.nextX = nil
     self.nextY = nil
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local x = self._config.margin.left
     local y = self._config.margin.top
     local size = self:GetElementSize()

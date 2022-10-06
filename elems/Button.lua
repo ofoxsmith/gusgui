@@ -42,7 +42,7 @@ function Button:Draw()
     end
     self.maskID = self.maskID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local parsedText = self:Interp(self._config.text)
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
@@ -68,9 +68,11 @@ function Button:Draw()
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self._config.onClick(self)
+        local posX, posY = EntityGetTransform(EntityGetWithTag("player_unit")[1])
+        GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", posX, posY)
     end
     if hovered then
-        GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
+        GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
         if self._config.onHover then
             self._config.onHover(self)
         end

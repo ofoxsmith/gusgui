@@ -43,7 +43,7 @@ local Slider = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return true, 1, nil
+                return true, 25, nil
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then
@@ -84,20 +84,20 @@ local Slider = class(GuiElement, function(o, config)
     }})
     o.type = "Slider"
     o.allowsChildren = false
+    o.value = o._config.defaultValue
 end)
 
 function Slider:GetBaseElementSize()
-    return math.max(25, self.width), 8
+    return math.max(25, self._config.width), 8
 end
 
 function Slider:Draw()
     if self._config.hidden then
         return
     end
-    self.value = self.value or self.defaultValue
     self.renderID = self.renderID or self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
     local paddingTop = self._config.padding.top

@@ -30,9 +30,10 @@ function HLayout:GetManagedXY(elem)
     if self.type == "HLayoutForEach" then 
         self:CreateElements()
     end 
-    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0)
-    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0)
     local elemsize = elem:GetElementSize()
+    local offsets = self:GetElementSize()
+    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0) + offsets.offsetX
+    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0) + offsets.offsetY
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextX = self.nextX + elemsize.width + elem._config.margin.left + elem._config.margin.right
@@ -50,7 +51,7 @@ function HLayout:Draw()
     self.nextY = nil
     local elementSize = self:GetElementSize()
     local border = (self._config.drawBorder and 1 or 0)
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local x = self._config.margin.left
     local y = self._config.margin.top
     local size = self:GetElementSize()

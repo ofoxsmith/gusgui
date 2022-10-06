@@ -53,7 +53,7 @@ local TextInput = class(GuiElement, function(o, config)
 end)
 
 function TextInput:GetBaseElementSize()
-    return math.max(25, self.width - (self._config.drawBorder and 4 or 0)), 10
+    return math.max(25, self._config.width), 10
 end
 function TextInput:Draw()
     if self._config.hidden then
@@ -63,7 +63,7 @@ function TextInput:Draw()
     self.inputID = self.inputID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
     local paddingTop = self._config.padding.top

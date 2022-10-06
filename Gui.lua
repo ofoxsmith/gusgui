@@ -20,6 +20,8 @@ local Gui = class(function(newGUI, state)
     newGUI.cachedValues = {}
     newGUI.state = state
     newGUI._state = {}
+    newGUI.screenW, newGUI.screenH = GuiGetScreenDimensions(newGUI.guiobj)
+    newGUI.screenW, newGUI.screenH = math.floor(newGUI.screenW), math.floor(newGUI.screenH)
 end)
 
 function Gui:GetState(s)
@@ -45,11 +47,13 @@ end
 
 function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
-        if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~= "VLayoutForEach" then 
-            error("GUI: Gui root nodes must be a Layout element.")
+        if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~=
+            "VLayoutForEach" then
+            error("GUI: Gui root nodes must be a Layout element.", 2)
         end
         table.insert(self.tree, data)
         data:OnEnterTree(nil, true, self)
+        return data
     else
         error("bad argument #1 to AddElement (GuiElement object expected, got invalid value)", 2)
     end
@@ -86,12 +90,17 @@ function searchTree(element, id)
 end
 
 function Gui:Render()
+    if (self.destroyed == true) then
+        return
+    end
     self.cachedData = {}
     self._state = self.state
     self.framenum = GameGetFrameNum()
-    if (self.destroyed == true) then return end
-    for _=1, #self.activeStates do local v = self.activeStates[_] 
-        if v._type == "global" then 
+    self.screenW, self.screenH = GuiGetScreenDimensions(self.guiobj)
+    self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
+    for _ = 1, #self.activeStates do
+        local v = self.activeStates[_]
+        if v._type == "global" then
             self.cachedValues[v.id] = GlobalsGetValue(v.value)
         end
     end
@@ -130,7 +139,23 @@ end
 function Gui:StateValue(s)
     local o = {
         _type = "state",
-        value = s,
+        value = s
+    }
+    return o
+end
+
+function Gui:ScreenWidth()
+    local o = {
+        _type = "screenw",
+        value = ""
+    }
+    return o
+end
+
+function Gui:ScreenHeight()
+    local o = {
+        _type = "screenh",
+        value = ""
     }
     return o
 end
@@ -158,7 +183,7 @@ local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
 local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
 local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
 local Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua")
---local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
+-- local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -173,7 +198,7 @@ return {
         Slider = Slider,
         TextInput = TextInput,
         ProgressBar = ProgressBar,
-        Checkbox = Checkbox,
-        --DraggableElement = DraggableElement
-    },
+        Checkbox = Checkbox
+        -- DraggableElement = DraggableElement
+    }
 }

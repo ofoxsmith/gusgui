@@ -80,7 +80,7 @@ function ImageButton:Draw()
     end
     self.imageID = self.imageID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
-    self.z = self:GetDepthInTree() * -100
+    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
     local paddingLeft = self._config.padding.left
     local paddingTop = self._config.padding.top

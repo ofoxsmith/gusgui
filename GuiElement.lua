@@ -39,10 +39,11 @@ local GuiElement = class(function(Element, config, extended)
             if Element.useHoverConfigForNextFrame then 
                 value = Element._rawconfig.hover[k] or Element._rawconfig[k]
             else value = Element._rawconfig[k] end
+            if k == "colour" and value ~= nil then return {Element:ResolveValue(value[1], k), Element:ResolveValue(value[2], k), Element:ResolveValue(value[3], k)}end
             return Element:ResolveValue(value, k)
         end,
         __newindex = function(t, k, v)
-            error("_config is readonly")
+            error("_config is readonly", 2)
         end
     })
     setmetatable(Element.config, {
@@ -83,7 +84,7 @@ function GuiElement:ResolveValue(a, k)
     if type(a) ~= "table" then
         return a
     end
-    if (a._type == "state" or a._type == "global") and type(a.value) == "string" then
+    if (a._type == "state" or a._type == "global" or a._type == "screenw" or a._type == "screenh") and type(a.value) == "string" then
         if a._type == "global" then
             local t = nil
             for _ = 1, #self.validator do
@@ -93,6 +94,8 @@ function GuiElement:ResolveValue(a, k)
             end
             return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
         end
+        if a._type == "screenw" then return self.gui.screenW
+        elseif a._type == "screenh" then return self.gui.screenH end
         return self.gui:GetState(a.value)
     end
     return a
@@ -115,6 +118,7 @@ function GuiElement:AddChild(child)
         error("GUI: " .. self.type .. " cannot have child element")
     end
     child:OnEnterTree(self, false)
+    return child
 end
 
 function GuiElement:RemoveChild(childID)
@@ -143,6 +147,8 @@ function GuiElement:GetElementSize()
     if self._config.drawBorder then
         borderSize = 6
     end
+    local offsetX = (baseW - iW) * self._config.horizontalAlign
+    local offsetY = (baseH - iH) * self._config.verticalAlign
     local width = baseW + self._config.padding.left + self._config.padding.right + borderSize
     local height = baseH + self._config.padding.top + self._config.padding.bottom + borderSize
     return {
@@ -150,8 +156,8 @@ function GuiElement:GetElementSize()
         baseH = baseH,
         width = width,
         height = height,
-        offsetX = self._config.horizontalAlign * (baseW - iW),
-        offsetY = self._config.verticalAlign * (baseH - iH)
+        offsetX = math.floor(offsetX),
+        offsetY = math.floor(offsetY)
     }
 end
 
