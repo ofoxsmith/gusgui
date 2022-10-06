@@ -40,10 +40,10 @@ local Checkbox = class(GuiElement, function(o, config)
     o._rawconfig.hover.colour = o._rawconfig.hover.colour or {240,230,140}
     o.type = "Checkbox"
     o.allowsChildren = false
+    o.value = o._config.defaultValue
 end)
 
 function Checkbox:GetBaseElementSize()
-    self.value = self.value or self._config.defaultValue
     if self._config.style == "text" then
         local t = "[" .. (self.value and "*" or " ") .. "]"
         local w, h = GuiGetTextDimensions(self.gui.guiobj, t)
@@ -57,7 +57,6 @@ function Checkbox:Draw()
     if self._config.hidden then
         return
     end
-    self.value = self.value or self._config.defaultValue
     self.maskID = self.maskID or self.gui.nextID()
     self.imageID = self.imageID or self.gui.nextID()
     self.z = 1000000 - self:GetDepthInTree() * 10
@@ -125,13 +124,10 @@ function Checkbox:Draw()
             if self._config.onHover then
                 self._config.onHover(self)
             end
-            GuiZSetForNextWidget(self.gui.guiobj, self.z - 3)
-            GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0,
-                (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)    
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z)
         local path = nil
-        if self.value then 
+        if self.value == true then 
             path = "GUSGUI_PATHcheckbox_t.png"
         else 
             path = "GUSGUI_PATHcheckbox_f.png"
