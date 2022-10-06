@@ -157,7 +157,7 @@ local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
 local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
 local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
 local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
-local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
+--local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -172,6 +172,6 @@ return {
         Slider = Slider,
         TextInput = TextInput,
         ProgressBar = ProgressBar,
-        DraggableElement = DraggableElement
+        --DraggableElement = DraggableElement
     },
 }
