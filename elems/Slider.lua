@@ -122,7 +122,7 @@ function Slider:Draw()
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + paddingLeft + border,
         y + elementSize.offsetY + border + paddingTop, "", self.value, self._config.min, self._config.max,
-        self._config.defaultValue, 1, " ", self._config.width)
+        self._config.defaultValue, 1, " ", math.max(25, self._config.width))
     self.value = math.floor(nv)
     if nv ~= old then
         self._config.onChange(self)
