@@ -98,6 +98,7 @@ function Gui:Render()
     self.framenum = GameGetFrameNum()
     self.screenW, self.screenH = GuiGetScreenDimensions(self.guiobj)
     self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
+    self.screenWorldX, self.screenWorldY = GameGetCameraBounds()
     for _ = 1, #self.activeStates do
         local v = self.activeStates[_]
         if v._type == "global" then

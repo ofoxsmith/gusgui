@@ -64,8 +64,7 @@ function Checkbox:Draw(x, y)
         elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
         local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
         if clicked then
-            local posX, posY = EntityGetTransform(EntityGetWithTag("player_unit")[1])
-            GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", posX, posY)
+            GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", self.gui.screenWorldX, self.gui.screenWorldY)
             self.value = not self.value
             self._config.onToggle(self)
         end    
@@ -94,8 +93,7 @@ function Checkbox:Draw(x, y)
         elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
         local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
         if clicked then
-            local posX, posY = EntityGetTransform(EntityGetWithTag("player_unit")[1])
-            GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", posX, posY)
+            GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", self.gui.screenWorldX, self.gui.screenWorldY)
             self.value = not self.value
             self._config.onToggle(self)
         end

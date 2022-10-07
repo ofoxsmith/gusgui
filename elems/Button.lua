@@ -48,8 +48,7 @@ function Button:Draw(x, y)
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self._config.onClick(self)
-        local posX, posY = EntityGetTransform(EntityGetWithTag("player_unit")[1])
-        GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", posX, posY)
+        GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", self.gui.screenWorldX, self.gui.screenWorldY)
     end
     if hovered then
         GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
