@@ -29,11 +29,15 @@ end
 function VLayout:GetManagedXY(elem)
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
-    self.nextX = self.nextX or (self.baseX + self._config.padding.left + (self._config.drawBorder and 3 or 0) + offsets.offsetX)
-    self.nextY = self.nextY or (self.baseY + self._config.padding.top + (self._config.drawBorder and 3 or 0) + offsets.offsetY)
+    self.nextX = self.nextX or (self.baseX + self._config.padding.left + offsets.offsetX)
+    self.nextY = self.nextY or (self.baseY + self._config.padding.top + offsets.offsetY)
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextY = self.nextY + elemsize.height + elem._config.margin.top + elem._config.margin.bottom
+    if elem._config.drawBorder then 
+        x = x + 2
+        y = y + 2
+    end
     return x, y
 end
 

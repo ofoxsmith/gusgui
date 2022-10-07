@@ -21,7 +21,7 @@ function HLayout:GetBaseElementSize()
         local w = math.max(size.width + child._config.margin.left + child._config.margin.right)
         local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom)
         totalW = totalW + w
-        totalH = totalH > size.height and totalH or h
+        totalH = math.max(totalH, h)
     end
     return totalW, totalH
 end
@@ -29,11 +29,15 @@ end
 function HLayout:GetManagedXY(elem)
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
-    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 3 or 0) + offsets.offsetX
-    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 3 or 0) + offsets.offsetY
+    self.nextX = self.nextX or self.baseX + self._config.padding.left + offsets.offsetX
+    self.nextY = self.nextY or self.baseY + self._config.padding.top + offsets.offsetY
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextX = self.nextX + elemsize.width + elem._config.margin.left + elem._config.margin.right
+    if elem._config.drawBorder then 
+        x = x + 2
+        y = y + 2
+    end
     return x, y
 end
 
