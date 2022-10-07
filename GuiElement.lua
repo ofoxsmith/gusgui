@@ -149,13 +149,11 @@ function GuiElement:Render()
     if self._config.hidden then
         return
     end
-    if self._config.drawBorder then 
-        self:RenderBorder(x, y, size.baseW - 2, size.baseH - 2)
-        x = x - 1
-        y = y - 1
+    if self._config.drawBorder then
+        self:RenderBorder(x, y, size.paddingW, size.paddingH)
     end
     if self._config.drawBackground then
-        self:RenderBackground(x + 1, y + 1, size.baseW - 2, size.baseH - 2)
+        self:RenderBackground(x, y, size.paddingW, size.paddingH)
     end
     self:Draw(x, y)
 end
