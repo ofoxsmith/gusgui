@@ -84,10 +84,10 @@ function ImageButton:Draw(x, y)
     elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
-        self._config.onClick(self)
+        self._config.onClick(self, self.gui.state)
     end
     if hovered and self._config.onHover then
-        self._config.onHover(self)
+        self._config.onHover(self, self.gui.state)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self._config.colour then

@@ -57,7 +57,7 @@ function HLayout:Draw(x, y)
     end
     if hovered then
         if self._config.onHover then
-            self._config.onHover(self)
+            self._config.onHover(self, self.gui.state)
         end
         self.useHoverConfigForNextFrame = true
     else

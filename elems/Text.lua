@@ -49,7 +49,7 @@ function Text:Draw(x, y)
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
         if self._config.onHover then
-            self._config.onHover(self)
+            self._config.onHover(self, self.gui.state)
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
         GuiImage(self.gui.guiobj, self.hoverMaskID, x, y, "data/debug/whitebox.png", 0,

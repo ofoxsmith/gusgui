@@ -106,11 +106,11 @@ function Slider:Draw(x, y)
         self._config.defaultValue, 1, " ", math.max(25, self._config.width))
     self.value = math.floor(nv)
     if nv ~= old then
-        self._config.onChange(self)
+        self._config.onChange(self, self.gui.state)
     end
     if hovered then
         if self._config.onHover then
-            self._config.onHover(self)
+            self._config.onHover(self, self.gui.state)
         end
         self.useHoverConfigForNextFrame = true
     else self.useHoverConfigForNextFrame = false end

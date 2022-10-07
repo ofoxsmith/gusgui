@@ -53,7 +53,7 @@ local TextInput = class(GuiElement, function(o, config)
 end)
 
 function TextInput:GetBaseElementSize()
-    return math.max(25, self._config.width), 10
+    return math.max(25, self._config.width), 11
 end
 function TextInput:Draw(x, y)
     self.value = self.value or " "
@@ -67,7 +67,7 @@ function TextInput:Draw(x, y)
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
         if self._config.onHover then
-            self._config.onHover(self)
+            self._config.onHover(self, self.gui.state)
         end
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
@@ -76,7 +76,7 @@ function TextInput:Draw(x, y)
         self._config.maxLength, " 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
     if self.value ~= n then
         self.value = n
-        self.onEdit(self)
+        self._config.onEdit(self, self.gui.state)
     end
     if hovered then self.useHoverConfigForNextFrame = true 
     else self.useHoverConfigForNextFrame = false end

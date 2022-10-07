@@ -47,13 +47,13 @@ function Button:Draw(x, y)
     elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
-        self._config.onClick(self)
+        self._config.onClick(self, self.gui.state)
         GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", self.gui.screenWorldX, self.gui.screenWorldY)
     end
     if hovered then
         GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
         if self._config.onHover then
-            self._config.onHover(self)
+            self._config.onHover(self, self.gui.state)
         end
         GuiImage(self.gui.guiobj, self.maskID, x, y, "data/debug/whitebox.png", 0,
             (elementSize.paddingW) / 20, (elementSize.paddingH) / 20)

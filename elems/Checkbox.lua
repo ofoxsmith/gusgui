@@ -66,14 +66,14 @@ function Checkbox:Draw(x, y)
         if clicked then
             GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", self.gui.screenWorldX, self.gui.screenWorldY)
             self.value = not self.value
-            self._config.onToggle(self)
+            self._config.onToggle(self, self.gui.state)
         end    
         if hovered then
             GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
             GuiImage(self.gui.guiobj, self.hoverMaskID, x, y, "data/debug/whitebox.png", 0,
                 (elementSize.paddingW) / 20, (elementSize.paddingH) / 20)    
             if self._config.onHover then
-                self._config.onHover(self)
+                self._config.onHover(self, self.gui.state)
             end
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z)
@@ -95,11 +95,11 @@ function Checkbox:Draw(x, y)
         if clicked then
             GamePlaySound("data/audio/Desktop/ui.bank", "ui/button_click", self.gui.screenWorldX, self.gui.screenWorldY)
             self.value = not self.value
-            self._config.onToggle(self)
+            self._config.onToggle(self, self.gui.state)
         end
         if hovered then
             if self._config.onHover then
-                self._config.onHover(self)
+                self._config.onHover(self, self.gui.state)
             end
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z)

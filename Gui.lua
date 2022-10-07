@@ -20,6 +20,7 @@ local Gui = class(function(newGUI, state)
     newGUI.cachedValues = {}
     newGUI.state = state
     newGUI._state = {}
+    newGUI.classOverrides = {}
     newGUI.screenW, newGUI.screenH = GuiGetScreenDimensions(newGUI.guiobj)
     newGUI.screenW, newGUI.screenH = math.floor(newGUI.screenW), math.floor(newGUI.screenH)
 end)
@@ -73,6 +74,10 @@ function Gui:GetElementById(id)
     end
     return nil
 end
+
+-- function Gui:ApplyConfigToClass(class, config)
+--     self.classOverrides[class] = config
+-- end
 
 function searchTree(element, id)
     for k = 1, #element.children do
