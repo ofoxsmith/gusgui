@@ -88,7 +88,7 @@ local Slider = class(GuiElement, function(o, config)
 end)
 
 function Slider:GetBaseElementSize()
-    return math.max(25, self._config.width), 8
+    return math.max(25, self._config.width), 8.3
 end
 
 function Slider:Draw(x, y)
@@ -101,7 +101,7 @@ function Slider:Draw(x, y)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
     elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + self._config.padding.left,
+    local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + self._config.padding.left - 2,
         y + elementSize.offsetY + self._config.padding.top, "", self.value, self._config.min, self._config.max,
         self._config.defaultValue, 1, " ", math.max(25, self._config.width))
     self.value = math.floor(nv)

@@ -73,7 +73,7 @@ function TextInput:Draw(x, y)
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     local n = GuiTextInput(self.gui.guiobj, self.inputID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, self.value, self._config.width,
-        self._config.maxLength, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        self._config.maxLength, " 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
     if self.value ~= n then
         self.value = n
         self.onEdit(self)
