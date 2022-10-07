@@ -74,33 +74,14 @@ function ImageButton:GetBaseElementSize()
     return w * self._config.scaleX, h * self._config.scaleY
 end
 
-function ImageButton:Draw()
-    if self._config.hidden then
-        return
-    end
+function ImageButton:Draw(x, y)
     self.imageID = self.imageID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
-    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
-    local paddingLeft = self._config.padding.left
-    local paddingTop = self._config.padding.top
-    local x = self._config.margin.left
-    local y = self._config.margin.top
     local c = self._config.colour
-    local border = (self._config.drawBorder and 1 or 0)
-    if self.parent then
-        x, y = self.parent:GetManagedXY(self)
-    end
-    if border > 0 then
-        self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
-    end
-    if self._config.drawBackground then
-        self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
-    end
-    self:PropagateInteractableBounds(x, y, elementSize.baseW + paddingLeft + self._config.padding.right, elementSize.baseH + paddingTop + self._config.padding.bottom)
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x + border, y + border, elementSize.width - border - border,
-        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x, y, elementSize.paddingW,
+    elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self._config.onClick(self)
@@ -112,8 +93,8 @@ function ImageButton:Draw()
     if self._config.colour then
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
-    GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + paddingLeft + border,
-        y + elementSize.offsetY + paddingTop + border, self._config.path, 1, self._config.scaleX, self._config.scaleY)
+    GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + self._config.padding.left,
+        y + elementSize.offsetY + self._config.padding.top, self._config.path, 1, self._config.scaleX, self._config.scaleY)
     if hovered then self.useHoverConfigForNextFrame = true 
     else self.useHoverConfigForNextFrame = false end
 end

@@ -38,48 +38,30 @@ function Text:GetBaseElementSize()
     return w, h
 end
 
-function Text:Draw()
-    if self._config.hidden then
-        return
-    end
+function Text:Draw(x, y)
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
-    self.z = 1000000 - self:GetDepthInTree() * 10
     local parsedText = self:Interp(self._config.value)
     local elementSize = self:GetElementSize()
-    local paddingLeft = self._config.padding.left
-    local paddingTop = self._config.padding.top
-    local x = self._config.margin.left
-    local y = self._config.margin.top
-    local c = self._config.colour
-    if self.parent then
-        x, y = self.parent:GetManagedXY(self)
-    end
-    local border = (self._config.drawBorder and 1 or 0)
-    if border > 0 then
-        self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
-    end
-    if self._config.drawBackground then
-        self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
-    end
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
-        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
+        elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
         if self._config.onHover then
             self._config.onHover(self)
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-        GuiImage(self.gui.guiobj, self.hoverMaskID, x + border, y + border, "data/debug/whitebox.png", 0,
-            (elementSize.width - border - border) / 20, (elementSize.height - border - border) / 20)
+        GuiImage(self.gui.guiobj, self.hoverMaskID, x, y, "data/debug/whitebox.png", 0,
+            (elementSize.paddingW) / 20, (elementSize.paddingH) / 20)
     end
     if self._config.colour then
+        local c = self._config.colour
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
-    GuiText(self.gui.guiobj, x + elementSize.offsetX + border + paddingLeft,
-        y + elementSize.offsetY + border + paddingTop, parsedText)
+    GuiText(self.gui.guiobj, x + elementSize.offsetX + self._config.padding.left,
+        y + elementSize.offsetY + self._config.padding.top, parsedText)
     if hovered then self.useHoverConfigForNextFrame = true 
     else self.useHoverConfigForNextFrame = false end
 end

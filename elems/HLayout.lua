@@ -27,51 +27,29 @@ function HLayout:GetBaseElementSize()
 end
 
 function HLayout:GetManagedXY(elem)
-    if self.type == "HLayoutForEach" then 
-        self:CreateElements()
-    end 
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
-    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 2 or 0) + offsets.offsetX
-    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 2 or 0) + offsets.offsetY
+    self.nextX = self.nextX or self.baseX + self._config.padding.left + (self._config.drawBorder and 3 or 0) + offsets.offsetX
+    self.nextY = self.nextY or self.baseY + self._config.padding.top + (self._config.drawBorder and 3 or 0) + offsets.offsetY
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextX = self.nextX + elemsize.width + elem._config.margin.left + elem._config.margin.right
     return x, y
 end
 
-function HLayout:Draw()
-    if self.type == "HLayoutForEach" then 
-        self:CreateElements()
-    end 
-    if self._config.hidden then
-        return
-    end
+function HLayout:Draw(x, y)
     self.nextX = nil
     self.nextY = nil
     local elementSize = self:GetElementSize()
-    local border = (self._config.drawBorder and 1 or 0)
-    self.z = 1000000 - self:GetDepthInTree() * 10
-    local x = self._config.margin.left
-    local y = self._config.margin.top
     local size = self:GetElementSize()
-    if self.parent then
-        x, y = self.parent:GetManagedXY(self)
-    end
     self.baseX = x
     self.baseY = y
-    if self._config.drawBorder then
-        self:RenderBorder(x, y, size.baseW, size.baseH)
-    end
-    if self._config.drawBackground then
-        self:RenderBackground(x, y, size.baseW, size.baseH)
-    end
     self.maskID = self.maskID or self.gui.nextID()
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
-        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
+    elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     for i = 1, #self.children do
-        self.children[i]:Draw()
+        self.children[i]:Render()
     end
     if hovered then
         if self._config.onHover then

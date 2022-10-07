@@ -91,37 +91,18 @@ function Slider:GetBaseElementSize()
     return math.max(25, self._config.width), 8
 end
 
-function Slider:Draw()
-    if self._config.hidden then
-        return
-    end
+function Slider:Draw(x, y)
     self.renderID = self.renderID or self.gui.nextID()
     self.maskID = self.maskID or self.gui.nextID()
-    self.z = 1000000 - self:GetDepthInTree() * 10
     local elementSize = self:GetElementSize()
-    local paddingLeft = self._config.padding.left
-    local paddingTop = self._config.padding.top
-    local x = self._config.margin.left
-    local y = self._config.margin.top
     local c = self._config.colour
-    local border = self._config.drawBorder and 1 or 0
-    if self.parent then
-        x, y = self.parent:GetManagedXY(self)
-    end
-    if self._config.drawBorder then
-        self:RenderBorder(x, y, elementSize.baseW, elementSize.baseH)
-    end
-    if self._config.drawBackground then
-        self:RenderBackground(x, y, elementSize.baseW, elementSize.baseH)
-    end
-    self:PropagateInteractableBounds(x, y, elementSize.baseW + paddingLeft + self._config.padding.right, elementSize.baseH + paddingTop + self._config.padding.bottom)
     local old = self.value
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x + border, y + border, elementSize.width - border - border,
-        elementSize.height - border - border, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
+    elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
-    local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + paddingLeft + border,
-        y + elementSize.offsetY + border + paddingTop, "", self.value, self._config.min, self._config.max,
+    local nv = GuiSlider(self.gui.guiobj, self.renderID, x + elementSize.offsetX + self._config.padding.left,
+        y + elementSize.offsetY + self._config.padding.top, "", self.value, self._config.min, self._config.max,
         self._config.defaultValue, 1, " ", math.max(25, self._config.width))
     self.value = math.floor(nv)
     if nv ~= old then
