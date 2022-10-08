@@ -64,12 +64,10 @@ local HLayoutForEach = class(HLayout, function(o, config)
     o.type = "HLayoutForEach"
     o.hasInit = false
     o.allowsChildren = false
+    o.lastUpdate = 0
 end)
 
 function HLayoutForEach:CreateElements()
-    if ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self.hasInit == true then
-        return
-    end
     if self._config.type == "executeNTimes" then
         local elems = {}
         for i=1, self._config.numTimes do
@@ -90,5 +88,7 @@ function HLayoutForEach:CreateElements()
         end
         self.children = elems
     end
+    self.lastUpdate = self.gui.framenum
+    self.hasInit = true
 end
 return HLayoutForEach

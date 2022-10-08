@@ -11,7 +11,9 @@ end)
 
 function HLayout:GetBaseElementSize()
     if self.type == "HLayoutForEach" then 
-        self:CreateElements()
+        if self.lastUpdate == self.gui.framenum then
+        elseif ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self.hasInit == true then
+        else self:CreateElements() end
     end 
     local totalW = 0
     local totalH = 0

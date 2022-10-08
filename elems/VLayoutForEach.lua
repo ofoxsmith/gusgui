@@ -64,12 +64,10 @@ local VLayoutForEach = class(VLayout, function(o, config)
     o.type = "VLayoutForEach"
     o.hasInit = false
     o.allowsChildren = false
+    o.lastUpdate = 0
 end)
 
 function VLayoutForEach:CreateElements()
-    if ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self.hasInit == true then
-        return
-    end
     if self._config.type == "executeNTimes" then
         local elems = {}
         for i=1, self._config.numTimes do
@@ -90,5 +88,7 @@ function VLayoutForEach:CreateElements()
         end
         self.children = elems
     end
+    self.lastUpdate = self.gui.framenum
+    self.hasInit = true
 end
 return VLayoutForEach
