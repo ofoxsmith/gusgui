@@ -133,6 +133,7 @@ function GuiElement:RemoveChild(childID)
             break
         end
     end
+    return self
 end
 
 local _uid_ = 1

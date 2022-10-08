@@ -26,7 +26,7 @@ local Slider = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return true, 1, nil
+                return true, 100, nil
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then

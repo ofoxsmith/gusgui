@@ -8,6 +8,9 @@ local Checkbox = class(GuiElement, function(o, config)
             if o == nil then
                 return false, nil, "GUI: Invalid value for defaultValue on element \"%s\" (defaultValue is required)"
             end
+            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
             if type(o) == "boolean" then
                 return true, nil, nil
             end
@@ -29,6 +32,9 @@ local Checkbox = class(GuiElement, function(o, config)
         validate = function(o)
             if o == nil then
                 return true, "image", nil
+            end
+            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
             end
             if type(o) == "string" and o == "image" or o == "text" then
                 return true, nil, nil
