@@ -28,4 +28,4 @@ dofile_once("mods/YOUR-MOD-ID/PATH-TO-GUSGUI/gusgui.lua").init("mods/YOUR-MOD-ID
 
 ## Documentation
 
-Documentation is on the [Github wiki](https://github.com/ofoxsmith/gusgui/wiki/Main-Page).
+Documentation is on the [Github wiki](https://github.com/ofoxsmith/gusgui/wiki).
