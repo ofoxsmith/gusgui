@@ -117,6 +117,14 @@ function GuiElement:ResolveValue(a, k)
     if type(a) ~= "table" then
         return a
     end
+    if a._type == "add" or a._type == "subtract" or a.type == "multiply" or a.type == "divide" and type(a.value) == "table" then 
+        local op1 = self:ResolveValue(a.value.a, k)
+        local op2 = self:ResolveValue(a.value.b, k)
+        if a._type == "add" then return op1 + op2 end
+        if a._type == "subtract" then return op1 - op2 end
+        if a._type == "multiply" then return op1 * op2 end
+        if a._type == "divide" then return op1 / op2 end
+    end
     if (a._type == "state" or a._type == "global" or a._type == "screenw" or a._type == "screenh") and type(a.value) ==
         "string" then
         if a._type == "global" then

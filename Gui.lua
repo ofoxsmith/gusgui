@@ -217,6 +217,46 @@ function Gui:GlobalValue(s)
     return o
 end
 
+function Gui:StateAdd(a, b) 
+    return {
+        _type = "add",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
+function Gui:StateSubtract(a, b) 
+    return {
+        _type = "subtract",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
+function Gui:StateMultiply(a, b) 
+    return {
+        _type = "multiply",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
+function Gui:StateDivide(a, b) 
+    return {
+        _type = "divide",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
 local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
 local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
 local Image = dofile_once("GUSGUI_PATHelems/Image.lua")
