@@ -52,8 +52,7 @@ end)
 function Checkbox:GetBaseElementSize()
     if self._config.style == "text" then
         local t = "[" .. (self.value and "*" or " ") .. "]"
-        local w, h = GuiGetTextDimensions(self.gui.guiobj, t)
-        return w, h
+        return GuiGetTextDimensions(self.gui.guiobj, t)
     else
         return 9, 9
     end
