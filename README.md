@@ -14,7 +14,10 @@ When cloning your mod's repo from Github, submodules do not automatically instal
 git submodule init
 git submodule update
 ```
-To update gusgui to the latest version, run `git submodule update --remote --merge`. 
+To update gusgui to the latest version, run:
+```console
+git submodule update --remote --merge
+```
 
 At the top of `init.lua`, call the initialisation function:
 ```lua
