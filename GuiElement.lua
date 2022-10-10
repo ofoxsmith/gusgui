@@ -44,21 +44,23 @@ local GuiElement = class(function(Element, config, extended)
     setmetatable(Element._config, {
         __index = function(t, k)
             local value = nil
-            if Element.useHoverConfigForNextFrame then
+            if Element.useHoverConfigForNextFrame == true then
                 value = Element._rawconfig.hover[k]
-                if value.isDF then value = Element._rawconfig[k] end
+                if value == nil or value.isDF == nil or value.value == nil then
+                    value = Element._rawconfig[k]
+                end
             else
                 value = Element._rawconfig[k]
             end
-            if Element.class ~= "" and value.isDF then 
-                for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do 
+            if Element.class ~= "" and value.isDF then
+                for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do
                     value = Element.gui.classOverrides[cls][k]
                 end
             end
             if k == "colour" then
                 if value.value ~= nil then
-                return {Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
-                        Element:ResolveValue(value.value[3], k)}
+                    return {Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
+                            Element:ResolveValue(value.value[3], k)}
                 end
             end
             return Element:ResolveValue(value.value, k)
@@ -76,12 +78,12 @@ local GuiElement = class(function(Element, config, extended)
                 if (Element.validator[_].name == k) then
                     local valid, nv, err, isDF = Element.validator[_].validate(v, Element.validator)
                     if valid and (nv ~= nil) then
-                        Element._rawconfig[v.name] = {
+                        Element._rawconfig[k] = {
                             value = nv,
                             isDF = isDF
                         }
                     elseif valid then
-                        Element._rawconfig[v.name] = {
+                        Element._rawconfig[k] = {
                             value = v,
                             isDF = isDF
                         }
