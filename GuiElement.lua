@@ -63,6 +63,10 @@ local GuiElement = class(function(Element, config, extended)
                             Element:ResolveValue(value.value[3], k)}
                 end
             end
+            if value == nil then
+                local s = "GUSGUI Internal Error: %s was nil on element %s %s %s %s"
+                error(s:format(k, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+            end
             return Element:ResolveValue(value.value, k)
         end,
         __newindex = function(t, k, v)

@@ -70,7 +70,7 @@ local ImageButton = class(GuiElement, function(o, config)
 end)
 
 function ImageButton:GetBaseElementSize()
-    local w, h = GuiGetImageDimensions(self.gui.guiobj, self._config.path)
+    local w, h = GuiGetImageDimensions(self.gui.guiobj, self._config.src)
     return w * self._config.scaleX, h * self._config.scaleY
 end
 
@@ -94,7 +94,7 @@ function ImageButton:Draw(x, y)
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
     GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + self._config.padding.left,
-        y + elementSize.offsetY + self._config.padding.top, self._config.path, 1, self._config.scaleX, self._config.scaleY)
+        y + elementSize.offsetY + self._config.padding.top, self._config.src, 1, self._config.scaleX, self._config.scaleY)
     if hovered then self.useHoverConfigForNextFrame = true 
     else self.useHoverConfigForNextFrame = false end
 end
