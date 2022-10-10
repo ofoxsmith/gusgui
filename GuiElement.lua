@@ -179,7 +179,7 @@ end
 
 function GuiElement:Render()
     local x, y = self._config.margin.left, self._config.margin.top
-    self.z = 1000000 - self:GetDepthInTree() * 10
+    self.z = 100000000 - self:GetDepthInTree() * 10
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
@@ -223,15 +223,15 @@ end
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w + self._config.padding.left + self._config.padding.right,
-        h + self._config.padding.top + self._config.padding.bottom, 1, "GUSGUI_PATHborder.png")
+    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w,
+        h, 1, "GUSGUI_PATHborder.png")
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w + self._config.padding.left + self._config.padding.right,
-        h + self._config.padding.top + self._config.padding.bottom, 1, "GUSGUI_PATHbg.png")
+    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w,
+        h, 1, "GUSGUI_PATHbg.png")
 end
 
 function GuiElement:Remove()
