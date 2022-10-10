@@ -1,4 +1,5 @@
 dofile_once("GUSGUI_PATHclass.lua")
+dofile_once("GUSGUI_PATHGuiElement.lua")
 function getIdCounter()
     local id = 1
     return function()
@@ -60,6 +61,32 @@ function Gui:AddElement(data)
     end
 end
 
+function Gui:RegisterConfigForClass(classname, config)
+    local s = baseValidator
+    function findSchema(n)
+        for i = 1, #s do
+            local v = s[i]
+            if v.name == n then
+                return v
+            end
+        end
+    end
+    local t = {}
+    for k, v in pairs(config) do
+        local f = findSchema(k)
+        if (f.canHover == nil) then
+            local valid, nv, err, isDF = f.validate(v, s)
+            if valid then
+                t[k][v.name] = {
+                    value = nv or v,
+                    isDF = isDF
+                }
+            end
+        end
+    end
+    self.classOverrides[classname] = t
+end
+
 function Gui:GetElementById(id)
     for k = 1, #self.tree do
         local v = self.tree[k]
@@ -75,9 +102,12 @@ function Gui:GetElementById(id)
     return nil
 end
 
--- function Gui:ApplyConfigToClass(class, config)
---     self.classOverrides[class] = config
--- end
+function Gui:GetElementsByClass(className)
+
+end
+
+function searchTreeForClass(element, id)
+end
 
 function searchTree(element, id)
     for k = 1, #element.children do

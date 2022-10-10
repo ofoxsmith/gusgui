@@ -8,7 +8,7 @@ local TextInput = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return true, 50, nil
+                return true, 50, nil, true
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then

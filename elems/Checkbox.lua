@@ -31,7 +31,7 @@ local Checkbox = class(GuiElement, function(o, config)
         name = "style",
         validate = function(o)
             if o == nil then
-                return true, "image", nil
+                return true, "image", nil, true
             end
             if type(o) == "table" and o["_type"] ~= nil and o["value"] then
                 return true, nil, nil

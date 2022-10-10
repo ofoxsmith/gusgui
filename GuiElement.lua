@@ -8,7 +8,7 @@ local GuiElement = class(function(Element, config, extended)
     Element.id = config.id
     Element.uid = GetNextUID()
     config.id = nil;
-    Element.class = config.class
+    Element.class = config.class or ""
     config.class = nil
     Element.name = config.name or nil
     Element.config = {}
@@ -25,11 +25,17 @@ local GuiElement = class(function(Element, config, extended)
     end
     for k = 1, #Element.validator do
         local v = Element.validator[k]
-        local valid, nv, err = v.validate(config[v.name], Element.validator)
+        local valid, nv, err, isDF = v.validate(config[v.name], Element.validator)
         if valid and (nv ~= nil) then
-            Element._rawconfig[v.name] = nv
+            Element._rawconfig[v.name] = {
+                value = nv,
+                isDF = isDF
+            }
         elseif valid then
-            Element._rawconfig[v.name] = config[v.name]
+            Element._rawconfig[v.name] = {
+                value = config[v.name],
+                isDF = isDF
+            }
         elseif err then
             error(err:format(Element.id or "NO ELEMENT ID"), 4)
         end
@@ -38,11 +44,22 @@ local GuiElement = class(function(Element, config, extended)
     setmetatable(Element._config, {
         __index = function(t, k)
             local value = nil
-            if Element.useHoverConfigForNextFrame then 
-                value = Element._rawconfig.hover[k] or Element._rawconfig[k]
-            else value = Element._rawconfig[k] end
-            if k == "colour" and value ~= nil then return {Element:ResolveValue(value[1], k), Element:ResolveValue(value[2], k), Element:ResolveValue(value[3], k)}end
-            return Element:ResolveValue(value, k)
+            if Element.useHoverConfigForNextFrame then
+                value = Element._rawconfig.hover[k]
+                if value.isDF then value = Element._rawconfig[k] end
+            else
+                value = Element._rawconfig[k]
+            end
+            if Element.class ~= "" then 
+                for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do 
+                    value = Element.gui.classOverrides[cls][k]
+                end
+            end
+            if k == "colour" and value ~= nil then
+                return {Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
+                        Element:ResolveValue(value.value[3], k)}
+            end
+            return Element:ResolveValue(value.value, k)
         end,
         __newindex = function(t, k, v)
             error("_config is readonly", 2)
@@ -55,11 +72,17 @@ local GuiElement = class(function(Element, config, extended)
         __newindex = function(t, k, v)
             for _ = 1, #Element.validator do
                 if (Element.validator[_].name == k) then
-                    local valid, nv, err = Element.validator[_].validate(v, Element.validator)
+                    local valid, nv, err, isDF = Element.validator[_].validate(v, Element.validator)
                     if valid and (nv ~= nil) then
-                        Element._rawconfig[k] = nv
+                        Element._rawconfig[v.name] = {
+                            value = nv,
+                            isDF = isDF
+                        }
                     elseif valid then
-                        Element._rawconfig[k] = v
+                        Element._rawconfig[v.name] = {
+                            value = v,
+                            isDF = isDF
+                        }
                     elseif err then
                         error(err:format(Element.id or "NO ELEMENT ID"), 2)
                     end
@@ -86,7 +109,8 @@ function GuiElement:ResolveValue(a, k)
     if type(a) ~= "table" then
         return a
     end
-    if (a._type == "state" or a._type == "global" or a._type == "screenw" or a._type == "screenh") and type(a.value) == "string" then
+    if (a._type == "state" or a._type == "global" or a._type == "screenw" or a._type == "screenh") and type(a.value) ==
+        "string" then
         if a._type == "global" then
             local t = nil
             for _ = 1, #self.validator do
@@ -96,8 +120,11 @@ function GuiElement:ResolveValue(a, k)
             end
             return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
         end
-        if a._type == "screenw" then return self.gui.screenW
-        elseif a._type == "screenh" then return self.gui.screenH end
+        if a._type == "screenw" then
+            return self.gui.screenW
+        elseif a._type == "screenh" then
+            return self.gui.screenH
+        end
         return self.gui:GetState(a.value)
     end
     return a
@@ -139,7 +166,7 @@ end
 local _uid_ = 1
 function GetNextUID()
     _uid_ = _uid_ + 1
-    return _uid_     
+    return _uid_
 end
 
 function GuiElement:Render()
@@ -188,14 +215,15 @@ end
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w + self._config.padding.left + self._config.padding.right, h + self._config.padding.top + self._config.padding.bottom, 1, "GUSGUI_PATHborder.png")
+    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w + self._config.padding.left + self._config.padding.right,
+        h + self._config.padding.top + self._config.padding.bottom, 1, "GUSGUI_PATHborder.png")
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w + self._config.padding.left + self._config.padding.right, h + self._config.padding.top + self._config.padding.bottom, 1,
-        "GUSGUI_PATHbg.png")
+    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w + self._config.padding.left + self._config.padding.right,
+        h + self._config.padding.top + self._config.padding.bottom, 1, "GUSGUI_PATHbg.png")
 end
 
 function GuiElement:Remove()
@@ -203,7 +231,7 @@ function GuiElement:Remove()
 end
 
 function GuiElement:OnEnterTree(parent, isroot, gui)
-    if isroot then 
+    if isroot then
         self.gui = gui
         if self.id then
             if self.gui.ids[self.id] then
@@ -212,11 +240,11 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
             end
             self.gui.ids[self.id] = true
         end
-        for i=1, #self._rawchildren do
+        for i = 1, #self._rawchildren do
             self._rawchildren[i]:OnEnterTree(self)
-        end    
-        return    
-    end 
+        end
+        return
+    end
     self.parent = parent
     self.gui = parent.gui
     if self.id then
@@ -226,7 +254,7 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
         end
         self.gui.ids[self.id] = true
     end
-    for i=1, #self._rawchildren do
+    for i = 1, #self._rawchildren do
         self._rawchildren[i]:OnEnterTree(self)
     end
     self._rawchildren = nil
@@ -252,9 +280,10 @@ function GuiElement:OnExitTree()
     self.gui = nil
 end
 
-
 function GuiElement:PropagateInteractableBounds(x, y, w, h)
-    if not self.parent then return end
+    if not self.parent then
+        return
+    end
     self.parent:PropagateInteractableBounds(x, y, w, h)
 end
 baseValidator = {{
@@ -265,7 +294,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, false, nil
+            return true, false, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
@@ -283,7 +312,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, false, nil
+            return true, false, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
@@ -301,7 +330,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, 0, nil
+            return true, 0, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
@@ -322,7 +351,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, 0, nil
+            return true, 0, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
@@ -343,7 +372,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, 0, nil
+            return true, 0, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
@@ -365,7 +394,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, 0, nil
+            return true, 0, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil
@@ -389,7 +418,7 @@ baseValidator = {{
                 bottom = 0,
                 left = 0,
                 right = 0
-            }, nil
+            }, nil, true
         end
         if t == "number" then
             return true, {
@@ -430,7 +459,7 @@ baseValidator = {{
                 bottom = 0,
                 left = 0,
                 right = 0
-            }, nil
+            }, nil, true
         end
         if t == "number" then
             return true, {
@@ -465,7 +494,7 @@ baseValidator = {{
     name = "colour",
     validate = function(o)
         if o == nil then
-            return true, nil, nil
+            return true, nil, nil, true
         end
         if type(o) == "table" then
             if not (type(o[1]) == "number" or (type(o[1]) == "table" and o[1]["value"] ~= nil and o[1]["_type"] ~= nil) and
@@ -481,7 +510,7 @@ baseValidator = {{
     name = "onHover",
     validate = function(o)
         if o == nil then
-            return true, nil, nil
+            return true, nil, nil, true
         end
         if type(o) == "function" then
             return true, nil, nil
@@ -492,21 +521,26 @@ baseValidator = {{
     name = "hover",
     validate = function(o, s)
         if o == nil then
-            return true, {}, nil
+            return true, {}, nil, true
         end
         function findSchema(n)
-            for i=1, #s do
+            for i = 1, #s do
                 local v = s[i]
-                if v.name == n then return v end 
+                if v.name == n then
+                    return v
+                end
             end
         end
         local t = {}
         for k, v in pairs(o) do
             local f = findSchema(k)
             if (f.canHover == nil) then
-                local valid, nv, err = f.validate(v, s)
+                local valid, nv, err, isDF = f.validate(v, s)
                 if valid then
-                    t[k] = nv or v
+                    t[k][v.name] = {
+                        value = nv or v,
+                        isDF = isDF
+                    }
                 end
             end
         end
@@ -520,7 +554,7 @@ baseValidator = {{
     validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, false, nil
+            return true, false, nil, true
         end
         if t == "table" and o["_type"] ~= nil and o["value"] then
             return true, nil, nil

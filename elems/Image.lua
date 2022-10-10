@@ -9,7 +9,7 @@ local Image = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return true, 1, nil
+                return true, 1, nil, true
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then
@@ -26,7 +26,7 @@ local Image = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return true, 1, nil
+                return true, 1, nil, true
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then
