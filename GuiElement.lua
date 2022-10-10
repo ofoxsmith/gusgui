@@ -179,7 +179,7 @@ end
 
 function GuiElement:Render()
     local x, y = self._config.margin.left, self._config.margin.top
-    self.z = 100000000 - self._config.overrideZ or 100000000 - self:GetDepthInTree() * 10
+    self.z = (self._config.overrideZ ~= nil and (100000000 - self._config.overrideZ) or (100000000 - self:GetDepthInTree() * 10))
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
