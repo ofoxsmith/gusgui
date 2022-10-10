@@ -43,7 +43,7 @@ local ImageButton = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for src on element \"%s\" (src paramater is required)"
+                return false, nil, "GUSGUI: Invalid value for src on element \"%s\" (src paramater is required)"
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then
@@ -57,12 +57,12 @@ local ImageButton = class(GuiElement, function(o, config)
         name = "onClick",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for onClick on element \"%s\" (onClick is required)"
+                return false, nil, "GUSGUI: Invalid value for onClick on element \"%s\" (onClick is required)"
             end
             if type(o) == "function" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for onHover on element \"%s\""
         end
     }})
     o.type = "ImageButton"

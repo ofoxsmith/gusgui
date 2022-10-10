@@ -18,7 +18,7 @@ local Text = class(GuiElement, function(o, config)
         name = "value",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for value on element \"%s\" (value is required)"
+                return false, nil, "GUSGUI: Invalid value for value on element \"%s\" (value is required)"
             end
             if type(o) == "table" and o["_type"] ~= nil and o["value"] then
                 return true, nil, nil
@@ -26,7 +26,7 @@ local Text = class(GuiElement, function(o, config)
             if type(o) == "string" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for value on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for value on element \"%s\""
         end
     }})
     o.type = "Text"

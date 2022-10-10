@@ -55,9 +55,11 @@ local GuiElement = class(function(Element, config, extended)
                     value = Element.gui.classOverrides[cls][k]
                 end
             end
-            if k == "colour" and value ~= nil then
+            if k == "colour" then
+                if value.value ~= nil then
                 return {Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
                         Element:ResolveValue(value.value[3], k)}
+                end
             end
             return Element:ResolveValue(value.value, k)
         end,
@@ -144,7 +146,7 @@ end
 
 function GuiElement:AddChild(child)
     if not self.allowsChildren then
-        error("GUI: " .. self.type .. " cannot have child element")
+        error("GUSGUI: " .. self.type .. " cannot have child element", 2)
     end
     child:OnEnterTree(self, false)
     return child
@@ -236,7 +238,7 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
         if self.id then
             if self.gui.ids[self.id] then
                 self.parent = nil
-                error("GUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
+                error("GUSGUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
             end
             self.gui.ids[self.id] = true
         end
@@ -250,7 +252,7 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
     if self.id then
         if self.gui.ids[self.id] then
             self.parent = nil
-            error("GUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
+            error("GUSGUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
         end
         self.gui.ids[self.id] = true
     end
@@ -302,7 +304,7 @@ baseValidator = {{
         if t == "boolean" then
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for drawBorder on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for drawBorder on element \"%s\""
     end
 }, {
     name = "drawBackground",
@@ -320,7 +322,7 @@ baseValidator = {{
         if t == "boolean" then
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for drawBackground on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for drawBackground on element \"%s\""
     end
 }, {
     name = "overrideWidth",
@@ -337,11 +339,11 @@ baseValidator = {{
         end
         if t == "number" then
             if o <= 0 then
-                return false, nil, "GUI: Invalid value for overrideWidth on element \"%s\" (must be greater than 0)"
+                return false, nil, "GUSGUI: Invalid value for overrideWidth on element \"%s\" (must be greater than 0)"
             end
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for overrideWidth on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for overrideWidth on element \"%s\""
     end
 }, {
     name = "overrideHeight",
@@ -358,11 +360,11 @@ baseValidator = {{
         end
         if t == "number" then
             if o <= 0 then
-                return false, nil, "GUI: Invalid value for overrideHeight on element \"%s\" (must be greater than 0)"
+                return false, nil, "GUSGUI: Invalid value for overrideHeight on element \"%s\" (must be greater than 0)"
             end
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for overrideHeight on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for overrideHeight on element \"%s\""
     end
 }, {
     name = "verticalAlign",
@@ -380,11 +382,11 @@ baseValidator = {{
         if t == "number" then
             if not (0 <= o and o <= 1) then
                 return false, nil,
-                    "GUI: Invalid value for verticalAlign on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
+                    "GUSGUI: Invalid value for verticalAlign on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
             end
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for verticalAlign on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for verticalAlign on element \"%s\""
     end
 }, {
     name = "horizontalAlign",
@@ -402,11 +404,11 @@ baseValidator = {{
         if t == "number" then
             if not (0 <= o and o <= 1) then
                 return false, nil,
-                    "GUI: Invalid value for horizontalAlign on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
+                    "GUSGUI: Invalid value for horizontalAlign on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
             end
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for horizontalAlign on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for horizontalAlign on element \"%s\""
     end
 }, {
     name = "margin",
@@ -442,12 +444,12 @@ baseValidator = {{
                 elseif ty == "number" then
                 elseif ty == "table" and m[v] ~= nil and m[v] ~= nil then
                 else
-                    return false, nil, "GUI: Invalid value for margin " .. v .. " on element \"%s\""
+                    return false, nil, "GUSGUI: Invalid value for margin " .. v .. " on element \"%s\""
                 end
             end
             return true, m, nil;
         end
-        return false, nil, "GUI: Invalid value for margin on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for margin on element \"%s\""
     end
 }, {
     name = "padding",
@@ -483,12 +485,12 @@ baseValidator = {{
                 elseif ty == "number" then
                 elseif ty == "table" and m[v] ~= nil and m[v] ~= nil then
                 else
-                    return false, nil, "GUI: Invalid value for padding " .. v .. " on element \"%s\""
+                    return false, nil, "GUSGUI: Invalid value for padding " .. v .. " on element \"%s\""
                 end
             end
             return true, m, nil;
         end
-        return false, nil, "GUI: Invalid value for padding on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for padding on element \"%s\""
     end
 }, {
     name = "colour",
@@ -500,11 +502,11 @@ baseValidator = {{
             if not (type(o[1]) == "number" or (type(o[1]) == "table" and o[1]["value"] ~= nil and o[1]["_type"] ~= nil) and
                 type(o[2]) == "number" or (type(o[2]) == "table" and o[2]["value"] ~= nil and o[2]["_type"] ~= nil) and
                 type(o[3]) == "number" or (type(o[3]) == "table" and o[3]["value"] ~= nil and o[3]["_type"] ~= nil)) then
-                return false, nil, "GUI: Invalid value for colour on element \"%s\""
+                return false, nil, "GUSGUI: Invalid value for colour on element \"%s\""
             end
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for colour on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for colour on element \"%s\""
     end
 }, {
     name = "onHover",
@@ -515,7 +517,7 @@ baseValidator = {{
         if type(o) == "function" then
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for onHover on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for onHover on element \"%s\""
     end
 }, {
     name = "hover",
@@ -562,7 +564,7 @@ baseValidator = {{
         if t == "boolean" then
             return true, nil, nil
         end
-        return false, nil, "GUI: Invalid value for hidden on element \"%s\""
+        return false, nil, "GUSGUI: Invalid value for hidden on element \"%s\""
     end
 }}
 

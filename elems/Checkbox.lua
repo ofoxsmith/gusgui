@@ -6,7 +6,7 @@ local Checkbox = class(GuiElement, function(o, config)
         name = "defaultValue",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for defaultValue on element \"%s\" (defaultValue is required)"
+                return false, nil, "GUSGUI: Invalid value for defaultValue on element \"%s\" (defaultValue is required)"
             end
             if type(o) == "table" and o["_type"] ~= nil and o["value"] then
                 return true, nil, nil
@@ -14,18 +14,18 @@ local Checkbox = class(GuiElement, function(o, config)
             if type(o) == "boolean" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for defaultValue on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for defaultValue on element \"%s\""
         end
     }, {
         name = "onToggle",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for onToggle on element \"%s\" (onToggle is required)"
+                return false, nil, "GUSGUI: Invalid value for onToggle on element \"%s\" (onToggle is required)"
             end
             if type(o) == "function" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for onToggle on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for onToggle on element \"%s\""
         end
     }, {
         name = "style",
@@ -39,7 +39,7 @@ local Checkbox = class(GuiElement, function(o, config)
             if type(o) == "string" and o == "image" or o == "text" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for style on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for style on element \"%s\""
         end
     }})
     o._rawconfig.hover = o._rawconfig.hover or {}

@@ -40,12 +40,12 @@ local TextInput = class(GuiElement, function(o, config)
         canHover = false,
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
+                return false, nil, "GUSGUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
             end
             if type(o) == "function" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for onEdit on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for onEdit on element \"%s\""
         end
     }})
     o.type = "TextInput"

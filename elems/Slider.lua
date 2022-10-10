@@ -74,12 +74,12 @@ local Slider = class(GuiElement, function(o, config)
         name = "onChange",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for onChange on element \"%s\" (onChange is required)"
+                return false, nil, "GUSGUI: Invalid value for onChange on element \"%s\" (onChange is required)"
             end
             if type(o) == "function" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for onChange on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for onChange on element \"%s\""
         end
     }})
     o.type = "Slider"

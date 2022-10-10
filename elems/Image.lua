@@ -43,7 +43,7 @@ local Image = class(GuiElement, function(o, config)
         end,
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for src on element \"%s\" (src paramater is required)"
+                return false, nil, "GUSGUI: Invalid value for src on element \"%s\" (src paramater is required)"
             end
             local t = type(o)
             if t == "table" and o["_type"] ~= nil and o["value"] then

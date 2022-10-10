@@ -6,18 +6,18 @@ local Button = class(GuiElement, function(o, config)
         name = "onClick",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for onClick on element \"%s\" (onClick is required)"
+                return false, nil, "GUSGUI: Invalid value for onClick on element \"%s\" (onClick is required)"
             end
             if type(o) == "function" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for onClick on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for onClick on element \"%s\""
         end
     }, {
         name = "text",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for text on element \"%s\" (text is required)"
+                return false, nil, "GUSGUI: Invalid value for text on element \"%s\" (text is required)"
             end
             if type(o) == "table" and o["_type"] ~= nil and o["value"] then
                 return true, nil, nil
@@ -25,7 +25,7 @@ local Button = class(GuiElement, function(o, config)
             if type(o) == "string" then
                 return true, nil, nil
             end
-            return false, nil, "GUI: Invalid value for text on element \"%s\""
+            return false, nil, "GUSGUI: Invalid value for text on element \"%s\""
         end
     }})
     o.allowsChildren = false

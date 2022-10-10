@@ -40,7 +40,7 @@ function Gui:GetState(s)
     item = init and self._state[init] or self._state
     for k, v in pairs(a) do
         if (type(item) ~= "table") then
-            error("GUI: Cannot access property of non-table value in state", 2)
+            error("GUSGUI: Cannot access property of non-table value in state", 2)
         end
         item = item[v];
     end
@@ -51,7 +51,7 @@ function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~=
             "VLayoutForEach" then
-            error("GUI: Gui root nodes must be a Layout element.", 2)
+            error("GUSGUI: Gui root nodes must be a Layout element.", 2)
         end
         table.insert(self.tree, data)
         data:OnEnterTree(nil, true, self)

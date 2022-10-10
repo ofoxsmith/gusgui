@@ -6,23 +6,23 @@ local VLayoutForEach = class(VLayout, function(o, config)
         name = "type",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for type on element \"%s\" (type paramater is required)"
+                return false, nil, "GUSGUI: Invalid value for type on element \"%s\" (type paramater is required)"
             elseif type(o) == "string" and (o == "foreach" or o == "executeNTimes") then
                 return true, nil, nil
             else
                 return false, nil,
-                    "GUI: Invalid value for type on element \"%s\" (type paramater must be \"foreach\" or \"executeNTimes\")"
+                    "GUSGUI: Invalid value for type on element \"%s\" (type paramater must be \"foreach\" or \"executeNTimes\")"
             end
         end
     }, {
         name = "func",
         validate = function(o)
             if o == nil then
-                return false, nil, "GUI: Invalid value for func on element \"%s\" (func paramater is required)"
+                return false, nil, "GUSGUI: Invalid value for func on element \"%s\" (func paramater is required)"
             elseif type(o) == "function" then
                 return true, nil, nil
             else
-                return false, nil, "GUI: Invalid value for func on element \"%s\""
+                return false, nil, "GUSGUI: Invalid value for func on element \"%s\""
             end
         end
     }, {
@@ -33,7 +33,7 @@ local VLayoutForEach = class(VLayout, function(o, config)
             elseif type(o) == "string" then
                 return true, nil, nil
             else
-                return false, nil, "GUI: Invalid value for stateVal on element \"%s\""
+                return false, nil, "GUSGUI: Invalid value for stateVal on element \"%s\""
             end
         end
     }, {
@@ -44,7 +44,7 @@ local VLayoutForEach = class(VLayout, function(o, config)
             elseif type(o) == "number" and (o >= 1 or o == -1) then
                 return true, nil, nil
             else
-                return false, nil, "GUI: Invalid value for calculateEveryNFrames on element \"%s\""
+                return false, nil, "GUSGUI: Invalid value for calculateEveryNFrames on element \"%s\""
             end
         end
 
@@ -56,7 +56,7 @@ local VLayoutForEach = class(VLayout, function(o, config)
             elseif type(o) == "number" and o >= 1 then
                 return true, nil, nil
             else
-                return false, nil, "GUI: Invalid value for numTimes on element \"%s\""
+                return false, nil, "GUSGUI: Invalid value for numTimes on element \"%s\""
             end
         end
 
