@@ -179,7 +179,7 @@ end
 
 function GuiElement:Render()
     local x, y = self._config.margin.left, self._config.margin.top
-    self.z = 100000000 - self:GetDepthInTree() * 10
+    self.z = 100000000 - self._config.overrideZ or 100000000 - self:GetDepthInTree() * 10
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
@@ -571,6 +571,24 @@ baseValidator = {{
             return true, nil, nil
         end
         return false, nil, "GUSGUI: Invalid value for hidden on element \"%s\""
+    end
+}, {
+    name = "overrideZ",
+    fromString = function(s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        local t = type(o)
+        if o == nil then
+            return true, nil, nil, true
+        end
+        if t == "table" and o["_type"] ~= nil and o["value"] then
+            return true, nil, nil
+        end
+        if t == "number" then
+            return true, nil, nil
+        end
+        return false, nil, "GUSGUI: Invalid value for overrideZ on element \"%s\""
     end
 }}
 
