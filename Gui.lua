@@ -257,6 +257,46 @@ function Gui:StateDivide(a, b)
     }
 end
 
+function Gui:ParentWidth(type) 
+    if type == "inner" then return {
+        _type = "p_innerW",
+        value = ""
+    } elseif type == "total" then return {
+        _type = "p_totalW",
+        value = ""
+    } end
+end
+
+function Gui:ParentHeight(type) 
+    if type == "inner" then return {
+        _type = "p_innerH",
+        value = ""
+    } elseif type == "total" then return {
+        _type = "p_totalH",
+        value = ""
+    } end
+end
+
+function Gui:ElemWidth(type) 
+    if type == "inner" then return {
+        _type = "innerW",
+        value = ""
+    } elseif type == "total" then return {
+        _type = "totalW",
+        value = ""
+    } end
+end
+
+function Gui:ElemHeight(type) 
+    if type == "inner" then return {
+        _type = "innerH",
+        value = ""
+    } elseif type == "total" then return {
+        _type = "totalH",
+        value = ""
+    } end
+end
+
 local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
 local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
 local Image = dofile_once("GUSGUI_PATHelems/Image.lua")

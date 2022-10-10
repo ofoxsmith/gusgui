@@ -117,6 +117,38 @@ function GuiElement:ResolveValue(a, k)
     if type(a) ~= "table" then
         return a
     end
+    if a._type == "p_innerW" then
+        local x = self.parent:GetElementSize()
+        return x.baseW
+    end 
+    if a._type == "p_totalW" then
+        local x = self.parent:GetElementSize()
+        return x.width
+    end 
+    if a._type == "p_innerH" then
+        local x = self.parent:GetElementSize()
+        return x.baseH
+    end 
+    if a._type == "p_totalH" then
+        local x = self.parent:GetElementSize()
+        return x.height
+    end
+    if a._type == "innerW" then
+        local x = self:GetElementSize()
+        return x.baseW
+    end 
+    if a._type == "totalW" then
+        local x = self:GetElementSize()
+        return x.width
+    end 
+    if a._type == "innerH" then
+        local x = self:GetElementSize()
+        return x.baseH
+    end 
+    if a._type == "totalH" then
+        local x = self:GetElementSize()
+        return x.height
+    end
     if a._type == "add" or a._type == "subtract" or a.type == "multiply" or a.type == "divide" and type(a.value) == "table" then 
         local op1 = self:ResolveValue(a.value.a, k)
         local op2 = self:ResolveValue(a.value.b, k)
