@@ -9,7 +9,8 @@ Add gusgui as a submodule, where INSTALL_PATH is where gusgui should be installe
 ```console
 git submodule add https://github.com/ofoxsmith/gusgui.git INSTALL_PATH
 ```
-When cloning your mod's repo from Github, submodules do not automatically install. To install them, run: ```console
+When cloning your mod's repo from Github, submodules do not automatically install. To install them, run: 
+```console
 git submodule init
 git submodule update
 ```
