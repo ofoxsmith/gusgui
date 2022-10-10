@@ -9,7 +9,15 @@ Add gusgui as a submodule, where INSTALL_PATH is where gusgui should be installe
 ```console
 git submodule add https://github.com/ofoxsmith/gusgui.git INSTALL_PATH
 ```
-To install/update gusgui to the latest version, run `git submodule update`
+When cloning your mod's repo from Github, submodules do not automatically install. To install them, run: 
+```console
+git submodule init
+git submodule update
+```
+To update gusgui to the latest version, run:
+```console
+git submodule update --remote --merge
+```
 
 At the top of `init.lua`, call the initialisation function:
 ```lua
