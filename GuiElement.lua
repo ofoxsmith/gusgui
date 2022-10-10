@@ -50,7 +50,7 @@ local GuiElement = class(function(Element, config, extended)
             else
                 value = Element._rawconfig[k]
             end
-            if Element.class ~= "" then 
+            if Element.class ~= "" and value.isDF then 
                 for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do 
                     value = Element.gui.classOverrides[cls][k]
                 end
