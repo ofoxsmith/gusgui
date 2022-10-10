@@ -103,11 +103,21 @@ function Gui:GetElementById(id)
 end
 
 function Gui:GetElementsByClass(className)
-
+    local elems = {}
+    function searchTreeForClass(elem)
+        if elem.class:find(className) then
+            table.insert(elems, elem)
+        end
+        for i=1, elem.children do 
+            searchTreeForClass(elem.children[i])
+        end
+    end
+    for i=1, #self.tree do local root = self.tree[i] 
+        searchTreeForClass(root) 
+    end
+    return elems
 end
 
-function searchTreeForClass(element, id)
-end
 
 function searchTree(element, id)
     for k = 1, #element.children do
