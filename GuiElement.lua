@@ -54,8 +54,17 @@ local GuiElement = class(function(Element, config, extended)
             end
             if Element.class ~= "" and value.isDF then
                 for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do
-                    value = Element.gui.classOverrides[cls][k]
+                    if Element.gui.classOverrides[cls] then value = Element.gui.classOverrides[cls][k] end
                 end
+                if value == nil then value = Element._rawconfig[k] end
+            end
+            if k == "margin" or k == "padding" then 
+                    return {
+                        top = Element:ResolveValue(value.value.top, k),
+                        left = Element:ResolveValue(value.value.left, k),
+                        bottom = Element:ResolveValue(value.value.bottom, k),
+                        right = Element:ResolveValue(value.value.right, k),
+                    }
             end
             if k == "colour" then
                 if value.value ~= nil then
@@ -65,7 +74,7 @@ local GuiElement = class(function(Element, config, extended)
             end
             if value == nil then
                 local s = "GUSGUI Internal Error: %s was nil on element %s %s %s %s"
-                error(s:format(k, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                error(s:format(k, Element.uid, Element.type, Element.id or "NO ID", Element.class), 2)
             end
             return Element:ResolveValue(value.value, k)
         end,
@@ -149,7 +158,7 @@ function GuiElement:ResolveValue(a, k)
         local x = self:GetElementSize()
         return x.height
     end
-    if a._type == "add" or a._type == "subtract" or a.type == "multiply" or a.type == "divide" and type(a.value) == "table" then 
+    if a._type == "add" or a._type == "subtract" or a._type == "multiply" or a._type == "divide"  then
         local op1 = self:ResolveValue(a.value.a, k)
         local op2 = self:ResolveValue(a.value.b, k)
         if a._type == "add" then return op1 + op2 end
@@ -157,23 +166,23 @@ function GuiElement:ResolveValue(a, k)
         if a._type == "multiply" then return op1 * op2 end
         if a._type == "divide" then return op1 / op2 end
     end
-    if (a._type == "state" or a._type == "global" or a._type == "screenw" or a._type == "screenh") and type(a.value) ==
-        "string" then
-        if a._type == "global" then
-            local t = nil
-            for _ = 1, #self.validator do
-                if (self.validator[_].name == k) then
-                    t = self.validator[_].fromString
-                end
-            end
-            return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
-        end
-        if a._type == "screenw" then
-            return self.gui.screenW
-        elseif a._type == "screenh" then
-            return self.gui.screenH
-        end
+    if a._type == "state" then
         return self.gui:GetState(a.value)
+    end
+    if a._type == "screenw" then
+        return self.gui.screenW
+    end 
+    if a._type == "screenh" then
+        return self.gui.screenH
+    end
+    if a._type == "global" then
+        local t = nil
+        for _ = 1, #self.validator do
+            if (self.validator[_].name == k) then
+                t = self.validator[_].fromString
+            end
+        end
+        return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
     end
     return a
 end
@@ -218,7 +227,7 @@ function GetNextUID()
 end
 
 function GuiElement:Render()
-    self._config.onBeforeRender(self, self.gui.state)
+    if self._config.onBeforeRender then self._config.onBeforeRender(self, self.gui.state) end
     local x, y = self._config.margin.left, self._config.margin.top
     self.z = (self._config.overrideZ ~= nil and (100000000 - self._config.overrideZ) or (100000000 - self:GetDepthInTree() * 10))
     local size = self:GetElementSize()
@@ -235,7 +244,7 @@ function GuiElement:Render()
         self:RenderBackground(x, y, size.paddingW, size.paddingH)
     end
     self:Draw(x, y)
-    self._config.onAfterRender(self, self.gui.state)
+    if self._config.onAfterRender then self._config.onAfterRender(self, self.gui.state) end
 end
 
 function GuiElement:GetElementSize()
@@ -637,7 +646,7 @@ baseValidator = {{
         validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, false, nil, true
+            return true, nil, nil, true
         end
         if t == "function" then
             return true, nil, nil
@@ -649,7 +658,7 @@ baseValidator = {{
         validate = function(o)
         local t = type(o)
         if o == nil then
-            return true, false, nil, true
+            return true, nil, nil, true
         end
         if t == "function" then
             return true, nil, nil

@@ -74,14 +74,12 @@ function Gui:RegisterConfigForClass(classname, config)
     local t = {}
     for k, v in pairs(config) do
         local f = findSchema(k)
-        if (f.canHover == nil) then
-            local valid, nv, err, isDF = f.validate(v, s)
-            if valid then
-                t[k][v.name] = {
-                    value = nv or v,
-                    isDF = isDF
-                }
-            end
+        local valid, nv, err, isDF = f.validate(v, s)
+        if valid then
+            t[k] = {
+                value = nv or v,
+                isDF = isDF
+            }
         end
     end
     self.classOverrides[classname] = t
@@ -108,16 +106,16 @@ function Gui:GetElementsByClass(className)
         if elem.class:find(className) then
             table.insert(elems, elem)
         end
-        for i=1, elem.children do 
+        for i = 1, elem.children do
             searchTreeForClass(elem.children[i])
         end
     end
-    for i=1, #self.tree do local root = self.tree[i] 
-        searchTreeForClass(root) 
+    for i = 1, #self.tree do
+        local root = self.tree[i]
+        searchTreeForClass(root)
     end
     return elems
 end
-
 
 function searchTree(element, id)
     for k = 1, #element.children do
@@ -217,7 +215,7 @@ function Gui:GlobalValue(s)
     return o
 end
 
-function Gui:StateAdd(a, b) 
+function Gui:StateAdd(a, b)
     return {
         _type = "add",
         value = {
@@ -227,7 +225,7 @@ function Gui:StateAdd(a, b)
     }
 end
 
-function Gui:StateSubtract(a, b) 
+function Gui:StateSubtract(a, b)
     return {
         _type = "subtract",
         value = {
@@ -237,7 +235,7 @@ function Gui:StateSubtract(a, b)
     }
 end
 
-function Gui:StateMultiply(a, b) 
+function Gui:StateMultiply(a, b)
     return {
         _type = "multiply",
         value = {
@@ -247,7 +245,7 @@ function Gui:StateMultiply(a, b)
     }
 end
 
-function Gui:StateDivide(a, b) 
+function Gui:StateDivide(a, b)
     return {
         _type = "divide",
         value = {
@@ -257,44 +255,60 @@ function Gui:StateDivide(a, b)
     }
 end
 
-function Gui:ParentWidth(type) 
-    if type == "inner" then return {
-        _type = "p_innerW",
-        value = ""
-    } elseif type == "total" then return {
-        _type = "p_totalW",
-        value = ""
-    } end
+function Gui:ParentWidth(type)
+    if type == "inner" then
+        return {
+            _type = "p_innerW",
+            value = ""
+        }
+    elseif type == "total" then
+        return {
+            _type = "p_totalW",
+            value = ""
+        }
+    end
 end
 
-function Gui:ParentHeight(type) 
-    if type == "inner" then return {
-        _type = "p_innerH",
-        value = ""
-    } elseif type == "total" then return {
-        _type = "p_totalH",
-        value = ""
-    } end
+function Gui:ParentHeight(type)
+    if type == "inner" then
+        return {
+            _type = "p_innerH",
+            value = ""
+        }
+    elseif type == "total" then
+        return {
+            _type = "p_totalH",
+            value = ""
+        }
+    end
 end
 
-function Gui:ElemWidth(type) 
-    if type == "inner" then return {
-        _type = "innerW",
-        value = ""
-    } elseif type == "total" then return {
-        _type = "totalW",
-        value = ""
-    } end
+function Gui:ElemWidth(type)
+    if type == "inner" then
+        return {
+            _type = "innerW",
+            value = ""
+        }
+    elseif type == "total" then
+        return {
+            _type = "totalW",
+            value = ""
+        }
+    end
 end
 
-function Gui:ElemHeight(type) 
-    if type == "inner" then return {
-        _type = "innerH",
-        value = ""
-    } elseif type == "total" then return {
-        _type = "totalH",
-        value = ""
-    } end
+function Gui:ElemHeight(type)
+    if type == "inner" then
+        return {
+            _type = "innerH",
+            value = ""
+        }
+    elseif type == "total" then
+        return {
+            _type = "totalH",
+            value = ""
+        }
+    end
 end
 
 local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
