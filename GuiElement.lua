@@ -643,6 +643,18 @@ baseValidator = {{
         end
         return false, nil, "GUSGUI: Invalid value for onBeforeRender on element \"%s\""
     end
+}, {
+    name = "onAfterRender",
+        validate = function(o)
+        local t = type(o)
+        if o == nil then
+            return true, false, nil, true
+        end
+        if t == "function" then
+            return true, nil, nil
+        end
+        return false, nil, "GUSGUI: Invalid value for onAfterRender on element \"%s\""
+    end
 }}
 
 return GuiElement
