@@ -218,6 +218,7 @@ function GetNextUID()
 end
 
 function GuiElement:Render()
+    self._config.onBeforeRender(self, self.gui.state)
     local x, y = self._config.margin.left, self._config.margin.top
     self.z = (self._config.overrideZ ~= nil and (100000000 - self._config.overrideZ) or (100000000 - self:GetDepthInTree() * 10))
     local size = self:GetElementSize()
@@ -629,6 +630,18 @@ baseValidator = {{
             return true, nil, nil
         end
         return false, nil, "GUSGUI: Invalid value for overrideZ on element \"%s\""
+    end
+}, {
+    name = "onBeforeRender",
+        validate = function(o)
+        local t = type(o)
+        if o == nil then
+            return true, false, nil, true
+        end
+        if t == "function" then
+            return true, nil, nil
+        end
+        return false, nil, "GUSGUI: Invalid value for onBeforeRender on element \"%s\""
     end
 }}
 
