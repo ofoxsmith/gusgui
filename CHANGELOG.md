@@ -4,9 +4,11 @@
 - Button element.
 - Checkbox element.
 - Layout elements.
+- LayoutForEach elements.
 - Image element.
 - ImageButton element.
-- Progressbar element.
+- ProgressBar element.
+- Checkbox element.
 - Slider element.
 - Text element.
 - TextInput element.
