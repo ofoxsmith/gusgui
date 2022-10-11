@@ -235,6 +235,7 @@ function GuiElement:Render()
         self:RenderBackground(x, y, size.paddingW, size.paddingH)
     end
     self:Draw(x, y)
+    self._config.onAfterRender(self, self.gui.state)
 end
 
 function GuiElement:GetElementSize()
