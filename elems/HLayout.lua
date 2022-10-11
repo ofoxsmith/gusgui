@@ -2,7 +2,29 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local HLayout = class(GuiElement, function(o, config)
-    GuiElement.init(o, config)
+    GuiElement.init(o, config, {{
+        name = "alignChildren",
+        fromString = function(s)
+            return tonumber(s)
+        end,
+        validate = function(o)
+            local t = type(o)
+            if o == nil then
+                return true, 0, nil, true
+            end
+            if t == "table" and o["_type"] ~= nil and o["value"] then
+                return true, nil, nil
+            end
+            if t == "number" then
+                if not (0 <= o and o <= 1) then
+                    return false, nil,
+                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
+                end
+                return true, nil, nil
+            end
+            return false, nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
+        end
+    }})
     o.type = "HLayout"
     o.allowsChildren = true
     o.childrenResolved = false
@@ -40,6 +62,7 @@ function HLayout:GetManagedXY(elem)
         x = x + 2
         y = y + 2
     end
+    y = y + ((offsets.baseH - elemsize.height) * self._config.alignChildren)
     return x, y
 end
 
