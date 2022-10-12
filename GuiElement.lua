@@ -113,12 +113,11 @@ local GuiElement = class(function(Element, config, extended)
 end)
 
 function GuiElement:Interp(s)
-    if (type(s) ~= "string") then
-        return error("bad argument #1 to Interp (string expected, got " .. type(s) .. ")", 2)
-    end
     return (s:gsub('($%b{})', function(w)
-        w = string.sub(w, 3, -2)
-        return self.gui:GetState(w)
+        w = w:sub(3, -2)
+        local v = self.gui:GetState(w)
+        if (type(v) ~= "string") then error("GUSGUI: Attempted to interpolate state value " .. w .. " into string, but " .. w .. " was a " .. type(v)) end
+        return v
     end))
 end
 
