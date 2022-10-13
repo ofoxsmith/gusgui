@@ -104,15 +104,18 @@ function GuiElement:ApplyConfig(k, v, configobj)
                 isDF = false
             }
         end
+        return
     end
     if v == nil and validator.required == true then
         local s = "GUSGUI: Invalid value for %s on element \"%s\" (%s is required)"
         error(s:format(k, self.id or "NO ELEMENT ID", k))
+        return
     elseif v == nil then
         configobj[k] = {
             value = validator.default,
             isDF = true
         }
+        return
     end
     local newValue, err = validator.validate(v)
     if type(err) == "string" then
@@ -495,8 +498,7 @@ baseValidator = {
                 left = o,
                 right = o
             }
-        end
-        if t == "table" then
+        elseif t == "table" then
             local m = {
                 top = o["top"],
                 bottom = o["bottom"],
@@ -514,8 +516,9 @@ baseValidator = {
                 end
             end
             return m;
-        end
+        else
         return nil, "GUSGUI: Invalid value for padding on element \"%s\""
+        end
     end
 }, colour = {
     allowsState = true,
