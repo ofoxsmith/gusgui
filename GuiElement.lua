@@ -95,7 +95,7 @@ end
 
 function GuiElement:ApplyConfig(k, v, configobj)
     configobj = configobj or self._rawconfig
-    local validator = self.validator[k] or baseValidator[k]
+    local validator = self.extendedValidator[k] or baseValidator[k]
     local t = type(v)
     if validator.allowsState == true then
         if t == "table" and v["_type"] ~= nil and v["value"] then
@@ -125,7 +125,7 @@ function GuiElement:ApplyConfig(k, v, configobj)
 end
 
 function GuiElement:ResolveValue(a, k)
-    if type(a) ~= "table" then
+    if type(a) ~= "table" or a._type == nil or a.value == nil then
         return a
     end
     if a._type == "p_innerW" then
