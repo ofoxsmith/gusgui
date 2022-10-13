@@ -57,7 +57,7 @@ function ProgressBar:Draw(x, y)
     self.barID = self.barID or self.gui.nextID()
     local elementSize = self:GetElementSize()
     local value = self._config.value
-    if value > 100 or value < 0 then 
+    if value < 0 or value > 100 then 
         local s = 'GUI: Error while drawing ProgressBar "%s" - value %s was not between 0 and 100'
         return error(s:format(self.id or "NO ELEMENT ID", tostring(value)))
     end
