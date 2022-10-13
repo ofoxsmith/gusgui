@@ -182,7 +182,7 @@ function GuiElement:ResolveValue(a, k)
                 t = self.validator[_].fromString
             end
         end
-        return t and t(self.gui.cachedValues[a.id]) or self.gui.cachedValues[a.id]
+        return t and t(GlobalsGetValue(a.value)) or GlobalsGetValue(a.value)
     end
     return a
 end

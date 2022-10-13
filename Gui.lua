@@ -12,13 +12,11 @@ local Gui = class(function(newGUI, state)
     data = data or {}
     state = state or {}
     newGUI.ids = {}
-    newGUI.activeStates = {}
     newGUI.nextID = getIdCounter()
     newGUI.stateID = getIdCounter()
     newGUI.guiobj = GuiCreate()
     newGUI.tree = {}
     newGUI.cachedData = {}
-    newGUI.cachedValues = {}
     newGUI.state = state
     newGUI._state = {}
     newGUI.classOverrides = {}
@@ -142,12 +140,6 @@ function Gui:Render()
     self.screenW, self.screenH = GuiGetScreenDimensions(self.guiobj)
     self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
     self.screenWorldX, self.screenWorldY = GameGetCameraBounds()
-    for _ = 1, #self.activeStates do
-        local v = self.activeStates[_]
-        if v._type == "global" then
-            self.cachedValues[v.id] = GlobalsGetValue(v.value)
-        end
-    end
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
@@ -205,13 +197,10 @@ function Gui:ScreenHeight()
 end
 
 function Gui:GlobalValue(s)
-    local i = self.stateID()
     local o = {
         _type = "global",
         value = s,
-        id = i
     }
-    table.insert(self.activeStates, o)
     return o
 end
 
