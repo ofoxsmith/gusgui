@@ -60,27 +60,34 @@ function Gui:AddElement(data)
 end
 
 function Gui:RegisterConfigForClass(classname, config)
-    local s = baseValidator
-    function findSchema(n)
-        for i = 1, #s do
-            local v = s[i]
-            if v.name == n then
-                return v
+    local configobj = {}
+    for k, v in pairs(config) do
+        local validator = self.validator[k] or baseValidator[k]
+        local t = type(v)
+        if validator.allowsState == true then
+            if t == "table" and v["_type"] ~= nil and v["value"] then
+                configobj[k] = {
+                    value = v,
+                    isDF = false
+                }
             end
         end
-    end
-    local t = {}
-    for k, v in pairs(config) do
-        local f = findSchema(k)
-        local valid, nv, err, isDF = f.validate(v, s)
-        if valid then
-            t[k] = {
-                value = nv or v,
-                isDF = isDF
+        if v == nil then
+            configobj[k] = {
+                value = validator.default,
+                isDF = true
             }
         end
+        local newValue, err = validator.validate(v)
+        if type(err) == "string" then
+            error(err:format(classname .. " CLASS CONFIG"))
+        end
+        configobj[k] = {
+            value = newValue,
+            isDF = false
+        }
     end
-    self.classOverrides[classname] = t
+    self.classOverrides[classname] = configobj
 end
 
 function Gui:GetElementById(id)
