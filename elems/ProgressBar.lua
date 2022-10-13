@@ -80,8 +80,8 @@ function ProgressBar:Draw(x, y)
     local elementSize = self:GetElementSize()
     local value = self._config.value
     if value > 100 or value < 0 then 
-        local s = 'GUI: Error while drawing ProgressBar "%s" - value must be between 0 and 100'
-        return error(s:format(self.id or "NO ELEMENT ID"))
+        local s = 'GUI: Error while drawing ProgressBar "%s" - value %s was not between 0 and 100'
+        return error(s:format(self.id or "NO ELEMENT ID", tostring(value)))
     end
     GuiImageNinePiece(self.gui.guiobj, self.barID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, self._config.width * (value * 0.01),
