@@ -74,7 +74,7 @@ local GuiElement = class(function(Element, config, extended)
             return Element._rawconfig[k]
         end,
         __newindex = function(t, k, v)
-            self:ApplyConfig(k, v)
+            Element:ApplyConfig(k, v)
         end
     })
     Element.children = {}
