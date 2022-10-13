@@ -2,27 +2,22 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local VLayout = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "alignChildren",
+    GuiElement.init(o, config, {alignChildren = {
+        allowsState = true,
+        default = 0,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
             local t = type(o)
-            if o == nil then
-                return true, 0, nil, true
-            end
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
             if t == "number" then
                 if not (0 <= o and o <= 1) then
-                    return false, nil,
-                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
+                    return nil,
+                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
                 end
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
+            return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
         end
     }})
     o.type = "VLayout"

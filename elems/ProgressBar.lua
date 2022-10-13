@@ -2,68 +2,46 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local ProgressBar = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "width",
+    GuiElement.init(o, config, {width = {
+        default = 50,
+        required = false,
+        validate = function(o)
+            if type(o) == "number" then
+                return o
+            end
+        end
+    }, height = {
+        allowsState = true,
+        required = false,
+        default = 10,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 50, nil, true
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "height",
+    }, value = {
+        default = 100,
+        required = true,
+        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 10, nil
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "value",
-        fromString = function(s)
-            return tonumber(s)
-        end,
+    }, barColour = {
+        default = "green",
+        required = false,
+        allowsState = true,
         validate = function(o)
-            if o == nil then
-                return true, 100, nil
+            if type(o) == "string" and o == "green" or o == "blue" or o == "yellow" or o == "white" then
+                return o
             end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
-            end
-        end
-    }, {
-        name = "barColour",
-        validate = function(o)
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "string" and o == "green" or o == "blue" or o == "yellow" or o == "white" then
-                return true, nil, nil
-            end
-            return true, "green", nil
         end
     }})
     o.type = "ProgressBar"

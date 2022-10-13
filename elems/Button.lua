@@ -2,32 +2,28 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local Button = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "onClick",
-        validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for onClick on element \"%s\" (onClick is required)"
+    GuiElement.init(o, config, {
+        onClick = {
+            required = true,
+            allowsState = false,
+            validate = function(o)
+                if type(o) == "function" then
+                    return o
+                end
+                return nil, "GUSGUI: Invalid value for onClick on element \"%s\""
             end
-            if type(o) == "function" then
-                return true, nil, nil
+        },
+        text = {
+            allowsState = true,
+            required = true,
+            validate = function(o)
+                if type(o) == "string" then
+                    return o
+                end
+                return nil, "GUSGUI: Invalid value for text on element \"%s\""
             end
-            return false, nil, "GUSGUI: Invalid value for onClick on element \"%s\""
-        end
-    }, {
-        name = "text",
-        validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for text on element \"%s\" (text is required)"
-            end
-            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if type(o) == "string" then
-                return true, nil, nil
-            end
-            return false, nil, "GUSGUI: Invalid value for text on element \"%s\""
-        end
-    }})
+        }
+    })
     o.allowsChildren = false
     o.type = "Button"
 end)
@@ -43,8 +39,8 @@ function Button:Draw(x, y)
     local elementSize = self:GetElementSize()
     local c = self._config.colour
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
-    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x, y, elementSize.paddingW,
-    elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.buttonID, x, y, elementSize.paddingW, elementSize.paddingH, 0,
+        "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if clicked then
         self._config.onClick(self, self.gui.state)
@@ -55,8 +51,8 @@ function Button:Draw(x, y)
         if self._config.onHover then
             self._config.onHover(self, self.gui.state)
         end
-        GuiImage(self.gui.guiobj, self.maskID, x, y, "data/debug/whitebox.png", 0,
-            (elementSize.paddingW) / 20, (elementSize.paddingH) / 20)
+        GuiImage(self.gui.guiobj, self.maskID, x, y, "data/debug/whitebox.png", 0, (elementSize.paddingW) / 20,
+            (elementSize.paddingH) / 20)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
     if self._config.colour then

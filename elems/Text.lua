@@ -14,19 +14,14 @@ local function splitString(s, delimiter)
 end
 
 local Text = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "value",
+    GuiElement.init(o, config, {value = {
+        required = true,
+        allowsState = true,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for value on element \"%s\" (value is required)"
-            end
-            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
             if type(o) == "string" then
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for value on element \"%s\""
+            return nil, "GUSGUI: Invalid value for value on element \"%s\""
         end
     }})
     o.type = "Text"

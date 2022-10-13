@@ -2,84 +2,58 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local Slider = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "min",
+    GuiElement.init(o, config, {min = {
+        allowsState = true,
+        default = 0,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 1, nil, true
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "max",
+    }, max = {
+        default = 100,
+        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 100, nil
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "width",
+    }, width = {
+        default = 25,
+        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 25, nil
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "defaultValue",
+    }, defaultValue = {
+        default = 1,
+        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 1, nil
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "onChange",
+    }, onChange = {
+        required = true,
+        allowsState = false,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for onChange on element \"%s\" (onChange is required)"
-            end
             if type(o) == "function" then
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for onChange on element \"%s\""
+            return nil, "GUSGUI: Invalid value for onChange on element \"%s\""
         end
     }})
     o.type = "Slider"

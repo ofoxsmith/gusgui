@@ -2,61 +2,58 @@ local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local HLayoutForEach = class(HLayout, function(o, config)
-    HLayout.init(o, config, {{
-        name = "type",
+    HLayout.init(o, config, {type = {
+        required = true,
+        allowsState = false,
         validate = function(o)
             if o == nil then
-                return false, nil, "GUSGUI: Invalid value for type on element \"%s\" (type paramater is required)"
+                return nil, "GUSGUI: Invalid value for type on element \"%s\" (type paramater is required)"
             elseif type(o) == "string" and (o == "foreach" or o == "executeNTimes") then
-                return true, nil, nil
+                return o
             else
-                return false, nil,
+                return nil,
                     "GUSGUI: Invalid value for type on element \"%s\" (type paramater must be \"foreach\" or \"executeNTimes\")"
             end
         end
-    }, {
-        name = "func",
+    }, func = {
+        required = true,
+        allowsState = false,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for func on element \"%s\" (func paramater is required)"
-            elseif type(o) == "function" then
-                return true, nil, nil
+            if type(o) == "function" then
+                return o
             else
-                return false, nil, "GUSGUI: Invalid value for func on element \"%s\""
+                return nil, "GUSGUI: Invalid value for func on element \"%s\""
             end
         end
-    }, {
-        name = "stateVal",
+    }, stateVal = {
+        required = false,
+        allowsState = false,
         validate = function(o)
-            if config.type == "num" then
-                return true, nil, nil
-            elseif type(o) == "string" then
-                return true, nil, nil
+            if type(o) == "string" then
+                return o
             else
-                return false, nil, "GUSGUI: Invalid value for stateVal on element \"%s\""
+                return nil, "GUSGUI: Invalid value for stateVal on element \"%s\""
             end
         end
-    }, {
-        name = "calculateEveryNFrames",
+    }, calculateEveryNFrames = {
+        default = 1,
+        allowsState = false,
         validate = function(o)
-            if o == nil then
-                return true, 1, nil
-            elseif type(o) == "number" and (o >= 1 or o == -1) then
-                return true, nil, nil
+            if type(o) == "number" and (o >= 1 or o == -1) then
+                return o
             else
-                return false, nil, "GUSGUI: Invalid value for calculateEveryNFrames on element \"%s\""
+                return nil, "GUSGUI: Invalid value for calculateEveryNFrames on element \"%s\""
             end
         end
 
-    }, {
-        name = "numTimes",
+    }, numTimes = {
+        required = false,
+        allowsState = false,
         validate = function(o)
-            if config.type == "foreach" then
-                return true, nil, nil
-            elseif type(o) == "number" and o >= 1 then
-                return true, nil, nil
+            if type(o) == "number" and o >= 1 then
+                return o
             else
-                return false, nil, "GUSGUI: Invalid value for numTimes on element \"%s\""
+                return nil, "GUSGUI: Invalid value for numTimes on element \"%s\""
             end
         end
 

@@ -2,29 +2,26 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local HLayout = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "alignChildren",
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            local t = type(o)
-            if o == nil then
-                return true, 0, nil, true
-            end
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                if not (0 <= o and o <= 1) then
-                    return false, nil,
-                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value did not match 0 ≤ value ≤ 1)"
+    GuiElement.init(o, config, {
+        alignChildren = {
+            allowsState = true,
+            default = 0,
+            fromString = function(s)
+                return tonumber(s)
+            end,
+            validate = function(o)
+                local t = type(o)
+                if t == "number" then
+                    if not (0 <= o and o <= 1) then
+                        return nil,
+                            "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
+                    end
+                    return o
                 end
-                return true, nil, nil
+                return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
             end
-            return false, nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
-        end
-    }})
+        }
+    })
     o.type = "HLayout"
     o.allowsChildren = true
     o.childrenResolved = false
@@ -32,11 +29,13 @@ local HLayout = class(GuiElement, function(o, config)
 end)
 
 function HLayout:GetBaseElementSize()
-    if self.type == "HLayoutForEach" then 
+    if self.type == "HLayoutForEach" then
         if self.lastUpdate == self.gui.framenum then
         elseif ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self.hasInit == true then
-        else self:CreateElements() end
-    end 
+        else
+            self:CreateElements()
+        end
+    end
     local totalW = 0
     local totalH = 0
     for i = 1, #self.children do
@@ -58,7 +57,7 @@ function HLayout:GetManagedXY(elem)
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextX = self.nextX + elemsize.width + elem._config.margin.left + elem._config.margin.right
-    if elem._config.drawBorder then 
+    if elem._config.drawBorder then
         x = x + 2
         y = y + 2
     end
@@ -74,8 +73,8 @@ function HLayout:Draw(x, y)
     self.baseX = x
     self.baseY = y
     self.maskID = self.maskID or self.gui.nextID()
-    GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
-    elementSize.paddingH, 0, "data/ui_gfx/decorations/9piece0_gray.png")
+    GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW, elementSize.paddingH, 0,
+        "data/ui_gfx/decorations/9piece0_gray.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     for i = 1, #self.children do
         self.children[i]:Render()

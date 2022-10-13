@@ -2,67 +2,45 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local ImageButton = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "scaleX",
+    GuiElement.init(o, config, {scaleX = {
+        required = false,
+        default = 1,
+        allowsState = false,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 1, nil, true
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "scaleY",
+    }, scaleY = {
+        required = false,
+        default = 1,
+        allowsState = false,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 1, nil
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "src",
-        fromString = function(s)
-            return s
-        end,
+    }, src = {
+        required = true,
+        allowsState = false,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for src on element \"%s\" (src paramater is required)"
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "string" then
-                return true, nil, nil
+            if type(o) == "string" then
+                return o
             end
         end
-    }, {
-        name = "onClick",
+    }, onClick = {
+        required = true,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for onClick on element \"%s\" (onClick is required)"
-            end
             if type(o) == "function" then
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for onHover on element \"%s\""
+            return nil, "GUSGUI: Invalid value for onHover on element \"%s\""
         end
     }})
     o.type = "ImageButton"

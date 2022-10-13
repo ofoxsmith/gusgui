@@ -2,40 +2,28 @@ local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 
 local Checkbox = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "defaultValue",
+    GuiElement.init(o, config, {defaultValue = {
+        required = true,
+        allowsState = true,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for defaultValue on element \"%s\" (defaultValue is required)"
-            end
-            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
             if type(o) == "boolean" then
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for defaultValue on element \"%s\""
+            return nil, "GUSGUI: Invalid value for defaultValue on element \"%s\""
         end
-    }, {
-        name = "onToggle",
+    }, onToggle = {
+        required = true,
+        allowsState = false,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for onToggle on element \"%s\" (onToggle is required)"
-            end
             if type(o) == "function" then
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for onToggle on element \"%s\""
+            return nil, "GUSGUI: Invalid value for onToggle on element \"%s\""
         end
-    }, {
-        name = "style",
+    }, style = {
+        default = "image",
+        allowsState = true,
         validate = function(o)
-            if o == nil then
-                return true, "image", nil, true
-            end
-            if type(o) == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
             if type(o) == "string" and o == "image" or o == "text" then
                 return true, nil, nil
             end

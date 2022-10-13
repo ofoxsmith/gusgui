@@ -45,6 +45,10 @@ local GuiElement = class(function(Element, config, extended)
                     value = Element._rawconfig[k]
                 end
             end
+            if value == nil then
+                local s = "GUSGUI Internal Error: %s was nil on element %s %s %s %s"
+                error(s:format(k, Element.uid, Element.type, Element.id or "NO ID", Element.class), 2)
+            end
             if k == "margin" or k == "padding" then
                 return {
                     top = Element:ResolveValue(value.value.top, k),
@@ -58,10 +62,6 @@ local GuiElement = class(function(Element, config, extended)
                     return {Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
                             Element:ResolveValue(value.value[3], k)}
                 end
-            end
-            if value == nil then
-                local s = "GUSGUI Internal Error: %s was nil on element %s %s %s %s"
-                error(s:format(k, Element.uid, Element.type, Element.id or "NO ID", Element.class), 2)
             end
             return Element:ResolveValue(value.value, k)
         end,
@@ -103,8 +103,8 @@ function GuiElement:ApplyConfig(k, v, configobj)
                 value = v,
                 isDF = false
             }
+            return
         end
-        return
     end
     if v == nil and validator.required == true then
         local s = "GUSGUI: Invalid value for %s on element \"%s\" (%s is required)"
@@ -292,7 +292,7 @@ end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
-    GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
+    GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w, h, 1, "GUSGUI_PATHbg.png")
 end
 
@@ -359,7 +359,7 @@ end
 
 baseValidator = {
     drawBorder = {
-    default = true,
+    default = false,
     allowsState = true,
     fromString = function(s)
         return s == "true"
@@ -371,7 +371,7 @@ baseValidator = {
         return nil, "GUSGUI: Invalid value for drawBorder on element \"%s\""
     end
 }, drawBackground = {
-    default = true,
+    default = false,
     allowsState = true,
     fromString = function(s)
         return s == "true"

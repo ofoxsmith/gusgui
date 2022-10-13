@@ -1,51 +1,37 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 local TextInput = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {{
-        name = "maxLength",
+    GuiElement.init(o, config, {maxLength = {
+        default = 50,
+        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 50, nil, true
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "width",
+    }, width = {
+        default = 25,
+        allowsState = true,
         fromString = function(o)
             return tonumber(o)
         end,
         validate = function(o)
-            if o == nil then
-                return true, 25, nil
-            end
-            local t = type(o)
-            if t == "table" and o["_type"] ~= nil and o["value"] then
-                return true, nil, nil
-            end
-            if t == "number" then
-                return true, nil, nil
+            if type(o) == "number" then
+                return o
             end
         end
-    }, {
-        name = "onEdit",
+    }, onEdit = {
+        required = true,
+        allowsState = false,
         canHover = false,
         validate = function(o)
-            if o == nil then
-                return false, nil, "GUSGUI: Invalid value for TextInput element \"%s\" (onEdit paramater is required)"
-            end
             if type(o) == "function" then
-                return true, nil, nil
+                return o
             end
-            return false, nil, "GUSGUI: Invalid value for onEdit on element \"%s\""
+            return nil, "GUSGUI: Invalid value for onEdit on element \"%s\""
         end
     }})
     o.type = "TextInput"
