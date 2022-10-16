@@ -350,13 +350,6 @@ function GuiElement:OnExitTree()
     self.gui = nil
 end
 
-function GuiElement:PropagateInteractableBounds(x, y, w, h)
-    if not self.parent then
-        return
-    end
-    self.parent:PropagateInteractableBounds(x, y, w, h)
-end
-
 baseValidator = {
     drawBorder = {
     default = false,

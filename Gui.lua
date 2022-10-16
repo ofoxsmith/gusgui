@@ -20,6 +20,7 @@ local Gui = class(function(newGUI, state)
     newGUI.state = state
     newGUI._state = {}
     newGUI.classOverrides = {}
+    newGUI.ezm = dofile_once("GUSGUI_PATHEZMouse.lua")
     newGUI.screenW, newGUI.screenH = GuiGetScreenDimensions(newGUI.guiobj)
     newGUI.screenW, newGUI.screenH = math.floor(newGUI.screenW), math.floor(newGUI.screenH)
 end)
@@ -148,6 +149,7 @@ function Gui:Render()
     self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
     self.screenWorldX, self.screenWorldY = GameGetCameraBounds()
     GuiStartFrame(self.guiobj)
+    self.ezm.Update(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
         v:Render(self.guiobj)
@@ -319,7 +321,7 @@ local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
 local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
 local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
 local Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua")
--- local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
+local DraggableElement = dofile_once("GUSGUI_PATHelems/DraggableElement.lua")
 return {
     Create = CreateGUI,
     Elements = {
@@ -334,7 +336,7 @@ return {
         Slider = Slider,
         TextInput = TextInput,
         ProgressBar = ProgressBar,
-        Checkbox = Checkbox
-        -- DraggableElement = DraggableElement
+        Checkbox = Checkbox,
+        DraggableElement = DraggableElement
     }
 }
