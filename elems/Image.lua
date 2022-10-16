@@ -28,7 +28,7 @@ local Image = class(GuiElement, function(o, config)
         end
     }, src = {
         required = true,
-        allowsState = false,
+        allowsState = true,
         validate = function(o)
             if type(o) == "string" then
                 return o
