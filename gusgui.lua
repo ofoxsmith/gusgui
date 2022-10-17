@@ -2,10 +2,11 @@ return {
     init = function(path)
         path = path:gsub("/$", "") .. "/"
         local files = {
-            "elems/Button.lua",
             "class.lua",
             "Gui.lua",
             "GuiElement.lua",
+            "EZMouse.lua",
+            "elems/Button.lua",
             "elems/Text.lua",
             "elems/Image.lua",
             "elems/ImageButton.lua",

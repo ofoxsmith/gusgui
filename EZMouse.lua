@@ -719,10 +719,6 @@ function Widget:__call(props)
     end
 
     table.insert(widget_instances, instance)
-    table.sort(widget_instances, function(a, b)
-        return a.z < b.z
-    end)
-
     return instance
 end
 

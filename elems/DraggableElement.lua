@@ -4,6 +4,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 local DraggableElement = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {dragLayer = {
         allowsState = false,
+        required = false,
         default = 0,
         fromString = function(s)
             return tonumber(s)
@@ -51,9 +52,9 @@ function DraggableElement:Draw()
             draggable = true,
     
         })    
-        self.ezmWidget:AddEventListener("drag", function(_, event)
-            self.currentX = event.dx
-            self.currentY = event.dy
+        self.ezmWidget:AddEventListener("drag_end", function(_, event)
+            self.currentX = _.x
+            self.currentY = _.y
         end)          
     end
     if self.setPos then 
@@ -68,7 +69,7 @@ function DraggableElement:Draw()
     self.ezmWidget.height = size.height
     self.currentX = self.currentX or x
     self.currentY = self.currentY or y
-    self.children[1]:Draw()
+    self.children[1]:Render()
 end
 
 function DraggableElement:Lock()
