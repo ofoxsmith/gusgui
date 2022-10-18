@@ -64,7 +64,7 @@ function ProgressBar:Draw(x, y)
     GuiImageNinePiece(self.gui.guiobj, self.barID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, self._config.width * (value * 0.01),
         math.max(2, self._config.height), 1, "GUSGUI_PATHpbar_" .. self._config.barColour .. ".png")
-    GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)
+    GuiZSetForNextWidget(self.gui.guiobj, self.z + 2)
     GuiImageNinePiece(self.gui.guiobj, self.sbgID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, math.max(15, self._config.width),
         math.max(2, self._config.height), 1, "GUSGUI_PATHpbarbg.png")
