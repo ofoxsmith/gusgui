@@ -43,6 +43,15 @@ local ProgressBar = class(GuiElement, function(o, config)
                 return o
             end
         end
+    }, customBarColourPath = {
+        default = nil,
+        required = false,
+        allowsState = true,
+        validate = function(o)
+            if type(o) == "string" then
+                return o
+            end
+        end
     }})
     o.type = "ProgressBar"
     o.allowsChildren = false
@@ -56,6 +65,12 @@ function ProgressBar:Draw(x, y)
     self.sbgID = self.sbgID or self.gui.nextID()
     self.barID = self.barID or self.gui.nextID()
     local elementSize = self:GetElementSize()
+    local barPath
+    if self._config.customBarColourPath ~= nil then
+        barPath = self._config.customBarColourPath
+    else 
+        barPath = "GUSGUI_PATHpbar_" .. self._config.barColour .. ".png"
+    end
     local value = self._config.value
     if value < 0 or value > 100 then 
         local s = 'GUI: Error while drawing ProgressBar "%s" - value %s was not between 0 and 100'
@@ -63,7 +78,7 @@ function ProgressBar:Draw(x, y)
     end
     GuiImageNinePiece(self.gui.guiobj, self.barID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, self._config.width * (value * 0.01),
-        math.max(2, self._config.height), 1, "GUSGUI_PATHpbar_" .. self._config.barColour .. ".png")
+        math.max(2, self._config.height), 1, barPath)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 2)
     GuiImageNinePiece(self.gui.guiobj, self.sbgID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, math.max(15, self._config.width),
