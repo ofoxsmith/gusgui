@@ -259,6 +259,9 @@ function GuiElement:Render()
         self._config.onBeforeRender(self, self.gui.state)
     end
     local x, y = self._config.margin.left, self._config.margin.top
+    if self.parent == nil then
+        x, y = self.gui:GetRootElemXY(self)
+    end
     self.z = (self._config.overrideZ ~= nil and (1000000 - self._config.overrideZ) or
                  (1000000 - self:GetDepthInTree() * 10))
     local size = self:GetElementSize()
@@ -280,6 +283,16 @@ function GuiElement:Render()
     end
 end
 
+--- @class elemSize
+--- @field baseW number
+--- @field baseH number
+--- @field width number
+--- @field height number
+--- @field paddingW number
+--- @field paddingH number
+--- @field offsetX number
+--- @field offsetY number
+--- @return elemSize
 function GuiElement:GetElementSize()
     local iW, iH = self:GetBaseElementSize()
     local baseW = math.max(self._config.overrideWidth, iW)

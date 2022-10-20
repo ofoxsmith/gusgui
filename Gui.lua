@@ -7,6 +7,7 @@ local function getIdCounter()
         return id
     end
 end
+
 --- @class Gui
 --- @field classOverrides table
 --- @field guiobj any
@@ -133,6 +134,7 @@ function Gui:GetElementsByClass(className)
             searchTreeForClass(elem.children[i])
         end
     end
+
     for i = 1, #self.tree do
         local root = self.tree[i]
         searchTreeForClass(root)
@@ -157,6 +159,26 @@ function Gui:Render()
     end
 end
 
+--- @param elem GuiElement
+--- @return number x, number y
+function Gui:GetRootElemXY(elem)
+    local x, y = 0, 0
+    local elemSize = elem:GetElementSize()
+    if elem._config.margin.right ~= 0 then 
+        x = (self.screenW - elemSize.width) - elem._config.margin.right
+    end
+    if elem._config.margin.left ~= 0 then
+        x = elem._config.margin.left
+    end
+    if elem._config.margin.top ~= 0 then 
+        y = elem._config.margin.top
+    end
+    if elem._config.margin.bottom ~= 0 then
+        y = (self.screenH - elemSize.height) - elem._config.margin.bottom
+    end
+    return x, y
+end
+
 function Gui:Destroy()
     self.destroyed = true
     self.tree = nil
@@ -165,7 +187,6 @@ function Gui:Destroy()
     GuiDestroy(self.guiobj)
     return
 end
-
 
 function Gui:GetMouseData()
     local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]
