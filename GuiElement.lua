@@ -5,6 +5,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 -- and a Draw method, which draws the element using the Gui API
 --- @class GuiElement
 --- @field init function
+--- @field is_a function
 --- @field _config table
 --- @field _rawconfig table
 --- @field Draw function
@@ -19,6 +20,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field bgID number
 --- @field parent GuiElement|nil
 --- @field borderID number
+--- @field maskID number
 --- @field children GuiElement[]
 --- @field z number
 local GuiElement = class(function(Element, config, extended)

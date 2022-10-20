@@ -2,6 +2,8 @@
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 --- @class ProgressBar: GuiElement
+--- @field barID number
+--- @field sbgID number
 local ProgressBar = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {width = {
         default = 50,

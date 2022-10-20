@@ -2,6 +2,7 @@
 local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
 dofile_once("GUSGUI_PATHclass.lua")
 --- @class HLayoutForEach: HLayout
+--- @field lastUpdate number|nil
 local HLayoutForEach = class(HLayout, function(o, config)
     HLayout.init(o, config, {type = {
         required = true,

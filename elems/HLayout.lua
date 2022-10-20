@@ -5,6 +5,9 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field lastUpdate number
 --- @field hasInit boolean
 --- @field CreateElements function|nil
+--- @field baseX number
+--- @field baseY number
+--- @field maskID number
 local HLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         alignChildren = {
