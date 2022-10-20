@@ -10,6 +10,8 @@ end
 --- @class Gui
 --- @field classOverrides table
 --- @field guiobj any
+--- @field state table
+--- @field tree GuiElement[]
 local Gui = class(function(newGUI, state)
     state = state or {}
     newGUI.ids = {}
@@ -151,7 +153,7 @@ function Gui:Render()
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
-        v:Render(self.guiobj)
+        v:Render()
     end
 end
 

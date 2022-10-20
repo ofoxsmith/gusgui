@@ -4,18 +4,22 @@ dofile_once("GUSGUI_PATHclass.lua")
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
 -- and a Draw method, which draws the element using the Gui API
 --- @class GuiElement
---- @field init any
+--- @field init function
 --- @field _config table
 --- @field _rawconfig table
---- @field Draw any
+--- @field Draw function
 --- @field type string
 --- @field id string
 --- @field uid number|nil
 --- @field extendedValidator table
 --- @field allowsChildren boolean|nil
---- @field GetBaseElementSize any
+--- @field GetBaseElementSize function
 --- @field gui table|nil
---- @field children table
+--- @field _rawchildren GuiElement[]
+--- @field bgID number
+--- @field parent GuiElement|nil
+--- @field borderID number
+--- @field children GuiElement[]
 --- @field z number
 local GuiElement = class(function(Element, config, extended)
     extended = extended or {}
