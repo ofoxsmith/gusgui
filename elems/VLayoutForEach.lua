@@ -1,6 +1,7 @@
+--- @module "VLayout"
 local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
+--- @class VLayoutForEach: VLayout
 local VLayoutForEach = class(VLayout, function(o, config)
     VLayout.init(o, config, {type = {
         required = true,
@@ -73,7 +74,7 @@ function VLayoutForEach:CreateElements()
         self.children = elems
     else
         local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
+        local data = (self.gui:GetState(self._config.stateVal))
         for i = 1, #data do
             local c = self._config.func(data[i])
             c.gui = self.gui

@@ -1,6 +1,10 @@
+--- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
+--- @class HLayout: GuiElement
+--- @field lastUpdate number
+--- @field hasInit boolean
+--- @field CreateElements function|nil
 local HLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         alignChildren = {

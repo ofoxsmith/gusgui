@@ -1,6 +1,7 @@
+--- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
+--- @class Checkbox: GuiElement
 local Checkbox = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {defaultValue = {
         required = true,
@@ -63,8 +64,8 @@ function Checkbox:Draw(x, y)
         end    
         if hovered then
             GuiZSetForNextWidget(self.gui.guiobj, self.z + 3)
-            GuiImage(self.gui.guiobj, self.hoverMaskID, x, y, "data/debug/whitebox.png", 0,
-                (elementSize.paddingW) / 20, (elementSize.paddingH) / 20)    
+            GuiImage(self.gui.guiobj, self.imageID, x, y, "data/debug/whitebox.png", 0,
+                (elementSize.paddingW) / 20, (elementSize.paddingH) / 20)
             if self._config.onHover then
                 self._config.onHover(self, self.gui.state)
             end

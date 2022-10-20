@@ -1,6 +1,7 @@
+--- @module "HLayout"
 local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
+--- @class HLayoutForEach: HLayout
 local HLayoutForEach = class(HLayout, function(o, config)
     HLayout.init(o, config, {type = {
         required = true,
@@ -76,7 +77,7 @@ function HLayoutForEach:CreateElements()
         self.children = elems
     else
         local elems = {}
-        local data = (self.gui:GetState(self.stateVal))
+        local data = (self.gui:GetState(self._config.stateVal))
         for i = 1, #data do
             local c = self._config.func(data[i])
             c.gui = self.gui

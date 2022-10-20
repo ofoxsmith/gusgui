@@ -1,6 +1,7 @@
+--- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
+--- @class Button: GuiElement
 local Button = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         onClick = {

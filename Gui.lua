@@ -1,15 +1,16 @@
 dofile_once("GUSGUI_PATHclass.lua")
 dofile_once("GUSGUI_PATHGuiElement.lua")
-function getIdCounter()
+local function getIdCounter()
     local id = 1
     return function()
         id = id + 1
         return id
     end
 end
-
+--- @class Gui
+--- @field classOverrides table
+--- @field guiobj any
 local Gui = class(function(newGUI, state)
-    data = data or {}
     state = state or {}
     newGUI.ids = {}
     newGUI.nextID = getIdCounter()
@@ -62,7 +63,7 @@ end
 function Gui:RegisterConfigForClass(classname, config)
     local configobj = {}
     for k, v in pairs(config) do
-        local validator = baseValidator[k]
+        local validator = BaseValidator[k]
         local t = type(v)
         if validator.allowsState == true then
             if t == "table" and v["_type"] ~= nil and v["value"] then
@@ -90,6 +91,21 @@ function Gui:RegisterConfigForClass(classname, config)
     self.classOverrides[classname] = configobj
 end
 
+local function searchTree(element, id)
+    for k = 1, #element.children do
+        local v = element.children[k]
+        if id and v.id == id then
+            return v
+        else
+            local search = searchTree(v, id)
+            if search ~= nil then
+                return search
+            end
+        end
+    end
+    return nil
+end
+
 function Gui:GetElementById(id)
     for k = 1, #self.tree do
         local v = self.tree[k]
@@ -107,7 +123,7 @@ end
 
 function Gui:GetElementsByClass(className)
     local elems = {}
-    function searchTreeForClass(elem)
+    local function searchTreeForClass(elem)
         if elem.class:find(className) then
             table.insert(elems, elem)
         end
@@ -120,21 +136,6 @@ function Gui:GetElementsByClass(className)
         searchTreeForClass(root)
     end
     return elems
-end
-
-function searchTree(element, id)
-    for k = 1, #element.children do
-        local v = element.children[k]
-        if id and v.id == id then
-            return v
-        else
-            local search = searchTree(v, id)
-            if search ~= nil then
-                return search
-            end
-        end
-    end
-    return nil
 end
 
 function Gui:Render()
@@ -162,6 +163,7 @@ function Gui:Destroy()
     GuiDestroy(self.guiobj)
     return
 end
+
 
 function Gui:GetMouseData()
     local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]

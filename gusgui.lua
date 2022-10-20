@@ -1,4 +1,6 @@
 return {
+    --- @param path string
+    --- @return nil
     init = function(path)
         path = path:gsub("/$", "") .. "/"
         local files = {
