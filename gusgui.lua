@@ -1,7 +1,9 @@
 return {
-    --- @param path string
-    --- @return nil
-    init = function(path)
+    init =
+    --- ### Initializes GusGui, and sets up file paths.
+    --- ***
+    --- @param path string The file path where `gusgui/` is located, within the mods folder. Example path would be `mods/modname/gusgui`
+    function(path)
         path = path:gsub("/$", "") .. "/"
         local files = {
             "class.lua",
@@ -18,10 +20,10 @@ return {
             "elems/Slider.lua",
             "elems/TextInput.lua",
             "elems/ProgressBar.lua",
-            "elems/Checkbox.lua"
---            "elems/DraggableElement.lua"
+            "elems/Checkbox.lua",
+            --"elems/DraggableElement.lua"
         }
-        for i, v in ipairs(files) do 
+        for i, v in ipairs(files) do
             local m = ModTextFileGetContent(path .. v)
             m = m:gsub("GUSGUI_PATH", path)
             ModTextFileSetContent(path .. v, m)

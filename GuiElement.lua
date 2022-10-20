@@ -1,22 +1,12 @@
 dofile_once("GUSGUI_PATHclass.lua")
--- Gui element parent class that is inherited by all elements
--- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
--- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
--- and a Draw method, which draws the element using the Gui API
+--- @module "gusgui/class.lua"
+
 --- @class GuiElement
---- @field init any
---- @field _config table
---- @field _rawconfig table
---- @field Draw any
---- @field type string
---- @field id string
---- @field uid number|nil
---- @field extendedValidator table
---- @field allowsChildren boolean|nil
---- @field GetBaseElementSize any
---- @field gui table|nil
---- @field children table
---- @field z number
+--- ### Gui element parent class that is inherited by all elements
+--- ***
+--- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
+--- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
+--- and a Draw method, which draws the element using the Gui API
 local GuiElement = class(function(Element, config, extended)
     extended = extended or {}
     Element.id = config.id

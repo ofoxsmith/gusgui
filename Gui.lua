@@ -1,12 +1,16 @@
 dofile_once("GUSGUI_PATHclass.lua")
 dofile_once("GUSGUI_PATHGuiElement.lua")
-local function getIdCounter()
+--- @module "gusgui/GuiElement.lua"
+--- @module "gusgui/class.lua"
+
+function getIdCounter()
     local id = 1
     return function()
         id = id + 1
         return id
     end
 end
+
 --- @class Gui
 --- @field classOverrides table
 --- @field guiobj any
@@ -131,6 +135,7 @@ function Gui:GetElementsByClass(className)
             searchTreeForClass(elem.children[i])
         end
     end
+
     for i = 1, #self.tree do
         local root = self.tree[i]
         searchTreeForClass(root)
@@ -163,7 +168,6 @@ function Gui:Destroy()
     GuiDestroy(self.guiobj)
     return
 end
-
 
 function Gui:GetMouseData()
     local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]
