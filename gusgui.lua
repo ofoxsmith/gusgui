@@ -19,7 +19,6 @@ return {
             "elems/TextInput.lua",
             "elems/ProgressBar.lua",
             "elems/Checkbox.lua",
-            "elems/DraggableElement.lua"
         }
         for i, v in ipairs(files) do 
             local m = ModTextFileGetContent(path .. v)
