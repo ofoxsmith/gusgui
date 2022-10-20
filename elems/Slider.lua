@@ -1,6 +1,9 @@
+--- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-
+--- @class Slider: GuiElement
+--- @field maskID number
+--- @field renderID number
 local Slider = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {min = {
         allowsState = true,

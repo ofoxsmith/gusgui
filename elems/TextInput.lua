@@ -1,5 +1,10 @@
+--- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+--- @class TextInput: GuiElement
+--- @field hoverMaskID number
+--- @field maskID number
+--- @field inputID number
 local TextInput = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {maxLength = {
         default = 50,

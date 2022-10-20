@@ -1,8 +1,28 @@
 dofile_once("GUSGUI_PATHclass.lua")
--- Gui element parent class that is inherited by all elements
--- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
--- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
--- and a Draw method, which draws the element using the Gui API
+-- Gui element parent class that is inherited by all elements   
+-- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions   
+-- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config   
+-- and a Draw method, which draws the element using the Gui API   
+--- @class GuiElement
+--- @field init function
+--- @field is_a function
+--- @field _config table
+--- @field _rawconfig table
+--- @field Draw function
+--- @field type string
+--- @field id string
+--- @field uid number|nil
+--- @field extendedValidator table
+--- @field allowsChildren boolean|nil
+--- @field GetBaseElementSize function
+--- @field gui Gui|nil
+--- @field _rawchildren GuiElement[]
+--- @field bgID number
+--- @field parent GuiElement|nil
+--- @field borderID number
+--- @field maskID number
+--- @field children GuiElement[]
+--- @field z number
 local GuiElement = class(function(Element, config, extended)
     extended = extended or {}
     Element.id = config.id
@@ -17,7 +37,7 @@ local GuiElement = class(function(Element, config, extended)
     Element._rawchildren = {}
     Element._config = {}
     Element.extendedValidator = extended
-    for k, _ in pairs(baseValidator) do
+    for k, _ in pairs(BaseValidator) do
         Element:ApplyConfig(k, config[k])
     end
     for k, _ in pairs(Element.extendedValidator) do
@@ -95,7 +115,7 @@ end
 
 function GuiElement:ApplyConfig(k, v, configobj)
     configobj = configobj or self._rawconfig
-    local validator = self.extendedValidator[k] or baseValidator[k]
+    local validator = self.extendedValidator[k] or BaseValidator[k]
     local t = type(v)
     if validator.allowsState == true then
         if t == "table" and v["_type"] ~= nil and v["value"] then
@@ -189,7 +209,7 @@ function GuiElement:ResolveValue(a, k)
         return self.gui.screenH
     end
     if a._type == "global" then
-        local t = baseValidator[k] or self.extendedValidator[k] or nil
+        local t = BaseValidator[k] or self.extendedValidator[k] or nil
         return t and t(GlobalsGetValue(a.value)) or GlobalsGetValue(a.value)
     end
     return a
@@ -350,7 +370,14 @@ function GuiElement:OnExitTree()
     self.gui = nil
 end
 
-baseValidator = {
+function GuiElement:PropagateInteractableBounds(x, y, w, h)
+    if not self.parent then
+        return
+    end
+    self.parent:PropagateInteractableBounds(x, y, w, h)
+end
+
+BaseValidator = {
     drawBorder = {
     default = false,
     allowsState = true,
@@ -588,4 +615,5 @@ baseValidator = {
     end
 }}
 
+--- @return GuiElement
 return GuiElement
