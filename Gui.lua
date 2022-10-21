@@ -1,7 +1,9 @@
 dofile_once("GUSGUI_PATHclass.lua")
 dofile_once("GUSGUI_PATHGuiElement.lua")
+--- @return function
 local function getIdCounter()
     local id = 1
+    --- @return number
     return function()
         id = id + 1
         return id
@@ -10,7 +12,7 @@ end
 
 --- @class Gui
 --- @field classOverrides table
---- @field guiobj any
+--- @field guiobj unknown
 --- @field state table
 --- @field tree GuiElement[]
 local Gui = class(function(newGUI, state)
@@ -28,6 +30,8 @@ local Gui = class(function(newGUI, state)
     newGUI.screenW, newGUI.screenH = math.floor(newGUI.screenW), math.floor(newGUI.screenH)
 end)
 
+--- @param s string
+--- @return any
 function Gui:GetState(s)
     local init = nil
     local a = {}
@@ -49,6 +53,8 @@ function Gui:GetState(s)
     return item
 end
 
+--- @param data GuiElement
+--- @return GuiElement data The element added.
 function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~=
@@ -63,6 +69,8 @@ function Gui:AddElement(data)
     end
 end
 
+--- @param classname string
+---@param config table
 function Gui:RegisterConfigForClass(classname, config)
     local configobj = {}
     for k, v in pairs(config) do
@@ -109,6 +117,8 @@ local function searchTree(element, id)
     return nil
 end
 
+--- @param id string
+--- @return GuiElement|nil
 function Gui:GetElementById(id)
     for k = 1, #self.tree do
         local v = self.tree[k]
@@ -124,6 +134,8 @@ function Gui:GetElementById(id)
     return nil
 end
 
+--- @param className string
+--- @return GuiElement[]
 function Gui:GetElementsByClass(className)
     local elems = {}
     local function searchTreeForClass(elem)
@@ -188,6 +200,7 @@ function Gui:Destroy()
     return
 end
 
+--- @return number, number, boolean
 function Gui:GetMouseData()
     local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]
     local mx, my = ComponentGetValue2(component, "mMousePosition")
@@ -200,8 +213,11 @@ function Gui:GetMouseData()
     return math.floor(gmx), math.floor(gmy), ComponentGetValue2(component, "mButtonDownLeftClick")
 end
 
-function CreateGUI(data, state)
-    return Gui(data, state)
+--- @param state table
+--- @return Gui
+--- @nodiscard
+function CreateGUI(state)
+    return Gui(state)
 end
 
 function Gui:StateValue(s)

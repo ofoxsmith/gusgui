@@ -4,6 +4,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @class Button: GuiElement
 --- @field buttonID number
 --- @field maskID number
+--- @operator call: Button
 local Button = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         onClick = {

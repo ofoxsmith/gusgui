@@ -4,6 +4,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @class Image: GuiElement
 --- @field maskID number
 --- @field imageID number
+--- @operator call: Image
 local Image = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {scaleX = {
         required = false,

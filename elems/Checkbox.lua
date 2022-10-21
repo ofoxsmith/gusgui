@@ -4,6 +4,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @class Checkbox: GuiElement
 --- @field imageID number
 --- @field maskID number
+--- @operator call: Checkbox
 local Checkbox = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {defaultValue = {
         required = true,

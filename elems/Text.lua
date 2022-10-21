@@ -17,6 +17,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @class Text: GuiElement
 --- @field maskID number
 --- @field hoverMaskID number
+--- @operator call: Text
 local Text = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {value = {
         required = true,

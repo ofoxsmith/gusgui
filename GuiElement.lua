@@ -23,6 +23,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field maskID number
 --- @field children GuiElement[]
 --- @field z number
+--- @operator call: GuiElement
 local GuiElement = class(function(Element, config, extended)
     extended = extended or {}
     Element.id = config.id
@@ -101,6 +102,8 @@ local GuiElement = class(function(Element, config, extended)
     Element.rootNode = false
 end)
 
+--- @param s string
+--- @return string
 function GuiElement:Interp(s)
     return (s:gsub('($%b{})', function(w)
         w = w:sub(3, -2)
@@ -215,6 +218,7 @@ function GuiElement:ResolveValue(a, k)
     return a
 end
 
+--- @return number
 function GuiElement:GetDepthInTree()
     local at = self
     local d = 0
@@ -227,6 +231,8 @@ function GuiElement:GetDepthInTree()
     end
 end
 
+--- @param child GuiElement
+--- @return GuiElement child The child added
 function GuiElement:AddChild(child)
     if not self.allowsChildren then
         error("GUSGUI: " .. self.type .. " cannot have child element", 2)
@@ -235,6 +241,8 @@ function GuiElement:AddChild(child)
     return child
 end
 
+--- @param childID string
+--- @return GuiElement self Returns self
 function GuiElement:RemoveChild(childID)
     if childID == nil then
         error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
@@ -249,6 +257,7 @@ function GuiElement:RemoveChild(childID)
 end
 
 local _uid_ = 1
+--- @return number
 function GetNextUID()
     _uid_ = _uid_ + 1
     return _uid_
@@ -333,8 +342,11 @@ function GuiElement:Remove()
     self:OnExitTree()
 end
 
+--- @param parent GuiElement|nil
+--- @param isroot boolean|nil
+--- @param gui Gui|nil
 function GuiElement:OnEnterTree(parent, isroot, gui)
-    if isroot then
+    if isroot or parent == nil then
         self.gui = gui
         if self.id then
             if self.gui.ids[self.id] then

@@ -8,6 +8,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field baseX number
 --- @field baseY number
 --- @field maskID number
+--- @operator call: HLayout
 local HLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         alignChildren = {
