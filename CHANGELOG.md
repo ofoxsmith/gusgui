@@ -1,5 +1,5 @@
 # Changelog
-## Initial release 1.0.0 - 2022-10-20
+## Initial release 1.0.0 - 2022-10-24
 ### Added
 - Button element.
 - Checkbox element.
