@@ -197,7 +197,6 @@ function Gui:Destroy()
     self.state = nil
     self._state = nil
     GuiDestroy(self.guiobj)
-    return
 end
 
 --- @return number, number, boolean
@@ -220,6 +219,12 @@ function CreateGUI(state)
     return Gui(state)
 end
 
+--- @class State
+--- @field _type string
+--- @field value any
+
+--- @param s string
+--- @return State
 function Gui:StateValue(s)
     local o = {
         _type = "state",
@@ -228,6 +233,7 @@ function Gui:StateValue(s)
     return o
 end
 
+--- @return State
 function Gui:ScreenWidth()
     local o = {
         _type = "screenw",
@@ -236,6 +242,7 @@ function Gui:ScreenWidth()
     return o
 end
 
+--- @return State
 function Gui:ScreenHeight()
     local o = {
         _type = "screenh",
@@ -244,6 +251,8 @@ function Gui:ScreenHeight()
     return o
 end
 
+--- @param s string
+--- @return State
 function Gui:GlobalValue(s)
     local o = {
         _type = "global",
@@ -252,6 +261,9 @@ function Gui:GlobalValue(s)
     return o
 end
 
+--- @param a State|number
+--- @param b State|number
+--- @return State
 function Gui:StateAdd(a, b)
     return {
         _type = "add",
@@ -262,6 +274,9 @@ function Gui:StateAdd(a, b)
     }
 end
 
+--- @param a State|number
+--- @param b State|number
+--- @return State
 function Gui:StateSubtract(a, b)
     return {
         _type = "subtract",
@@ -272,6 +287,9 @@ function Gui:StateSubtract(a, b)
     }
 end
 
+--- @param a State|number
+--- @param b State|number
+--- @return State
 function Gui:StateMultiply(a, b)
     return {
         _type = "multiply",
@@ -282,6 +300,9 @@ function Gui:StateMultiply(a, b)
     }
 end
 
+--- @param a State|number
+--- @param b State|number
+--- @return State
 function Gui:StateDivide(a, b)
     return {
         _type = "divide",
@@ -292,13 +313,15 @@ function Gui:StateDivide(a, b)
     }
 end
 
+--- @param type "inner"|"total"
+--- @return State
 function Gui:ParentWidth(type)
     if type == "inner" then
         return {
             _type = "p_innerW",
             value = ""
         }
-    elseif type == "total" then
+    else
         return {
             _type = "p_totalW",
             value = ""
@@ -306,13 +329,15 @@ function Gui:ParentWidth(type)
     end
 end
 
+--- @param type "inner"|"total"
+--- @return State
 function Gui:ParentHeight(type)
     if type == "inner" then
         return {
             _type = "p_innerH",
             value = ""
         }
-    elseif type == "total" then
+    else
         return {
             _type = "p_totalH",
             value = ""
@@ -320,13 +345,15 @@ function Gui:ParentHeight(type)
     end
 end
 
+--- @param type "inner"|"total"
+--- @return State
 function Gui:ElemWidth(type)
     if type == "inner" then
         return {
             _type = "innerW",
             value = ""
         }
-    elseif type == "total" then
+    else
         return {
             _type = "totalW",
             value = ""
@@ -334,13 +361,15 @@ function Gui:ElemWidth(type)
     end
 end
 
+--- @param type "inner"|"total"
+--- @return State
 function Gui:ElemHeight(type)
     if type == "inner" then
         return {
             _type = "innerH",
             value = ""
         }
-    elseif type == "total" then
+    else
         return {
             _type = "totalH",
             value = ""
