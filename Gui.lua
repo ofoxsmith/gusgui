@@ -10,11 +10,43 @@ local function getIdCounter()
     end
 end
 
+local GuiElements = {}
+do
+    local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
+    local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
+    local Image = dofile_once("GUSGUI_PATHelems/Image.lua")
+    local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
+    local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
+    local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
+    local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
+    local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
+    local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
+    local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
+    local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
+    local Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua")
+    GuiElements = {
+        Text = Text,
+        Button = Button,
+        Image = Image,
+        ImageButton = ImageButton,
+        HLayout = HLayout,
+        HLayoutForEach = HLayoutForEach,
+        VLayout = VLayout,
+        VLayoutForEach = VLayoutForEach,
+        Slider = Slider,
+        TextInput = TextInput,
+        ProgressBar = ProgressBar,
+        Checkbox = Checkbox,
+    }
+end
+
+
 --- @class Gui
 --- @field classOverrides table
 --- @field guiobj unknown
 --- @field state table
 --- @field tree GuiElement[]
+--- @operator call: Gui
 local Gui = class(function(newGUI, state)
     state = state or {}
     newGUI.ids = {}
@@ -176,13 +208,13 @@ end
 function Gui:GetRootElemXY(elem)
     local x, y = 0, 0
     local elemSize = elem:GetElementSize()
-    if elem._config.margin.right ~= 0 then 
+    if elem._config.margin.right ~= 0 then
         x = (self.screenW - elemSize.width) - elem._config.margin.right
     end
     if elem._config.margin.left ~= 0 then
         x = elem._config.margin.left
     end
-    if elem._config.margin.top ~= 0 then 
+    if elem._config.margin.top ~= 0 then
         y = elem._config.margin.top
     end
     if elem._config.margin.bottom ~= 0 then
@@ -217,6 +249,38 @@ end
 --- @nodiscard
 function CreateGUI(state)
     return Gui(state)
+end
+
+--- @param filename string
+--- @param state table
+--- @return Gui
+--- @nodiscard
+function CreateGUIFromXML(filename, state)
+    if not ModTextFileGetContent then
+        error("GUSGUI: Loading GUI XML files can only be done in init.lua", 2)
+    end
+    local nxml = dofile_once("GUSGUI_PATH/nxml.lua")
+    local gui = Gui(state)
+    local xml = nxml.parse(ModTextFileGetContent(filename))
+    ---@param elem any
+    ---@param parent GuiElement
+    local function parseTree(elem, parent)
+        for element in elem:each_child() do
+            if GuiElements[element.name] == nil then
+                error(("GUSGUI: Failed to parse xml file %s (Element with name %s does not exist."):format(filename, element.name))
+            end
+            local addTo = parent:AddChild(GuiElements[element.name]())
+            parseTree(element, addTo)
+        end
+    end
+    for element in xml:each_child() do
+        if GuiElements[element.name] == nil then
+            error(("GUSGUI: Failed to parse xml file %s (Element with name %s does not exist."):format(filename, element.name))
+        end
+        local addTo = gui:AddElement(GuiElements[element.name]())
+        parseTree(element, addTo)
+    end
+    return gui
 end
 
 --- @class State
@@ -377,32 +441,7 @@ function Gui:ElemHeight(type)
     end
 end
 
-local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
-local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
-local Image = dofile_once("GUSGUI_PATHelems/Image.lua")
-local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
-local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
-local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
-local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
-local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
-local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
-local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
-local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
-local Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua")
 return {
     Create = CreateGUI,
-    Elements = {
-        Text = Text,
-        Button = Button,
-        Image = Image,
-        ImageButton = ImageButton,
-        HLayout = HLayout,
-        HLayoutForEach = HLayoutForEach,
-        VLayout = VLayout,
-        VLayoutForEach = VLayoutForEach,
-        Slider = Slider,
-        TextInput = TextInput,
-        ProgressBar = ProgressBar,
-        Checkbox = Checkbox,
-    }
+    Elements = GuiElements
 }
