@@ -34,14 +34,20 @@ local Text = class(GuiElement, function(o, config)
 end)
 
 function Text:GetBaseElementSize()
-    local w, h = GuiGetTextDimensions(self.gui.guiobj, self:Interp(self._config.value))
+    local lines = splitString(self:Interp(self._config.value), "\n")
+    local w, h = 0, 0
+    for _, value in ipairs(lines) do
+        local lw, lh = GuiGetTextDimensions(self.gui.guiobj, value)
+        w = math.max(w, lw);
+        h = h + lh
+    end
     return w, h
 end
 
 function Text:Draw(x, y)
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
-    local parsedText = self:Interp(self._config.value)
+    local lines = splitString(self:Interp(self._config.value), "\n")
     local elementSize = self:GetElementSize()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
@@ -60,9 +66,15 @@ function Text:Draw(x, y)
         GuiColorSetForNextWidget(self.gui.guiobj, c[1] / 255, c[2] / 255, c[3] / 255, 1)
     end
     GuiZSetForNextWidget(self.gui.guiobj, self.z)
-    GuiText(self.gui.guiobj, x + elementSize.offsetX + self._config.padding.left,
-        y + elementSize.offsetY + self._config.padding.top, parsedText)
-    if hovered then self.useHoverConfigForNextFrame = true 
+    local rx = x + elementSize.offsetX + self._config.padding.left;
+    local ry = y + elementSize.offsetY + self._config.padding.top;
+    for _=1, #lines do
+        local v = lines[_]
+        GuiText(self.gui.guiobj, rx, ry, v)
+        local _, lh = GuiGetTextDimensions(self.gui.guiobj, v)
+        ry = ry + lh
+    end
+    if hovered then self.useHoverConfigForNextFrame = true
     else self.useHoverConfigForNextFrame = false end
 end
 
