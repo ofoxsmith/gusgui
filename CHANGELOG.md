@@ -1,4 +1,7 @@
 # Changelog
+## 1.1.0 - 2022-11-29
+### Added
+- Ability to split text in Text elements into multiple lines.
 ## Initial release 1.0.0 - 2022-10-24
 ### Added
 - Button element.
