@@ -51,7 +51,7 @@ local HLayoutForEach = class(HLayout, function(o, config)
 
     }, numTimes = {
         required = false,
-        allowsState = false,
+        allowsState = true,
         validate = function(o)
             if type(o) == "number" and o >= 1 then
                 return o
