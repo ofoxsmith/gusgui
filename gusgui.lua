@@ -7,6 +7,7 @@ return {
             "class.lua",
             "Gui.lua",
             "GuiElement.lua",
+            "configParser.lua",
             "elems/Button.lua",
             "elems/Text.lua",
             "elems/Image.lua",

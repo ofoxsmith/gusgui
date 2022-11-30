@@ -251,19 +251,6 @@ function CreateGUI(state)
     return Gui(state)
 end
 
-local function splitString(s, delimiter)
-    local result = {}
-    local from = 1
-    local delim_from, delim_to = string.find(s, delimiter, from)
-    while delim_from do
-        table.insert(result, string.sub(s, from, delim_from - 1))
-        from = delim_to + 1
-        delim_from, delim_to = string.find(s, delimiter, from)
-    end
-    table.insert(result, string.sub(s, from))
-    return result
-end
-
 --- @param filename string
 --- @param funcs table
 --- @return Gui
@@ -272,6 +259,7 @@ function CreateGUIFromXML(filename, funcs)
     if not ModTextFileGetContent then
         error("GUSGUI: Loading GUI XML files can only be done in init.lua", 2)
     end
+    local parser = dofile_once("GUSGUI_PATHconfigParser.lua")
     -- read inline config options
     local function createConfigTable(elem)
         local conf = {}
@@ -288,104 +276,7 @@ function CreateGUIFromXML(filename, funcs)
             conf.src = elem:text()
         end
         for key, value in pairs(elem.attr) do
-            ---@cast value string
-            local applyTo = conf
-            if value:find("^State(") ~= nil then
-                conf[key] = Gui:StateValue(value:gsub("^State(", ""):gsub(")$", ""))
-            elseif value:find("^Global(") ~= nil then
-                conf[key] = Gui:GlobalValue(value:gsub("^State(", ""):gsub(")$", ""))
-            else
-                if key:find("^hover%-") ~= nil then
-                    applyTo = conf.hover
-                    key = key:gsub("^hover-", "")
-                end
-                if elem.name:find("Layout") ~= nil then
-                    if key == "alignChildren" then 
-                        applyTo[key] = tonumber(value)
-                    end
-                end
-                if elem.name:find("Button") ~= nil then
-                    if key == "onClick" then
-                        applyTo[key] = tonumber(value)
-                    end
-                end
-                if elem.name:find("LayoutForEach") ~= nil then 
-                    if key == "type" or key == "stateVal" then
-                        applyTo[key] = value
-                    end
-                    if key == "numTimes" or key == "calculateEveryNFrames" then 
-                        applyTo[key] = tonumber(value)
-                    end
-                    if key == "func" then 
-                        applyTo[key] = funcs[value]
-                    end
-                end
-                if elem.name:find("Image") then
-                    if key == "src" then
-                        applyTo[key] = value
-                    end
-                    if key == "scaleX" or key == "scaleY" then
-                        applyTo[key] = tonumber(value)
-                    end
-                end
-                if elem.name == "Checkbox" then
-                    if key == "defaultValue" then 
-                        applyTo[key] = value == "true"
-                    end
-                    if key == "style" then 
-                        applyTo[key] = value
-                    end
-                    if key == "onToggle" then
-                        applyTo[key] = funcs[value]
-                    end
-                end
-                if elem.name == "ProgressBar" then 
-                    if key == "width" or key == "height" or key == "value" then
-                        applyTo[key] = tonumber(value)
-                    end
-                    if key == "customBarColourPath" or key == "barColour" then
-                        applyTo[key] = value
-                    end
-                end
-                if elem.name == "Slider" then 
-                    if key == "min" or key == "max" or key == "width" or key == "defaultValue" then
-                        applyTo[key] = tonumber(value)
-                    end
-                    if key == "onChange" then
-                        applyTo[key] = funcs[value]
-                    end
-                end
-                if elem.name == "TextInput" then 
-                    if "width" or key == "maxLength" then
-                        applyTo[key] = tonumber(value)
-                    end
-                    if key == "onEdit" then
-                        applyTo[key] = funcs[value]
-                    end
-                end
-                if key == "id" or key == "class" or key == "name" then
-                    applyTo[key] = value
-                end
-                if key == "drawBorder" or key == "drawBackground" or key == "hidden" then
-                    applyTo[key] = value == "true"
-                end
-                if key == "alignChildren" or key == "numTimes" or key == "calculateEveryNFrames" or
-                    key == "overrideWidth" or
-                    key == "overrideHeight" or key == "horizontalAlign" or key == "verticalAlign" or key == "overrideZ" then
-                    applyTo[key] = tonumber(value)
-                end
-                if key == "colour" then
-                    local v = splitString(value, ",")
-                    applyTo[key] = { tonumber(v[1]), tonumber(v[2]), tonumber(v[3]) }
-                end
-                if key == "onHover" then
-                    applyTo[key] = funcs[value]
-                end
-                if key == "margin" or key == "padding" then
-                    local v = splitString(value, ",")
-                    applyTo[key] = { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
-                end
-            end
+            parser(elem.name, key, value, conf, Gui, funcs)
         end
     end
 
@@ -403,13 +294,21 @@ function CreateGUIFromXML(filename, funcs)
         end
     end
 
+    local configElem = nil
     for element in xml:each_child() do
-        if GuiElements[element.name] == nil then
-            error(("GUSGUI: Failed to parse xml file %s (Element with name %s does not exist."):format(filename,
-                element.name))
+        if element.name == "Style" then
+            configElem = element
+        else
+            if GuiElements[element.name] == nil then
+                error(("GUSGUI: Failed to parse xml file %s (Element with name %s does not exist."):format(filename,
+                    element.name))
+            end
+            local addTo = gui:AddElement(GuiElements[element.name](createConfigTable(element)))
+            parseTree(element, addTo)
         end
-        local addTo = gui:AddElement(GuiElements[element.name](createConfigTable(element)))
-        parseTree(element, addTo)
+    end
+    if configElem ~= nil then
+        
     end
     return gui
 end
