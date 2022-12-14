@@ -1,39 +1,3 @@
----@diagnostic disable: redundant-parameter
-local ffi = nil
-if require then
-    pcall(function()
-        ffi = require("ffi")
-    end)
-end
-
-local str_sub
-local str_index
-local str_normalize
-
-if ffi then
-    str_normalize = function(str)
-        return ffi.cast("const char*", str)
-    end
-
-    str_sub = function(ptr, start_idx, len)
-        return ffi.string(ptr + start_idx, len)
-    end
-
-    str_index = function(ptr, idx)
-        return ptr[idx]
-    end
-else
-    str_normalize = function(str) return str end
-
-    str_sub = function(str, start_idx, len)
-        return str:sub(start_idx + 1, start_idx + len)
-    end
-
-    str_index = function(str, idx)
-        return string.byte(str:sub(idx + 1, idx + 1))
-    end
-end
-
 --[[
  * The following is a Lua port of the NXML parser:
  * https://github.com/xwitchproject/nxml
@@ -64,10 +28,16 @@ end
 
 local nxml = {}
 
+local str_sub = function(str, start_idx, len)
+    return str:sub(start_idx + 1, start_idx + len)
+end
+local str_index = function(str, idx)
+    return string.byte(str:sub(idx + 1, idx + 1))
+end
 local TOKENIZER_FUNCS = {}
 local TOKENIZER_MT = {
     __index = TOKENIZER_FUNCS,
-    __tostring = function(self) return "natif.nxml.tokenizer" end
+    __tostring = function() return "natif.nxml.tokenizer" end
 }
 
 local function new_tokenizer(cstring, len)
@@ -134,8 +104,6 @@ end
 
 function TOKENIZER_FUNCS:match_string(str)
     local len = #str
-    str = str_normalize(str)
-    
     for i = 0, len - 1 do
         if self:peek(i) ~= str_index(str, i) then return false end
     end
@@ -276,7 +244,7 @@ function PARSER_FUNCS:parse_attr(attr_table, name)
         if tok.type == "string" then
             attr_table[name] = tok.value
         else
-            self:report_error("missing_attribute_value", string.format("parsing attribute '%s' - expected a string after =, but did not find one"), name)
+            self:report_error("missing_attribute_value", string.format("parsing attribute '%s' - expected a string after =, but did not find one", name))
         end
     else
         self:report_error("missing_equals_sign", string.format("parsing attribute '%s' - did not find equals sign after attribute name", name))
@@ -346,7 +314,7 @@ function PARSER_FUNCS:parse_element(skip_opening_tag)
                 end
                 return elem
             else
-                local child = self:parse_element(elem, true)
+                local child = self:parse_element(elem)
                 table.insert(elem.children, child)
             end
         else
@@ -401,76 +369,6 @@ function XML_ELEMENT_FUNCS:text()
     return text
 end
 
-function XML_ELEMENT_FUNCS:add_child(child)
-    self.children[#self.children + 1] = child
-end
-
-function XML_ELEMENT_FUNCS:add_children(children)
-    local children_i = #self.children + 1
-    for i = 1, #children do
-        self.children[children_i] = children[i]
-        children_i = children_i + 1
-    end
-end
-
-function XML_ELEMENT_FUNCS:remove_child(child)
-    for i = 1, #self.children do
-        if self.children[i] == child then
-            table.remove(self.children, i)
-            break
-        end
-    end
-end
-
-function XML_ELEMENT_FUNCS:remove_child_at(index)
-    table.remove(self.children, index)
-end
-
-function XML_ELEMENT_FUNCS:clear_children()
-    self.children = {}
-end
-
-function XML_ELEMENT_FUNCS:clear_attrs()
-    self.attr = {}
-end
-
-function XML_ELEMENT_FUNCS:first_of(element_name)
-    local i = 0
-    local n = #self.children
-
-    while i < n do
-        i = i + 1
-        local c = self.children[i]
-
-        if c.name == element_name then return c end
-    end
-
-    return nil
-end
-
-function XML_ELEMENT_FUNCS:each_of(element_name)
-    local i = 1
-    local n = #self.children
-
-    return function()
-        while i <= n and not self.children[i].name == element_name do
-            i = i + 1
-        end
-        i = i + 1
-        return self.children[i - 1]
-    end
-end
-
-function XML_ELEMENT_FUNCS:all_of(element_name)
-    local table = {}
-    local i = 1
-    for elem in self:each_of(element_name) do
-        table[i] = elem
-        i = i + 1
-    end
-    return table
-end
-
 function XML_ELEMENT_FUNCS:each_child()
     local i = 0
     local n = #self.children
@@ -485,7 +383,7 @@ end
 
 function nxml.parse(data)
     local data_len = #data
-    local tok = new_tokenizer(str_normalize(data), data_len)
+    local tok = new_tokenizer(data, data_len)
     local parser = new_parser(tok)
     
     local elem = parser:parse_element(false)
@@ -497,24 +395,6 @@ function nxml.parse(data)
     return elem
 end
 
-function nxml.parse_many(data)
-    local data_len = #data
-    local tok = new_tokenizer(str_normalize(data), data_len)
-    local parser = new_parser(tok)
-    
-    local elems = parser:parse_elements(false)
-    
-    for i = 1, #elems do
-        local elem = elems[i]
-
-        if elem.errors and #elem.errors > 0 then
-            error("parser encountered errors")
-        end
-    end
-
-    return elems
-end
-
 function nxml.new_element(name, attrs)
     return setmetatable({
         name = name,
@@ -522,51 +402,6 @@ function nxml.new_element(name, attrs)
         children = {},
         content = nil
     }, XML_ELEMENT_MT)
-end
-
-local function attr_value_to_str(value)
-    local t = type(value)
-    if t == "string" then return value end
-    if t == "boolean" then return value and "1" or "0" end
-
-    return tostring(value)
-end
-
-function nxml.tostring(elem, packed, indent_char, cur_indent)
-    indent_char = indent_char or "\t"
-    cur_indent = cur_indent or ""
-    local s = "<" .. elem.name
-    local self_closing = #elem.children == 0 and (not elem.content or #elem.content == 0)
-
-    for k, v in pairs(elem.attr) do
-        s = s .. " " .. k .. "=\"" .. attr_value_to_str(v) .. "\""
-    end
-
-    if self_closing then
-        s = s .. " />"
-        return s
-    end
-
-    s = s .. ">"
-
-    local deeper_indent = cur_indent .. indent_char
-
-    if elem.content and #elem.content ~= 0 then
-        if not packed then s = s .. "\n" .. deeper_indent end
-        s = s .. elem:text()
-    end
-
-    if not packed then s = s .. "\n" end
-
-    for i, v in ipairs(elem.children) do
-        if not packed then s = s .. deeper_indent end
-        s = s .. nxml.tostring(v, packed, indent_char, deeper_indent)
-        if not packed then s = s .. "\n" end
-    end
-
-    s = s .. cur_indent .. "</" .. elem.name .. ">"
-
-    return s
 end
 
 return nxml
