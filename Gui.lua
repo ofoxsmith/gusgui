@@ -277,8 +277,9 @@ function CreateGUIFromXML(filename, funcs)
             conf.src = elem:text()
         end
         for key, value in pairs(elem.attr) do
-            parser(elem.name, key, value, conf, Gui, funcs)
+            parser(elem.name, key, value, conf, funcs)
         end
+        return conf
     end
 
     local gui = Gui()
@@ -308,27 +309,66 @@ function CreateGUIFromXML(filename, funcs)
         end
     end
     if configElem ~= nil then
-        local function splitString(s, delimiter)
-            local result = {}
-            local from = 1
-            local delim_from, delim_to = string.find(s, delimiter, from)
-            while delim_from do
-                table.insert(result, string.sub(s, from, delim_from - 1))
-                from = delim_to + 1
-                delim_from, delim_to = string.find(s, delimiter, from)
+        --- Parse config manually, as nxml mangles newlines and other spacing
+        local content = ModTextFileGetContent(filename)
+        local _, openingTag = content:find("<Style>")
+        local closingTag = content:find("</Style>")
+        local parser = dofile_once("GUSGUI_PATHconfigParser.lua")
+        content = content:sub(openingTag + 1, closingTag - 1)
+        local stringLookup = {}
+        content = content:gsub('"([^"]+)"', function(string)
+            table.insert(stringLookup, string)
+            return "&&&" .. #stringLookup
+        end)
+        content = content:gsub("%s", "")
+        local configToApply = {}
+        while true do
+            if content == "" then
+                break;
             end
-            table.insert(result, string.sub(s, from))
-            return result
+            local s, e = content:find("^[^{}]+")
+            local key = content:sub(s, e)
+            content = content:sub(e + 1)
+            local vs, ve = content:find("^{[^{}]+}")
+            local value = content:sub(vs, ve)
+            content = content:sub(ve + 1)
+            configToApply[key] = value:sub(vs + 1, ve - 1)
+        end
+        for key, value in pairs(configToApply) do
+            local isClass = false
+            local applyTo
+            ---@cast key string
+            ---@cast value string
+            if key:sub(1, 1) == "." then
+                isClass = true
+                applyTo = stringLookup[tonumber(key:sub(5))]
+            else
+                applyTo = stringLookup[tonumber(key:sub(4))]
+            end
+            local config = {}
+            value = value:gsub("&&&[0-9]+", function(e)
+                return stringLookup[tonumber(e:sub(4))]
+            end)
+            while true do
+                if value == "" then break end
+                local keyS, keyE = value:find("^([a-zA-Z%-]+):")
+                local configOpt = value:sub(keyS, keyE - 1)
+                value = value:sub(keyE + 1)
+                local configS, configE = value:find("^([^;]+);")
+                local configVal = value:sub(configS, configE - 1)
+                value = value:sub(configE + 1)
+                -- use a string with the name of every element, to trigger the config parsers for every single element type
+                local eachElement = "LayoutForEachButtonImageCheckboxProgressBarSliderTextInput"
+                parser(eachElement, configOpt, configVal, config, funcs)
+            end
+            if isClass then
+                gui:RegisterConfigForClass(applyTo, config)
+            else
+                local elem = gui:GetElementById(applyTo)
+                elem.config = config
+            end
         end
 
-        for elem in configElem:each_child() do
-            if elem.name == "Class" then
-                local class = elem.attr.name
-                local configEntries = splitString()
-            else 
-                
-            end
-        end
     end
     return gui
 end
@@ -534,6 +574,7 @@ GUSGUI_NXML = function()
             len = len
         }, TOKENIZER_MT)
     end
+
     local ws = {
         [string.byte(" ")] = true,
         [string.byte("\t")] = true,
@@ -563,12 +604,14 @@ GUSGUI_NXML = function()
             end
         end
     end
+
     function TOKENIZER_FUNCS:peek(n)
         n = n or 1
         local idx = self.cur_idx + n
         if idx >= self.len then return 0 end
         return string.byte(self.data:sub(idx + 1, idx + 1))
     end
+
     function TOKENIZER_FUNCS:match_string(str)
         local len = #str
         for i = 0, len - 1 do
@@ -576,10 +619,12 @@ GUSGUI_NXML = function()
         end
         return true
     end
+
     function TOKENIZER_FUNCS:cur_char()
         if (self.cur_idx >= self.len) then return 0 end
         return tonumber(string.byte(self.data:sub(self.cur_idx + 1, self.cur_idx + 1)))
     end
+
     function TOKENIZER_FUNCS:skip_whitespace()
         while not (self.cur_idx >= self.len) do
             if (ws[tonumber(self:cur_char())] or false) then
@@ -613,6 +658,7 @@ GUSGUI_NXML = function()
             end
         end
     end
+
     function TOKENIZER_FUNCS:read_quoted_string()
         local start_idx = self.cur_idx
         local len = 0
@@ -623,6 +669,7 @@ GUSGUI_NXML = function()
         self:move() -- skip "
         return self.data:sub(start_idx + 1, start_idx + len)
     end
+
     function TOKENIZER_FUNCS:read_unquoted_string()
         local start_idx = self.cur_idx - 1 -- first char is move()d
         local len = 1
@@ -633,6 +680,7 @@ GUSGUI_NXML = function()
         end
         return self.data:sub(start_idx + 1, start_idx + len)
     end
+
     local C_NULL = 0
     local C_LT = string.byte("<")
     local C_GT = string.byte(">")
@@ -654,6 +702,7 @@ GUSGUI_NXML = function()
         elseif c == C_QUOTE then return { type = "string", value = self:read_quoted_string() }
         else return { type = "string", value = self:read_unquoted_string() } end
     end
+
     local PARSER_FUNCS = {}
     local PARSER_MT = {
         __index = PARSER_FUNCS,
@@ -665,6 +714,7 @@ GUSGUI_NXML = function()
             error_reporter = error_reporter or function(type, msg) print("parser error: [" .. type .. "] " .. msg) end
         }, PARSER_MT)
     end
+
     local XML_ELEMENT_FUNCS = {}
     local XML_ELEMENT_MT = {
         __index = XML_ELEMENT_FUNCS,
@@ -673,6 +723,7 @@ GUSGUI_NXML = function()
         self.error_reporter(type, msg)
         table.insert(self.errors, { type = type, msg = msg, row = self.tok.prev_row, col = self.tok.prev_col })
     end
+
     function PARSER_FUNCS:parse_attr(attr_table, name)
         local tok = self.tok:next_token()
         if tok.type == "=" then
@@ -688,6 +739,7 @@ GUSGUI_NXML = function()
                 string.format("parsing attribute '%s' - did not find equals sign after attribute name", name))
         end
     end
+
     function PARSER_FUNCS:parse_element(skip_opening_tag)
         local tok
         if not skip_opening_tag then
@@ -756,6 +808,7 @@ GUSGUI_NXML = function()
             end
         end
     end
+
     function PARSER_FUNCS:parse_elements()
         local tok = self.tok:next_token()
         local elems = {}
@@ -767,6 +820,7 @@ GUSGUI_NXML = function()
         end
         return elems
     end
+
     function XML_ELEMENT_FUNCS:text()
         local content_count = #self.content
         if self.content == nil or content_count == 0 then
@@ -785,6 +839,7 @@ GUSGUI_NXML = function()
         end
         return text
     end
+
     function XML_ELEMENT_FUNCS:each_child()
         local i = 0
         return function()
@@ -794,6 +849,7 @@ GUSGUI_NXML = function()
             end
         end
     end
+
     function nxml.parse(data)
         local data_len = #data
         local tok = new_tokenizer(data, data_len)
@@ -804,6 +860,7 @@ GUSGUI_NXML = function()
         end
         return elem
     end
+
     function nxml.new_element(name, attrs)
         return setmetatable({
             name = name,
@@ -812,6 +869,7 @@ GUSGUI_NXML = function()
             content = nil
         }, XML_ELEMENT_MT)
     end
+
     return nxml
 end
 --#endregion

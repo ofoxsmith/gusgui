@@ -11,12 +11,17 @@ local function splitString(s, delimiter)
     return result
 end
 
-return function(elem, key, value, conf, Gui, funcs)
+---@param elem string
+---@param key string
+---@param value string
+---@param conf table
+---@param funcs table
+return function(elem, key, value, conf, funcs)
     local applyTo;
-    if value:find("^State(") ~= nil then
-        conf[key] = Gui:StateValue(value:gsub("^State(", ""):gsub(")$", ""))
-    elseif value:find("^Global(") ~= nil then
-        conf[key] = Gui:GlobalValue(value:gsub("^State(", ""):gsub(")$", ""))
+    if value:find("^State%(") ~= nil then
+        conf[key] = {_type = "state", value = value:gsub('^State%("', ""):gsub('%)$"', "")}
+    elseif value:find("^Global%(") ~= nil then
+        conf[key] = {_type = "state", value = value:gsub('^Global%("', ""):gsub('%)$"', "")}
     else
         if key:find("^hover%-") ~= nil then
             applyTo = conf.hover
@@ -108,6 +113,13 @@ return function(elem, key, value, conf, Gui, funcs)
             local v = splitString(value, ",")
             applyTo[key] = { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
         end
+        if key:find("^padding-") then
+            applyTo.padding = applyTo.padding or {}
+            applyTo.padding[key:sub(8)] = tonumber(value)
+        end
+        if key:find("^margin-") then
+            applyTo.padding = applyTo.padding or {}
+            applyTo.padding[key:sub(8)] = tonumber(value)
+        end
     end
-
 end
