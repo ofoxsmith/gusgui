@@ -1,4 +1,10 @@
 # Changelog
+## 1.2.0 - 2022-12-30
+### Added
+- Ability to create GUIs from XML based files.
+- Ability to style and edit config for GUI elements using CSS-based schema
+### Fixed
+- Invalid Regex patterns in multiple files.
 ## 1.1.0 - 2022-11-29
 ### Added
 - Ability to split text in Text elements into multiple lines.

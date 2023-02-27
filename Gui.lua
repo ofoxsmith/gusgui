@@ -1,6 +1,5 @@
 dofile_once("GUSGUI_PATHclass.lua")
 dofile_once("GUSGUI_PATHGuiElement.lua")
-local nxml = GUSGUI_NXML()
 --- @return function
 local function getIdCounter()
     local id = 1
@@ -257,6 +256,7 @@ end
 --- @return Gui
 --- @nodiscard
 function CreateGUIFromXML(filename, funcs)
+    nxml = GUSGUI_NXML()
     if not ModTextFileGetContent then
         error("GUSGUI: Loading GUI XML files can only be done in init.lua", 2)
     end
