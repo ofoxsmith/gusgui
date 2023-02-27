@@ -11,6 +11,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field Draw function
 --- @field type string
 --- @field id string
+--- @field class string
 --- @field uid number|nil
 --- @field extendedValidator table
 --- @field allowsChildren boolean|nil
@@ -105,6 +106,9 @@ end)
 --- @param s string
 --- @return string
 function GuiElement:Interp(s)
+    if type(s) ~= "string" then
+        error(("GUSGUI Internal Error: Interp was called with an invalid value on element %s %s %s %s"):format(self.uid, self.type, self.id or "NO ID", self.class), 2)
+    end
     return (s:gsub('($%b{})', function(w)
         w = w:sub(3, -2)
         local v = self.gui:GetState(w)
