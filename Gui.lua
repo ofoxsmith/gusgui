@@ -45,17 +45,21 @@ end
 --- @field classOverrides table
 --- @field guiobj unknown
 --- @field state table
+--- @field enableLogging boolean
 --- @field tree GuiElement[]
 --- @operator call: Gui
-local Gui = class(function(newGUI, state)
-    state = state or {}
+local Gui = class(function(newGUI, config)
+    config = config or {}
+    config.state = config.state or {}
+    config.enableLogging = config.enableLogging or false
     newGUI.ids = {}
     newGUI.nextID = getIdCounter()
     newGUI.stateID = getIdCounter()
     newGUI.guiobj = GuiCreate()
     newGUI.tree = {}
     newGUI.cachedData = {}
-    newGUI.state = state
+    newGUI.enableLogging = config.enableLogging
+    newGUI.state = config.state
     newGUI._state = {}
     newGUI.classOverrides = {}
     newGUI.screenW, newGUI.screenH = GuiGetScreenDimensions(newGUI.guiobj)
@@ -186,6 +190,12 @@ function Gui:GetElementsByClass(className)
     return elems
 end
 
+function Gui:Log(message)
+    if self.enableLogging then
+        print(message)
+    end
+end
+
 function Gui:Render()
     if (self.destroyed == true) then
         return
@@ -197,10 +207,12 @@ function Gui:Render()
     self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
     self.screenWorldX, self.screenWorldY = GameGetCameraBounds()
     GuiStartFrame(self.guiobj)
+    self:Log(("GUSGUI: Starting to render frame %s"):format(self.framenum))
     for k = 1, #self.tree do
         local v = self.tree[k]
         v:Render()
     end
+    self:Log(("GUSGUI: Finished rendering frame %s"):format(self.framenum))
 end
 
 --- @param elem GuiElement
@@ -244,18 +256,19 @@ function Gui:GetMouseData()
     return math.floor(gmx), math.floor(gmy), ComponentGetValue2(component, "mButtonDownLeftClick")
 end
 
---- @param state table
+--- @param config table
 --- @return Gui
 --- @nodiscard
-function CreateGUI(state)
-    return Gui(state)
+function CreateGUI(config)
+    return Gui(config)
 end
 
 --- @param filename string
 --- @param funcs table
+--- @param config table
 --- @return Gui
 --- @nodiscard
-function CreateGUIFromXML(filename, funcs)
+function CreateGUIFromXML(filename, funcs, config)
     nxml = GUSGUI_NXML()
     if not ModTextFileGetContent then
         error("GUSGUI: Loading GUI XML files can only be done in init.lua", 2)
@@ -282,7 +295,7 @@ function CreateGUIFromXML(filename, funcs)
         return conf
     end
 
-    local gui = Gui()
+    local gui = Gui(config)
     local xml = nxml.parse(ModTextFileGetContent(filename))
     local function parseTree(elem, parent)
         for element in elem:each_child() do

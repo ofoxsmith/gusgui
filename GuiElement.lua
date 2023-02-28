@@ -107,6 +107,7 @@ end)
 --- @return string
 function GuiElement:Interp(s)
     if type(s) ~= "string" then
+        self.gui:Log(("GUSGUI: Found a non-string value where a string is usually expected on element with id %s, is this intentional?"):format(self.id or "NO ELEMENT ID"))
         s = tostring(s)
     end
     return (s:gsub('($%b{})', function(w)
@@ -207,7 +208,11 @@ function GuiElement:ResolveValue(a, k)
         end
     end
     if a._type == "state" then
-        return self.gui:GetState(a.value)
+        local v = self.gui:GetState(a.value)
+        if v == nil then 
+            self.gui:Log(("GUSGUI: Attempting to read from the state value %s, but it is nil. Is this intentional?"):format(a.value))
+            return nil
+        end
     end
     if a._type == "screenw" then
         return self.gui.screenW

@@ -40,6 +40,9 @@ function Button:Draw(x, y)
     self.maskID = self.maskID or self.gui.nextID()
     self.buttonID = self.buttonID or self.gui.nextID()
     local parsedText = self:Interp(self._config.text)
+    if parsedText == "" then
+        self.gui:Log(("GUSGUI: Rendering an empty buttom element with id %s"):format(self.id or "NO ELEMENT ID"))
+    end
     local elementSize = self:GetElementSize()
     local c = self._config.colour
     GuiZSetForNextWidget(self.gui.guiobj, self.z - 1)

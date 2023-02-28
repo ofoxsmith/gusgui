@@ -47,7 +47,11 @@ end
 function Text:Draw(x, y)
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
-    local lines = splitString(self:Interp(self._config.value), "\n")
+    local value = self:Interp(self._config.value)
+    if value == "" then
+        self.gui:Log(("GUSGUI: Rendering an empty text element with id %s"):format(self.id or "NO ELEMENT ID"))
+    end
+    local lines = splitString(value, "\n")
     local elementSize = self:GetElementSize()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
     GuiImageNinePiece(self.gui.guiobj, self.maskID, x, y, elementSize.paddingW,
