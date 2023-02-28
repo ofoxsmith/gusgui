@@ -85,7 +85,8 @@ local GuiElement = class(function(Element, config, extended)
                             Element:ResolveValue(value.value[3], k)}
                 end
             end
-            return Element:ResolveValue(value.value, k)
+            local resolvedValue = Element:ResolveValue(value.value, k)
+            return resolvedValue
         end,
         __newindex = function(t, k, v)
             error("_config is readonly", 2)
@@ -209,10 +210,11 @@ function GuiElement:ResolveValue(a, k)
     end
     if a._type == "state" then
         local v = self.gui:GetState(a.value)
-        if v == nil then 
+        if v == nil then
             self.gui:Log(("GUSGUI: Attempting to read from the state value %s, but it is nil. Is this intentional?"):format(a.value))
             return nil
         end
+        return v
     end
     if a._type == "screenw" then
         return self.gui.screenW
