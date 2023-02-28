@@ -1,4 +1,7 @@
 # Changelog
+## 1.2.1/1.2.2 - 2023-02-28
+### Fixed
+- Text elements attempting to perform string interpolation on non-string values
 ## 1.2.0 - 2022-12-30
 ### Added
 - Ability to create GUIs from XML based files.
