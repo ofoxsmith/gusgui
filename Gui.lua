@@ -51,11 +51,12 @@ end
 local Gui = class(function(newGUI, config)
     config = config or {}
     config.state = config.state or {}
+    config.gui = config.gui or GuiCreate()
     config.enableLogging = config.enableLogging or false
     newGUI.ids = {}
     newGUI.nextID = getIdCounter()
     newGUI.stateID = getIdCounter()
-    newGUI.guiobj = GuiCreate()
+    newGUI.guiobj = config.gui
     newGUI.tree = {}
     newGUI.cachedData = {}
     newGUI.enableLogging = config.enableLogging
