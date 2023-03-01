@@ -1,5 +1,5 @@
 # Changelog
-## 1.3.2 - 2023-03-01
+## 1.3.0 - 2023-03-01
 ### Added
 - Changed the gui constructor to have more options:
 - Added the ability to use a pre-existing gui object
