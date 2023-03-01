@@ -43,9 +43,11 @@ end
 
 --- @class Gui
 --- @field classOverrides table
---- @field guiobj unknown
+--- @field guiobj userdata
 --- @field state table
 --- @field enableLogging boolean
+--- @field baseX integer
+--- @field baseY integer
 --- @field tree GuiElement[]
 --- @operator call: Gui
 local Gui = class(function(newGUI, config)
@@ -53,6 +55,8 @@ local Gui = class(function(newGUI, config)
     config.state = config.state or {}
     config.gui = config.gui or GuiCreate()
     config.enableLogging = config.enableLogging or false
+    config.baseX = config.baseX or 0
+    config.baseY = config.baseY or 0
     newGUI.ids = {}
     newGUI.nextID = getIdCounter()
     newGUI.stateID = getIdCounter()
@@ -60,6 +64,8 @@ local Gui = class(function(newGUI, config)
     newGUI.tree = {}
     newGUI.cachedData = {}
     newGUI.enableLogging = config.enableLogging
+    newGUI.baseX = config.baseX
+    newGUI.baseY = config.baseY
     newGUI.state = config.state
     newGUI._state = {}
     newGUI.classOverrides = {}
@@ -219,7 +225,7 @@ end
 --- @param elem GuiElement
 --- @return number x, number y
 function Gui:GetRootElemXY(elem)
-    local x, y = 0, 0
+    local x, y = self.baseX, self.baseY
     local elemSize = elem:GetElementSize()
     if elem._config.margin.right ~= 0 then
         x = (self.screenW - elemSize.width) - elem._config.margin.right
