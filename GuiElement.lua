@@ -86,6 +86,10 @@ local GuiElement = class(function(Element, config, extended)
                 end
             end
             local resolvedValue = Element:ResolveValue(value.value, k)
+            if type(resolvedValue) == "table" and resolvedValue._type ~= nil and resolvedValue.value ~= nil then
+                local s = "GUSGUI Internal Error: Element:ResolveValue failed to get value (%s, %s) on element %s %s %s %s"
+                error(s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID", Element.class), 2)
+            end
             return resolvedValue
         end,
         __newindex = function(t, k, v)
