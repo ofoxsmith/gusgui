@@ -1,4 +1,12 @@
 # Changelog
+## 1.3.0 - 2023-03-01
+### Added
+- Changed the gui constructor to have more options:
+- Added the ability to use a pre-existing gui object
+- Added a basic logging function that shows possible problems in a gui
+- Added the ability to specify the x and y that the gui begins rendering from
+### Fixed
+- Bug causing state values to always be nil
 ## 1.2.1/1.2.2 - 2023-02-28
 ### Fixed
 - Text elements attempting to perform string interpolation on non-string values
