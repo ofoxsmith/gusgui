@@ -76,25 +76,22 @@ end)
 --- @param s string
 --- @return any
 function Gui:GetState(s)
-    local init = nil
-    local a = {}
-    local item = {}
+    local values = {}
     for i in s:gmatch("[^/]+") do
-        if not init then
-            init = i
-        else
-            table.insert(a, i)
-        end
+        table.insert(values, i)
     end
-    item = init and self._state[init] or self._state
-    for k, v in pairs(a) do
-        if (type(item) ~= "table") then
-            error("GUSGUI: Cannot access property of non-table value in state", 2)
+    local item
+    for i = 1, #values do
+        local k = values[i]
+        if i == 1 then
+            item = self._state[k]
+        else
+            item = item[k]
         end
-        item = item[v];
     end
     return item
 end
+
 
 --- @param data GuiElement
 --- @return GuiElement data The element added.

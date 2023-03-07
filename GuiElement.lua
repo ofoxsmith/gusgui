@@ -92,7 +92,7 @@ local GuiElement = class(function(Element, config, extended)
             end
             return resolvedValue
         end,
-        __newindex = function(t, k, v)
+        __newindex = function()
             error("_config is readonly", 2)
         end
     })
