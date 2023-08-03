@@ -11,7 +11,6 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @operator call: VLayout
 local VLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {alignChildren = {
-        allowsState = true,
         default = 0,
         fromString = function(s)
             return tonumber(s)

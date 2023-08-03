@@ -7,7 +7,9 @@ dofile_once("GUSGUI_PATHclass.lua")
 local HLayoutForEach = class(HLayout, function(o, config)
     HLayout.init(o, config, {type = {
         required = true,
-        allowsState = false,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
             if o == nil then
                 return nil, "GUSGUI: Invalid value for type on element \"%s\" (type paramater is required)"
@@ -20,7 +22,9 @@ local HLayoutForEach = class(HLayout, function(o, config)
         end
     }, func = {
         required = true,
-        allowsState = false,
+        fromString = function (s)
+            error("GUSGUI: Can't convert a string value into a function")
+        end,    
         validate = function(o)
             if type(o) == "function" then
                 return o
@@ -30,7 +34,9 @@ local HLayoutForEach = class(HLayout, function(o, config)
         end
     }, stateVal = {
         required = false,
-        allowsState = false,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
             if type(o) == "string" then
                 return o
@@ -40,7 +46,9 @@ local HLayoutForEach = class(HLayout, function(o, config)
         end
     }, calculateEveryNFrames = {
         default = 1,
-        allowsState = false,
+        fromString = function (s)
+            return tonumber(s)
+        end,
         validate = function(o)
             if type(o) == "number" and (o >= 1 or o == -1) then
                 return o
@@ -51,7 +59,9 @@ local HLayoutForEach = class(HLayout, function(o, config)
 
     }, numTimes = {
         required = false,
-        allowsState = true,
+        fromString = function (s)
+            return tonumber(s)
+        end,
         validate = function(o)
             if type(o) == "number" and o >= 1 then
                 return o

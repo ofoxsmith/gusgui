@@ -12,7 +12,6 @@ dofile_once("GUSGUI_PATHclass.lua")
 local HLayout = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         alignChildren = {
-            allowsState = true,
             default = 0,
             fromString = function(s)
                 return tonumber(s)

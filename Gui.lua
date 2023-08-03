@@ -116,13 +116,11 @@ function Gui:RegisterConfigForClass(classname, config)
     for k, v in pairs(config) do
         local validator = BaseValidator[k]
         local t = type(v)
-        if validator.allowsState == true then
-            if t == "table" and v["_type"] ~= nil and v["value"] then
-                configobj[k] = {
-                    value = v,
-                    isDF = false
-                }
-            end
+        if t == "table" and v["_type"] ~= nil and v["value"] then
+            configobj[k] = {
+                value = v,
+                isDF = false
+            }
         end
         if v == nil then
             configobj[k] = {

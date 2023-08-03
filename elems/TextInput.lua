@@ -9,7 +9,6 @@ dofile_once("GUSGUI_PATHclass.lua")
 local TextInput = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {maxLength = {
         default = 50,
-        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -20,7 +19,6 @@ local TextInput = class(GuiElement, function(o, config)
         end
     }, width = {
         default = 25,
-        allowsState = true,
         fromString = function(o)
             return tonumber(o)
         end,
@@ -31,7 +29,9 @@ local TextInput = class(GuiElement, function(o, config)
         end
     }, onEdit = {
         required = true,
-        allowsState = false,
+        fromString = function (s)
+            error("GUSGUI: Can't convert a string value into a function")
+        end,
         canHover = false,
         validate = function(o)
             if type(o) == "function" then

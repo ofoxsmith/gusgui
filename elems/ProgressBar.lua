@@ -9,13 +9,15 @@ local ProgressBar = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {width = {
         default = 50,
         required = false,
+        fromString = function (s)
+            return tonumber(s)
+        end,
         validate = function(o)
             if type(o) == "number" then
                 return o
             end
         end
     }, height = {
-        allowsState = true,
         required = false,
         default = 10,
         fromString = function(s)
@@ -29,7 +31,6 @@ local ProgressBar = class(GuiElement, function(o, config)
     }, value = {
         default = 100,
         required = true,
-        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -41,16 +42,20 @@ local ProgressBar = class(GuiElement, function(o, config)
     }, barColour = {
         default = "green",
         required = false,
-        allowsState = true,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
-            if type(o) == "string" and o == "green" or o == "blue" or o == "yellow" or o == "white" then
+            if o == "green" or o == "blue" or o == "yellow" or o == "white" then
                 return o
             end
         end
     }, customBarColourPath = {
         default = nil,
         required = false,
-        allowsState = true,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
             if type(o) == "string" then
                 return o

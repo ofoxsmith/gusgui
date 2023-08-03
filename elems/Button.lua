@@ -9,7 +9,9 @@ local Button = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {
         onClick = {
             required = true,
-            allowsState = false,
+            fromString = function (s)
+                error("GUSGUI: Can't convert a string value into a function")
+            end,        
             validate = function(o)
                 if type(o) == "function" then
                     return o
@@ -18,8 +20,10 @@ local Button = class(GuiElement, function(o, config)
             end
         },
         text = {
-            allowsState = true,
             required = true,
+            fromString = function (s)
+                return s 
+            end,
             validate = function(o)
                 if type(o) == "string" then
                     return o

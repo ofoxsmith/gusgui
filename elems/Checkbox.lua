@@ -8,7 +8,9 @@ dofile_once("GUSGUI_PATHclass.lua")
 local Checkbox = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {defaultValue = {
         required = true,
-        allowsState = true,
+        fromString = function (s)
+            return s == "true"
+        end,
         validate = function(o)
             if type(o) == "boolean" then
                 return o
@@ -17,7 +19,9 @@ local Checkbox = class(GuiElement, function(o, config)
         end
     }, onToggle = {
         required = true,
-        allowsState = false,
+        fromString = function (s)
+            error("GUSGUI: Can't convert a string value into a function")
+        end,    
         validate = function(o)
             if type(o) == "function" then
                 return o
@@ -26,7 +30,9 @@ local Checkbox = class(GuiElement, function(o, config)
         end
     }, style = {
         default = "image",
-        allowsState = true,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
             if type(o) == "string" and o == "image" or o == "text" then
                 return true, nil, nil

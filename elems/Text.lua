@@ -21,7 +21,9 @@ dofile_once("GUSGUI_PATHclass.lua")
 local Text = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {value = {
         required = true,
-        allowsState = true,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
             if type(o) == "string" then
                 return o

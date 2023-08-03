@@ -7,7 +7,6 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @operator call: Slider
 local Slider = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {min = {
-        allowsState = true,
         default = 0,
         fromString = function(s)
             return tonumber(s)
@@ -19,7 +18,6 @@ local Slider = class(GuiElement, function(o, config)
         end
     }, max = {
         default = 100,
-        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -30,7 +28,6 @@ local Slider = class(GuiElement, function(o, config)
         end
     }, width = {
         default = 25,
-        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -41,7 +38,6 @@ local Slider = class(GuiElement, function(o, config)
         end
     }, defaultValue = {
         default = 1,
-        allowsState = true,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -52,7 +48,9 @@ local Slider = class(GuiElement, function(o, config)
         end
     }, onChange = {
         required = true,
-        allowsState = false,
+        fromString = function (s)
+            error("GUSGUI: Can't convert a string value into a function")
+        end,
         validate = function(o)
             if type(o) == "function" then
                 return o

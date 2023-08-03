@@ -126,25 +126,22 @@ function GuiElement:Interp(s)
     end))
 end
 
-function GuiElement:ApplyConfig(k, v, configobj)
-    configobj = configobj or self._rawconfig
+function GuiElement:ApplyConfig(k, v)
     local validator = self.extendedValidator[k] or BaseValidator[k]
     local t = type(v)
-    if validator.allowsState == true then
-        if t == "table" and v["_type"] ~= nil and v["value"] then
-            configobj[k] = {
-                value = v,
-                isDF = false
-            }
-            return
-        end
+    if t == "table" and v["_type"] ~= nil and v["value"] then
+        self._rawconfig[k] = {
+            value = v,
+            isDF = false
+        }
+        return
     end
     if v == nil and validator.required == true then
         local s = "GUSGUI: Invalid value for %s on element \"%s\" (%s is required)"
         error(s:format(k, self.id or "NO ELEMENT ID", k))
         return
     elseif v == nil then
-        configobj[k] = {
+        self._rawconfig[k] = {
             value = validator.default,
             isDF = true
         }
@@ -154,7 +151,7 @@ function GuiElement:ApplyConfig(k, v, configobj)
     if type(err) == "string" then
         error(err:format(self.id))
     end
-    configobj[k] = {
+    self._rawconfig[k] = {
         value = newValue,
         isDF = false
     }
@@ -227,8 +224,8 @@ function GuiElement:ResolveValue(a, k)
         return self.gui.screenH
     end
     if a._type == "global" then
-        local t = BaseValidator[k] or self.extendedValidator[k] or nil
-        return t and t(GlobalsGetValue(a.value)) or GlobalsGetValue(a.value)
+        local t = BaseValidator[k] or self.extendedValidator[k]
+        return t.fromString(GlobalsGetValue(a.value))
     end
     return a
 end
@@ -267,6 +264,14 @@ function GuiElement:RemoveChild(childID)
             v:OnExitTree()
             break
         end
+    end
+    return self
+end
+
+--- @return GuiElement self Returns self
+function GuiElement:RemoveAllChildren()
+    for i, v in ipairs(self.children) do
+        v:OnExitTree()
     end
     return self
 end
@@ -417,10 +422,22 @@ function GuiElement:PropagateInteractableBounds(x, y, w, h)
     self.parent:PropagateInteractableBounds(x, y, w, h)
 end
 
+local function splitString(s, delimiter)
+    local result = {}
+    local from = 1
+    local delim_from, delim_to = string.find(s, delimiter, from)
+    while delim_from do
+        table.insert(result, string.sub(s, from, delim_from - 1))
+        from = delim_to + 1
+        delim_from, delim_to = string.find(s, delimiter, from)
+    end
+    table.insert(result, string.sub(s, from))
+    return result
+end
+
 BaseValidator = {
     drawBorder = {
     default = false,
-    allowsState = true,
     fromString = function(s)
         return s == "true"
     end,
@@ -432,7 +449,6 @@ BaseValidator = {
     end
 }, drawBackground = {
     default = false,
-    allowsState = true,
     fromString = function(s)
         return s == "true"
     end,
@@ -444,7 +460,6 @@ BaseValidator = {
     end
 }, overrideWidth = {
     default = 0,
-    allowsState = true,
     fromString = function(s)
         return tonumber(s)
     end,
@@ -459,7 +474,6 @@ BaseValidator = {
     end
 }, overrideHeight = {
     default = 0,
-    allowsState = true,
     fromString = function(s)
         return tonumber(s)
     end,
@@ -474,7 +488,6 @@ BaseValidator = {
     end
 }, verticalAlign = {
     default = 0,
-    allowsState = true,
     fromString = function(s)
         return tonumber(s)
     end,
@@ -489,7 +502,6 @@ BaseValidator = {
     end
 }, horizontalAlign = {
     default = 0,
-    allowsState = true,
     fromString = function(s)
         return tonumber(s)
     end,
@@ -503,13 +515,16 @@ BaseValidator = {
         return nil, "GUSGUI: Invalid value for horizontalAlign on element \"%s\""
     end
 }, margin = {
-    allowsState = true,
     default = {
         top = 0,
         bottom = 0,
         left = 0,
         right = 0
     },
+    fromString = function (s)
+        local v = splitString(s, ",")
+        return { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
+    end,
     validate = function(o)
         local t = type(o)
         if t == "number" then
@@ -542,13 +557,16 @@ BaseValidator = {
         return nil, "GUSGUI: Invalid value for margin on element \"%s\""
     end
 }, padding = {
-    allowsState = true,
     default = {
         top = 0,
         bottom = 0,
         left = 0,
         right = 0
     },
+    fromString = function (s)
+        local v = splitString(s, ",")
+        return { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
+    end,
     validate = function(o)
         local t = type(o)
         if t == "number" then
@@ -581,8 +599,11 @@ BaseValidator = {
         end
     end
 }, colour = {
-    allowsState = true,
     default = nil,
+    fromString = function (s)
+        local v = splitString(s, ",")
+        return {tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3])}
+    end,
     validate = function(o)
         if type(o) == "table" then
             if not (type(o[1]) == "number" or (type(o[1]) == "table" and o[1]["value"] ~= nil and o[1]["_type"] ~= nil) and
@@ -595,8 +616,10 @@ BaseValidator = {
         return nil, "GUSGUI: Invalid value for colour on element \"%s\""
     end
 }, onHover = {
-    allowsState = false,
     default = nil,
+    fromString = function (s)
+        error("GUSGUI: Can't convert a string value into a function")
+    end,
     validate = function(o)
         if type(o) == "function" then
             return o
@@ -604,13 +627,10 @@ BaseValidator = {
         return nil, "GUSGUI: Invalid value for onHover on element \"%s\""
     end
 }, hover = {
-    allowsState = false,
     validate = function(o)
-        -- hover config isn't validated
         return o
     end
 }, hidden = {
-    allowsState = true,
     fromString = function(s)
         return s == "true"
     end,
@@ -622,7 +642,6 @@ BaseValidator = {
     end
 }, overrideZ = {
     default = nil,
-    allowsState = true,
     fromString = function(s)
         return tonumber(s)
     end,
@@ -634,8 +653,10 @@ BaseValidator = {
         return nil, "GUSGUI: Invalid value for overrideZ on element \"%s\""
     end
 }, onBeforeRender = {
-    allowsState = false,
     default = nil,
+    fromString = function (s)
+        error("GUSGUI: Can't convert a string value into a function")
+    end,
     validate = function(o)
         local t = type(o)
         if t == "function" then
@@ -644,8 +665,10 @@ BaseValidator = {
         return nil, "GUSGUI: Invalid value for onBeforeRender on element \"%s\""
     end
 }, onAfterRender = {
-    allowsState = false,
     default = nil,
+    fromString = function (s)
+        error("GUSGUI: Can't convert a string value into a function")
+    end,
     validate = function(o)
         local t = type(o)
         if t == "function" then

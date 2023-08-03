@@ -10,7 +10,6 @@ local ImageButton = class(GuiElement, function(o, config)
     GuiElement.init(o, config, {scaleX = {
         required = false,
         default = 1,
-        allowsState = false,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -22,7 +21,6 @@ local ImageButton = class(GuiElement, function(o, config)
     }, scaleY = {
         required = false,
         default = 1,
-        allowsState = false,
         fromString = function(s)
             return tonumber(s)
         end,
@@ -33,7 +31,9 @@ local ImageButton = class(GuiElement, function(o, config)
         end
     }, src = {
         required = true,
-        allowsState = true,
+        fromString = function (s)
+            return s
+        end,
         validate = function(o)
             if type(o) == "string" then
                 return o
@@ -41,6 +41,9 @@ local ImageButton = class(GuiElement, function(o, config)
         end
     }, onClick = {
         required = true,
+        fromString = function (s)
+            error("GUSGUI: Can't convert a string value into a function")
+        end,
         validate = function(o)
             if type(o) == "function" then
                 return o
