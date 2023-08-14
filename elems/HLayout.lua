@@ -57,6 +57,9 @@ function HLayout:GetBaseElementSize()
 end
 
 function HLayout:GetManagedXY(elem)
+    if (elem._config.hidden) then
+        return 0, 0
+    end
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
     self.nextX = self.nextX or self.baseX + self._config.padding.left + offsets.offsetX

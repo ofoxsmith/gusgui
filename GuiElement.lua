@@ -297,7 +297,7 @@ function GuiElement:Render()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
     end
-    if self._config.hidden then
+    if not self._config.visible or self._config.hidden then
         return
     end
     if self._config.drawBorder then
@@ -334,6 +334,18 @@ function GuiElement:GetElementSize()
     local offsetY = (baseH - iH) * self._config.verticalAlign
     local width = baseW + self._config.padding.left + self._config.padding.right + borderSize
     local height = baseH + self._config.padding.top + self._config.padding.bottom + borderSize
+    if self._config.hidden then
+        return {
+            baseW = 0,
+            baseH = 0,
+            width = 0,
+            height = 0,
+            paddingW = 0,
+            paddingH = 0,
+            offsetX = 0,
+            offsetY = 0
+        }
+    end
     return {
         baseW = baseW,
         baseH = baseH,
@@ -630,7 +642,19 @@ BaseValidator = {
     validate = function(o)
         return o
     end
+}, visible = {
+    default = true,
+    fromString = function(s)
+        return s == "true"
+    end,
+    validate = function(o)
+        if type(o) == "boolean" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for visible on element \"%s\""
+    end
 }, hidden = {
+    default = false,
     fromString = function(s)
         return s == "true"
     end,

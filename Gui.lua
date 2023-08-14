@@ -12,17 +12,29 @@ end
 
 local GuiElements = {}
 do
+    ---@module "Text"
     local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
+    ---@module "Button"
     local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
+    ---@module "Image"
     local Image = dofile_once("GUSGUI_PATHelems/Image.lua")
+    ---@module "ImageButton"
     local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
+    ---@module "HLayout"
     local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
+    ---@module "HLayoutForEach"
     local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
+    ---@module "VLayoutForEach"
     local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
+    ---@module "VLayout"
     local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
+    ---@module "Slider"
     local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
+    ---@module "TextInput"
     local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
+    ---@module "ProgressBar"
     local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
+    ---@module "Checkbox"
     local Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua")
     GuiElements = {
         Text = Text,
@@ -192,6 +204,7 @@ function Gui:GetElementsByClass(className)
     return elems
 end
 
+---@param message string
 function Gui:Log(message)
     if self.enableLogging then
         print(message)

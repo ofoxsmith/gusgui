@@ -53,6 +53,9 @@ function VLayout:GetBaseElementSize()
 end
 
 function VLayout:GetManagedXY(elem)
+    if (elem._config.hidden) then
+        return 0, 0
+    end
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
     self.nextX = self.nextX or (self.baseX + self._config.padding.left + offsets.offsetX)
@@ -60,7 +63,7 @@ function VLayout:GetManagedXY(elem)
     local x = self.nextX + elem._config.margin.left
     local y = self.nextY + elem._config.margin.top
     self.nextY = self.nextY + elemsize.height + elem._config.margin.top + elem._config.margin.bottom
-    if elem._config.drawBorder then 
+    if elem._config.drawBorder then
         x = x + 2
         y = y + 2
     end
