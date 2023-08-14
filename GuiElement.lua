@@ -642,17 +642,6 @@ BaseValidator = {
     validate = function(o)
         return o
     end
-}, visible = {
-    default = true,
-    fromString = function(s)
-        return s == "true"
-    end,
-    validate = function(o)
-        if type(o) == "boolean" then
-            return o
-        end
-        return nil, "GUSGUI: Invalid value for visible on element \"%s\""
-    end
 }, hidden = {
     default = false,
     fromString = function(s)
@@ -664,7 +653,18 @@ BaseValidator = {
         end
         return nil, "GUSGUI: Invalid value for hidden on element \"%s\""
     end
-}, overrideZ = {
+}, visible = {
+    default = true,
+    fromString = function(s)
+        return s == "true"
+    end,
+    validate = function(o)
+        if type(o) == "boolean" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for visible on element \"%s\""
+    end
+ }, overrideZ = {
     default = nil,
     fromString = function(s)
         return tonumber(s)

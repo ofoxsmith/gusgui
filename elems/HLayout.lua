@@ -47,19 +47,19 @@ function HLayout:GetBaseElementSize()
     local totalH = 0
     for i = 1, #self.children do
         local child = self.children[i]
-        local size = child:GetElementSize()
-        local w = math.max(size.width + child._config.margin.left + child._config.margin.right)
-        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom)
-        totalW = totalW + w
-        totalH = math.max(totalH, h)
+        if not child._config.hidden then
+            local size = child:GetElementSize()
+            local w = math.max(size.width + child._config.margin.left + child._config.margin.right)
+            local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom)
+            totalW = totalW + w
+            totalH = math.max(totalH, h)
+        end
     end
     return totalW, totalH
 end
 
 function HLayout:GetManagedXY(elem)
-    if (elem._config.hidden) then
-        return 0, 0
-    end
+    if elem._config.hidden then return 0, 0 end
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
     self.nextX = self.nextX or self.baseX + self._config.padding.left + offsets.offsetX
