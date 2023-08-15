@@ -104,7 +104,6 @@ function Gui:GetState(s)
     return item
 end
 
-
 --- @param data GuiElement
 --- @return GuiElement data The element added.
 function Gui:AddElement(data)
@@ -288,8 +287,13 @@ function CreateGUIFromXML(filename, funcs, config)
         error("GUSGUI: Loading GUI XML files can only be done in init.lua", 2)
     end
     local gui = Gui(config)
-    --#region xml parsing
-    --#endregion
+    local data
+    do
+        local xml2lua = dofile("xml2lua.lua")
+        local handler = xml2lua.getTree()
+        local parser = xml2lua.parser(handler)
+        data = parser:parse(ModTextFileGetContent(filename))
+    end
     return gui
 end
 
