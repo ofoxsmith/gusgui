@@ -283,17 +283,86 @@ end
 --- @return Gui
 --- @nodiscard
 function CreateGUIFromXML(filename, funcs, config)
-    if not ModTextFileGetContent then
-        error("GUSGUI: Loading GUI XML files can only be done in init.lua", 2)
+    local function throwErr(err)
+        error(("GUSGUI XML: Parsing %s failed:"):format(filename) .. err, 3)
     end
+
+    if not ModTextFileGetContent then
+        throwErr("Loading GUI XML files can only be done when ModTextFileGetContent is available")
+    end
+
     local gui = Gui(config)
+    local StyleElem
     local data
     do
-        local xml2lua = dofile("xml2lua.lua")
+        local xml2lua = dofile("GUSGUI_PATH/xml2lua.lua")
         local handler = xml2lua.getTree()
-        local parser = xml2lua.parser(handler)
-        data = parser:parse(ModTextFileGetContent(filename))
+        local parser = xml2lua.parser(handler):new()
+        parser:parse(ModTextFileGetContent(filename))
+        data = handler.root._children
     end
+
+    --Main parsing function
+    ---@param elem table
+    ---@param parent GuiElement?
+    local function parseElementAndChildren(elem, parent)
+        if GuiElements[elem._name] == nil then
+            throwErr("Unrecognised element type: \"" .. elem._name .. "\". Make sure that types use the correct case.")
+        end
+        ---@type GuiElement
+        local newElement = GuiElements[elem._name]()
+        
+        --Read config options and apply them to new element
+        for k, v in pairs(elem._attr) do
+            local convert = BaseValidator[k] or newElement.extendedValidator[k]
+            if convert == nil then
+                throwErr("Unrecognised inline config name: \"" .. k .. "\".")
+            end
+            --TODO - REMAKE CONFIGPARSER.LUA AND ADD IT HERE
+            --TODO - ADD STATESTRING TO STATETABLE FUNCTION
+        end
+
+        --If element contains a text body, read it
+        if #(elem._children) == 1 and elem._children[1]._type == "TEXT" then
+            if elem._name == "Text" then
+                newElement:ApplyConfig("value", elem._text)
+            end
+            if elem._name == "Button" then
+                newElement:ApplyConfig("text", elem._text)
+            end
+            if elem._name == "Image" then
+                newElement:ApplyConfig("src", elem._text)
+            end
+            if elem._name == "ImageButton" then
+                newElement:ApplyConfig("src", elem._text)
+            end
+        end
+
+        --Parse all children
+        for index, value in ipairs(elem._children) do
+            parseElementAndChildren(value, newElement)
+        end
+
+        ---Add element to gui tree
+        if not parent then
+            gui:AddElement(newElement)
+        else 
+            parent:AddChild(newElement)
+        end
+    end
+    
+    --Main parsing loop
+    for _, value in ipairs(data) do
+        if value._name == "Style" then
+            if StyleElem ~= nil then
+                throwErr("Only one style element is allowed - combine styles into one tag or convert to inline config")
+            end
+            StyleElem = value
+        else
+            parseElementAndChildren(value)
+        end
+    end
+
     return gui
 end
 
