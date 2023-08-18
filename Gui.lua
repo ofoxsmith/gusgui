@@ -373,22 +373,61 @@ function CreateGUIFromXML(filename, funcs, config)
             if convert == nil then
                 throwErr("Unrecognised inline config name: \"" .. k .. "\".")
             end
-            --TODO - REMAKE CONFIGPARSER.LUA AND ADD IT HERE
+            local value
+            if v:find("State([a-zA-Z]+)") then
+                value = gui:StateStringToTable(v)
+            else 
+                ---@diagnostic disable-next-line: need-check-nil
+                value = convert.fromString(v)
+            end
+            newElement:ApplyConfig(k, value)
         end
 
         --If element contains a text body, read it
         if #(elem._children) == 1 and elem._children[1]._type == "TEXT" then
             if elem._name == "Text" then
-                newElement:ApplyConfig("value", elem._text)
+                local v = elem._text
+                local value
+                if v:find("State([a-zA-Z]+)") then
+                    value = gui:StateStringToTable(v)
+                else 
+                    ---@diagnostic disable-next-line: need-check-nil
+                    value = newElement.extendedValidator["value"].fromString(v)
+                end
+                newElement:ApplyConfig("value", value)
             end
             if elem._name == "Button" then
-                newElement:ApplyConfig("text", elem._text)
+                local v = elem._text
+                local value
+                if v:find("State([a-zA-Z]+)") then
+                    value = gui:StateStringToTable(v)
+                else 
+                    ---@diagnostic disable-next-line: need-check-nil
+                    value = newElement.extendedValidator["text"].fromString(v)
+                end
+                newElement:ApplyConfig("text", value)
             end
             if elem._name == "Image" then
-                newElement:ApplyConfig("src", elem._text)
+                local v = elem._text
+                local value
+                if v:find("State([a-zA-Z]+)") then
+                    value = gui:StateStringToTable(v)
+                else 
+                    ---@diagnostic disable-next-line: need-check-nil
+                    value = newElement.extendedValidator["src"].fromString(v)
+                end
+                newElement:ApplyConfig("src", value)
             end
             if elem._name == "ImageButton" then
-                newElement:ApplyConfig("src", elem._text)
+                local v = elem._text
+                local value
+                if v:find("State([a-zA-Z]+)") then
+                    value = gui:StateStringToTable(v)
+                else 
+                    ---@diagnostic disable-next-line: need-check-nil
+                    value = newElement.extendedValidator["ImageButton"].fromString(v)
+                end
+                newElement:ApplyConfig("ImageButton", value)
             end
         end
 
