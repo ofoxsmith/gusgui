@@ -53,6 +53,7 @@ do
 end
 
 
+
 --- @class Gui
 --- @field classOverrides table
 --- @field guiobj userdata
@@ -102,6 +103,60 @@ function Gui:GetState(s)
         end
     end
     return item
+end
+
+---@param str string
+---@return State
+function Gui:StateStringToTable(str)
+    local StateTypes = {
+        Value = Gui.StateValue,
+        Add = Gui.StateAdd,
+        Subtract = Gui.StateSubtract,
+        Divide = Gui.StateDivide,
+        Multiply = Gui.StateMultiply,
+        Global = Gui.StateGlobal
+    }    
+    ---@type string[]
+    local vals = {}
+    if str:find("State[a-zA-Z]+") == 1 then
+        while true do
+            local c = false
+            str = str:gsub("%([a-zA-Z0-9,%% ]+%)", function (s)
+                c = true
+                ---@cast s string
+                table.insert(vals, s:sub(1, -1))
+                return "%%" .. #vals
+            end)
+            if c == false then break end
+        end
+    end
+    ---@param a string
+    ---@return State
+    local function resolve(a)
+        local type = a:match("State([a-zA-Z]+)")
+        if StateTypes[type] == nil then error(("GUSGUI: Failed to read state value string")) end
+        local val = vals[tonumber(a:match("([0-9]+)"))]
+        if type == "Add" or type == "Subtract" or type == "Divide" or type == "Multiply" then
+            local val1 = val:match("^[^,]+")
+            local val2 = val:match("[^,]+$")
+            local res1, res2
+            if val1:match("State([a-zA-Z]+)") then
+                res1 = resolve(val1)
+            end
+            if val2:match("State([a-zA-Z]+)") then
+                res2 = resolve(val2)
+            end
+            if tonumber(val1) ~= nil then res1 = tonumber(val1) end
+            if tonumber(val2) ~= nil then res2 = tonumber(val2) end
+            if res1 == nil or res2 == nil then error("GUSGUI: Failed to parse param to State" .. type) end
+            return StateTypes[type](self, res1, res2)
+        end
+        if type == "Global" or type == "Value" then
+            return StateTypes[type](self, val)
+        end
+        error("GUSGUI: Unknown state type in state string")
+    end
+    return resolve(str)
 end
 
 --- @param data GuiElement
@@ -319,7 +374,6 @@ function CreateGUIFromXML(filename, funcs, config)
                 throwErr("Unrecognised inline config name: \"" .. k .. "\".")
             end
             --TODO - REMAKE CONFIGPARSER.LUA AND ADD IT HERE
-            --TODO - ADD STATESTRING TO STATETABLE FUNCTION
         end
 
         --If element contains a text body, read it
@@ -400,7 +454,7 @@ end
 
 --- @param s string
 --- @return State
-function Gui:GlobalValue(s)
+function Gui:StateGlobal(s)
     local o = {
         _type = "global",
         value = s,
