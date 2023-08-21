@@ -29,9 +29,10 @@ local TextInput = class(GuiElement, function(o, config)
         end
     }, onEdit = {
         required = true,
-        fromString = function (s)
-            error("GUSGUI: Can't convert a string value into a function")
-        end,
+        fromString = function (s, funcs)
+            if funcs[s] then return funcs[s] end
+            error("GUSGUI: Unknown function name" .. s)
+            end,
         canHover = false,
         validate = function(o)
             if type(o) == "function" then

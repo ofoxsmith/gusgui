@@ -378,7 +378,7 @@ function CreateGUIFromXML(filename, funcs, config)
                 value = gui:StateStringToTable(v)
             else 
                 ---@diagnostic disable-next-line: need-check-nil
-                value = convert.fromString(v)
+                value = convert.fromString(v, funcs)
             end
             newElement:ApplyConfig(k, value)
         end
