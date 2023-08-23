@@ -1,6 +1,25 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local HLayoutConf = {
+    alignChildren = {
+        default = 0,
+        fromString = function(s)
+            return tonumber(s)
+        end,
+        validate = function(o)
+            local t = type(o)
+            if t == "number" then
+                if not (0 <= o and o <= 1) then
+                    return nil,
+                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
+                end
+                return o
+            end
+            return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
+        end
+    }
+}
 --- @class HLayout: GuiElement
 --- @field lastUpdate number
 --- @field hasInit boolean
@@ -11,25 +30,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @operator call: HLayout
 local HLayout = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, {
-        alignChildren = {
-            default = 0,
-            fromString = function(s)
-                return tonumber(s)
-            end,
-            validate = function(o)
-                local t = type(o)
-                if t == "number" then
-                    if not (0 <= o and o <= 1) then
-                        return nil,
-                            "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
-                    end
-                    return o
-                end
-                return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
-            end
-        }
-    })
+    GuiElement.init(o, config, HLayoutConf)
     o.type = "HLayout"
     o.allowsChildren = true
     o.childrenResolved = false
@@ -100,4 +101,5 @@ function HLayout:Draw(x, y)
     end
 end
 
+HLayout.extConf = HLayoutConf
 return HLayout

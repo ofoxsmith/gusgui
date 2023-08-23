@@ -14,24 +14,25 @@ end
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local TextConf = {value = {
+    required = true,
+    fromString = function (s)
+        return s
+    end,
+    validate = function(o)
+        if type(o) == "string" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for value on element \"%s\""
+    end
+}}
 --- @class Text: GuiElement
 --- @field maskID number
 --- @field hoverMaskID number
 --- @operator call: Text
 local Text = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, {value = {
-        required = true,
-        fromString = function (s)
-            return s
-        end,
-        validate = function(o)
-            if type(o) == "string" then
-                return o
-            end
-            return nil, "GUSGUI: Invalid value for value on element \"%s\""
-        end
-    }})
+    GuiElement.init(o, config, TextConf)
     o.type = "Text"
     o.allowsChildren = false
 end)
@@ -85,4 +86,5 @@ function Text:Draw(x, y)
     else self.useHoverConfigForNextFrame = false end
 end
 
+Text.extConf = TextConf
 return Text

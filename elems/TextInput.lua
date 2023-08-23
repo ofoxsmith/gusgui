@@ -1,6 +1,40 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local TextInputConf = {maxLength = {
+    default = 50,
+    fromString = function(s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, width = {
+    default = 25,
+    fromString = function(o)
+        return tonumber(o)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, onEdit = {
+    required = true,
+    fromString = function (s, funcs)
+        if funcs[s] then return funcs[s] end
+        error("GUSGUI: Unknown function name" .. s)
+        end,
+    canHover = false,
+    validate = function(o)
+        if type(o) == "function" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for onEdit on element \"%s\""
+    end
+}}
 --- @class TextInput: GuiElement
 --- @field hoverMaskID number
 --- @field maskID number
@@ -8,40 +42,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @operator call: TextInput
 local TextInput = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, {maxLength = {
-        default = 50,
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, width = {
-        default = 25,
-        fromString = function(o)
-            return tonumber(o)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, onEdit = {
-        required = true,
-        fromString = function (s, funcs)
-            if funcs[s] then return funcs[s] end
-            error("GUSGUI: Unknown function name" .. s)
-            end,
-        canHover = false,
-        validate = function(o)
-            if type(o) == "function" then
-                return o
-            end
-            return nil, "GUSGUI: Invalid value for onEdit on element \"%s\""
-        end
-    }})
+    GuiElement.init(o, config, TextInputConf)
     o.type = "TextInput"
     o.allowsChildren = false
 end)
@@ -76,4 +77,5 @@ function TextInput:Draw(x, y)
     else self.useHoverConfigForNextFrame = false end
 end
 
+TextInput.extConf = TextInputConf
 return TextInput

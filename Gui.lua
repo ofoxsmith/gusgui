@@ -341,18 +341,21 @@ function CreateGUIFromXML(filename, funcs, config)
     funcs = funcs or {}
     config = config or {}
     local function throwErr(err)
-        error(("GUSGUI XML: Parsing %s failed:"):format(filename) .. err, 3)
+        error(("GUSGUI XML: Parsing %s failed: "):format(filename) .. err, 3)
     end
 
     if not ModTextFileGetContent then
         throwErr("Loading GUI XML files can only be done when ModTextFileGetContent is available")
     end
 
+    if ModTextFileGetContent(filename) == nil then 
+        throwErr("File does not exist")
+    end
     local gui = Gui(config)
     local StyleElem
     local data
     do
-        local xml2lua = dofile("GUSGUI_PATHxml2lua.lua")
+        local xml2lua = dofile_once("GUSGUI_PATHxml2lua.lua")
         local dom = xml2lua.getTree():new()
         local parser = xml2lua.parser(dom)
         parser:parse(ModTextFileGetContent(filename))
@@ -366,16 +369,16 @@ function CreateGUIFromXML(filename, funcs, config)
         if GuiElements[elem._name] == nil then
             throwErr("Unrecognised element type: \"" .. elem._name .. "\". Make sure that types use the correct case.")
         end
-        ---@type GuiElement
-        local newElement = GuiElements[elem._name]()
-        
-        --Read config options and apply them to new element
+        elem._attr = elem._attr or {}
+        local confTable = {}
+        --Read config options and apply them to table
         for k, v in pairs(elem._attr) do
             ---@cast k string
             ---@cast v unknown
-            local convert = BaseValidator[k] or newElement.extendedValidator[k]
+            local convert = BaseValidator[k] or GuiElements[elem._name].extConf[k]
             if convert == nil then
-                if k:match("^hover-") then
+                if k:match("^hover%-") then
+                    convert = BaseValidator[k:gsub("hover%-", "")] or GuiElements[elem._name].extConf[k:gsub("hover%-", "")]
                     local value
                     if v:find("State([a-zA-Z]+)") then
                         value = gui:StateStringToTable(v)
@@ -383,73 +386,79 @@ function CreateGUIFromXML(filename, funcs, config)
                         ---@diagnostic disable-next-line: need-check-nil
                         value = convert.fromString(v, funcs)
                     end
-                    newElement._config.hover = newElement._config.hover or {}
-                    newElement._config.hover[k:gsub("hover-", "")] = value
+                    confTable.hover = confTable.hover or {}
+                    confTable.hover[k:gsub("hover%-", "")] = value
                 else 
                     throwErr("Unrecognised inline config name: \"" .. k .. "\".")
                 end
+            else
+                local value
+                if v:find("State([a-zA-Z]+)") then
+                    value = gui:StateStringToTable(v)
+                else 
+                    ---@diagnostic disable-next-line: need-check-nil
+                    value = convert.fromString(v, funcs)
+                end
+                confTable[k] = value
             end
-            local value
-            if v:find("State([a-zA-Z]+)") then
-                value = gui:StateStringToTable(v)
-            else 
-                ---@diagnostic disable-next-line: need-check-nil
-                value = convert.fromString(v, funcs)
-            end
-            newElement:ApplyConfig(k, value)
         end
 
         --If element contains a text body, read it
         if #(elem._children) == 1 and elem._children[1]._type == "TEXT" then
             if elem._name == "Text" then
-                local v = elem._text
+                local v = elem._children[1]._text
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else 
                     ---@diagnostic disable-next-line: need-check-nil
-                    value = newElement.extendedValidator["value"].fromString(v)
+                    value = GuiElements[elem._name].extConf["value"].fromString(v)
                 end
-                newElement:ApplyConfig("value", value)
+                confTable.value = value
             end
             if elem._name == "Button" then
-                local v = elem._text
+                local v = elem._children[1]._text
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else 
                     ---@diagnostic disable-next-line: need-check-nil
-                    value = newElement.extendedValidator["text"].fromString(v)
+                    value = GuiElements[elem._name].extConf["text"].fromString(v)
                 end
-                newElement:ApplyConfig("text", value)
+                confTable.text = value
             end
             if elem._name == "Image" then
-                local v = elem._text
+                local v = elem._children[1]._text
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else 
                     ---@diagnostic disable-next-line: need-check-nil
-                    value = newElement.extendedValidator["src"].fromString(v)
+                    value = GuiElements[elem._name].extConf["src"].fromString(v)
                 end
-                newElement:ApplyConfig("src", value)
+                confTable.src = value
             end
             if elem._name == "ImageButton" then
-                local v = elem._text
+                local v = elem._children[1]._text
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else 
                     ---@diagnostic disable-next-line: need-check-nil
-                    value = newElement.extendedValidator["ImageButton"].fromString(v)
+                    value = GuiElements[elem._name].extConf["src"].fromString(v)
                 end
-                newElement:ApplyConfig("ImageButton", value)
+                confTable.src = value
             end
         end
 
+        ---@type GuiElement
+        local newElement = GuiElements[elem._name](confTable)
+        newElement.gui = gui
         --Parse all children
         for index, value in ipairs(elem._children) do
-            parseElementAndChildren(value, newElement)
+            if value._type == "ELEMENT" then
+                parseElementAndChildren(value, newElement)
+            end
         end
 
         ---Add element to gui tree
