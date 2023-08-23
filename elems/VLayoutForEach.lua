@@ -5,6 +5,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field lastUpdate number|nil
 --- @operator call: VLayoutForEach
 local VLayoutForEach = class(VLayout, function(o, config)
+    config = config or {}
     VLayout.init(o, config, {type = {
         required = true,
         fromString = function (s)

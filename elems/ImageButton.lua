@@ -7,6 +7,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field buttonID number
 --- @operator call: ImageButton
 local ImageButton = class(GuiElement, function(o, config)
+    config = config or {}
     GuiElement.init(o, config, {scaleX = {
         required = false,
         default = 1,

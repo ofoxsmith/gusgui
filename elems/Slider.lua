@@ -6,6 +6,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field renderID number
 --- @operator call: Slider
 local Slider = class(GuiElement, function(o, config)
+    config = config or {}
     GuiElement.init(o, config, {min = {
         default = 0,
         fromString = function(s)

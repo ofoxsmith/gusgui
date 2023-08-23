@@ -333,11 +333,13 @@ function CreateGUI(config)
 end
 
 --- @param filename string
---- @param funcs table
---- @param config table
+--- @param funcs table?
+--- @param config table?
 --- @return Gui
 --- @nodiscard
 function CreateGUIFromXML(filename, funcs, config)
+    funcs = funcs or {}
+    config = config or {}
     local function throwErr(err)
         error(("GUSGUI XML: Parsing %s failed:"):format(filename) .. err, 3)
     end
@@ -350,11 +352,11 @@ function CreateGUIFromXML(filename, funcs, config)
     local StyleElem
     local data
     do
-        local xml2lua = dofile("GUSGUI_PATH/xml2lua.lua")
-        local handler = xml2lua.getTree()
-        local parser = xml2lua.parser(handler):new()
+        local xml2lua = dofile("GUSGUI_PATHxml2lua.lua")
+        local dom = xml2lua.getTree():new()
+        local parser = xml2lua.parser(dom)
         parser:parse(ModTextFileGetContent(filename))
-        data = handler.root._children
+        data = dom.root._children
     end
 
     --Main parsing function
@@ -369,9 +371,23 @@ function CreateGUIFromXML(filename, funcs, config)
         
         --Read config options and apply them to new element
         for k, v in pairs(elem._attr) do
+            ---@cast k string
+            ---@cast v unknown
             local convert = BaseValidator[k] or newElement.extendedValidator[k]
             if convert == nil then
-                throwErr("Unrecognised inline config name: \"" .. k .. "\".")
+                if k:match("^hover-") then
+                    local value
+                    if v:find("State([a-zA-Z]+)") then
+                        value = gui:StateStringToTable(v)
+                    else 
+                        ---@diagnostic disable-next-line: need-check-nil
+                        value = convert.fromString(v, funcs)
+                    end
+                    newElement._config.hover = newElement._config.hover or {}
+                    newElement._config.hover[k:gsub("hover-", "")] = value
+                else 
+                    throwErr("Unrecognised inline config name: \"" .. k .. "\".")
+                end
             end
             local value
             if v:find("State([a-zA-Z]+)") then

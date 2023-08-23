@@ -5,6 +5,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field lastUpdate number|nil
 --- @operator call: HLayoutForEach
 local HLayoutForEach = class(HLayout, function(o, config)
+    config = config or {}
     HLayout.init(o, config, {type = {
         required = true,
         fromString = function (s)

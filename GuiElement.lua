@@ -26,6 +26,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field z number
 --- @operator call: GuiElement
 local GuiElement = class(function(Element, config, extended)
+    config = config or {}
     extended = extended or {}
     Element.id = config.id
     Element.uid = GetNextUID()

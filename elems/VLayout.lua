@@ -10,6 +10,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field maskID number
 --- @operator call: VLayout
 local VLayout = class(GuiElement, function(o, config)
+    config = config or {}
     GuiElement.init(o, config, {alignChildren = {
         default = 0,
         fromString = function(s)

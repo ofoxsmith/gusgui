@@ -6,6 +6,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field sbgID number
 --- @operator call: ProgressBar
 local ProgressBar = class(GuiElement, function(o, config)
+    config = config or {}
     GuiElement.init(o, config, {width = {
         default = 50,
         required = false,

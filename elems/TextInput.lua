@@ -7,6 +7,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field inputID number
 --- @operator call: TextInput
 local TextInput = class(GuiElement, function(o, config)
+    config = config or {}
     GuiElement.init(o, config, {maxLength = {
         default = 50,
         fromString = function(s)
