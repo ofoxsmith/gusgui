@@ -124,7 +124,7 @@ function Gui:StateStringToTable(str)
             str = str:gsub("%([a-zA-Z0-9,%% ]+%)", function(s)
                 c = true
                 ---@cast s string
-                table.insert(vals, s:sub(1, -1))
+                table.insert(vals, s:sub(2, -2))
                 return "%%" .. #vals
             end)
             if c == false then break end
@@ -389,6 +389,8 @@ function CreateGUIFromXML(filename, funcs, config)
                     end
                     confTable.hover = confTable.hover or {}
                     confTable.hover[k:gsub("hover%-", "")] = value
+                elseif k == "id" then
+                    confTable.id = v
                 else
                     throwErr("Unrecognised inline config name: \"" .. k .. "\".")
                 end
@@ -473,13 +475,15 @@ function CreateGUIFromXML(filename, funcs, config)
 
     --Main parsing loop
     for _, value in ipairs(data) do
-        if value._name == "Style" then
-            if StyleElem ~= nil then
-                throwErr("Only one style element is allowed - combine styles into one tag or convert to inline config")
+        if value._type == "ELEMENT" then
+            if value._name == "Style" then
+                if StyleElem ~= nil then
+                    throwErr("Only one style element is allowed - combine styles into one tag or convert to inline config")
+                end
+                StyleElem = value
+            else
+                parseElementAndChildren(value)
             end
-            StyleElem = value
-        else
-            parseElementAndChildren(value)
         end
     end
 
