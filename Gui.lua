@@ -566,12 +566,13 @@ function CreateGUIFromXML(filename, funcs, config)
                 gui:RegisterConfigForClass(id:sub(2), resolvedTable)
             else
                 local elem = gui:GetElementById(id:sub(2))
-                if not elem then
-                    gui:Log("GUSGUI XML: Style element contains config for non-existent element id; config ignored.")
+                if elem then
                     for key, value in pairs(resolvedTable) do
                         ---@diagnostic disable-next-line: need-check-nil
                         elem:ApplyConfig(key, value)
                     end
+                else 
+                    gui:Log("GUSGUI XML: Style element contains config for non-existent element id; config ignored.")
                 end
             end
         end
