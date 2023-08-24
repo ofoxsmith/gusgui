@@ -115,13 +115,13 @@ function Gui:StateStringToTable(str)
         Divide = Gui.StateDivide,
         Multiply = Gui.StateMultiply,
         Global = Gui.StateGlobal
-    }    
+    }
     ---@type string[]
     local vals = {}
     if str:find("State[a-zA-Z]+") == 1 then
         while true do
             local c = false
-            str = str:gsub("%([a-zA-Z0-9,%% ]+%)", function (s)
+            str = str:gsub("%([a-zA-Z0-9,%% ]+%)", function(s)
                 c = true
                 ---@cast s string
                 table.insert(vals, s:sub(1, -1))
@@ -348,7 +348,7 @@ function CreateGUIFromXML(filename, funcs, config)
         throwErr("Loading GUI XML files can only be done when ModTextFileGetContent is available")
     end
 
-    if ModTextFileGetContent(filename) == nil then 
+    if ModTextFileGetContent(filename) == nil then
         throwErr("File does not exist")
     end
     local gui = Gui(config)
@@ -378,24 +378,25 @@ function CreateGUIFromXML(filename, funcs, config)
             local convert = BaseValidator[k] or GuiElements[elem._name].extConf[k]
             if convert == nil then
                 if k:match("^hover%-") then
-                    convert = BaseValidator[k:gsub("hover%-", "")] or GuiElements[elem._name].extConf[k:gsub("hover%-", "")]
+                    convert = BaseValidator[k:gsub("hover%-", "")] or
+                    GuiElements[elem._name].extConf[k:gsub("hover%-", "")]
                     local value
                     if v:find("State([a-zA-Z]+)") then
                         value = gui:StateStringToTable(v)
-                    else 
+                    else
                         ---@diagnostic disable-next-line: need-check-nil
                         value = convert.fromString(v, funcs)
                     end
                     confTable.hover = confTable.hover or {}
                     confTable.hover[k:gsub("hover%-", "")] = value
-                else 
+                else
                     throwErr("Unrecognised inline config name: \"" .. k .. "\".")
                 end
             else
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
-                else 
+                else
                     ---@diagnostic disable-next-line: need-check-nil
                     value = convert.fromString(v, funcs)
                 end
@@ -410,7 +411,7 @@ function CreateGUIFromXML(filename, funcs, config)
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
-                else 
+                else
                     ---@diagnostic disable-next-line: need-check-nil
                     value = GuiElements[elem._name].extConf["value"].fromString(v)
                 end
@@ -421,7 +422,7 @@ function CreateGUIFromXML(filename, funcs, config)
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
-                else 
+                else
                     ---@diagnostic disable-next-line: need-check-nil
                     value = GuiElements[elem._name].extConf["text"].fromString(v)
                 end
@@ -432,7 +433,7 @@ function CreateGUIFromXML(filename, funcs, config)
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
-                else 
+                else
                     ---@diagnostic disable-next-line: need-check-nil
                     value = GuiElements[elem._name].extConf["src"].fromString(v)
                 end
@@ -443,7 +444,7 @@ function CreateGUIFromXML(filename, funcs, config)
                 local value
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
-                else 
+                else
                     ---@diagnostic disable-next-line: need-check-nil
                     value = GuiElements[elem._name].extConf["src"].fromString(v)
                 end
@@ -461,14 +462,15 @@ function CreateGUIFromXML(filename, funcs, config)
             end
         end
 
+
         ---Add element to gui tree
         if not parent then
             gui:AddElement(newElement)
-        else 
+        else
             parent:AddChild(newElement)
         end
     end
-    
+
     --Main parsing loop
     for _, value in ipairs(data) do
         if value._name == "Style" then
@@ -481,6 +483,94 @@ function CreateGUIFromXML(filename, funcs, config)
         end
     end
 
+    local function splitString(s, delimiter)
+        local result = {}
+        local from = 1
+        local delim_from, delim_to = string.find(s, delimiter, from)
+        while delim_from do
+            table.insert(result, string.sub(s, from, delim_from - 1))
+            from = delim_to + 1
+            delim_from, delim_to = string.find(s, delimiter, from)
+        end
+        table.insert(result, string.sub(s, from))
+        return result
+    end
+
+    if StyleElem then
+        local StyleText = StyleElem._children[1]._text
+        if not StyleText then throwErr("Failed to find text in Style element") end
+        local Styles = {}
+        for m in StyleText:gmatch("[.#][a-zA-Z0-9]+ *{[^}]+}") do
+            local key = m:match("[.#][a-zA-Z0-9]+")
+            local values = splitString(
+            m:match("{([^}]+)}"):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s*[a-zA-Z]+[ :]+",
+                function(s) return s:gsub("^%s*", "") end), ";")
+            values[#values] = nil
+            local conf = {}
+            for _, value in ipairs(values) do
+                local t = value:match("^[^:]*")
+                local k = value:match("%s+([^:]*)$")
+                conf[t] = k
+            end
+            Styles[key] = conf
+        end
+
+        for id, conf in pairs(Styles) do
+            ---@cast id string
+            local resolvedTable = {}
+            for k, v in pairs(conf) do
+                ---@cast k string
+                ---@cast v unknown
+                local convert
+                do
+                    convert = BaseValidator[k:gsub("hover%-", "")]
+                    if convert == nil then
+                        for index, value in ipairs(GuiElements) do
+                            if value.extConf[k:gsub("hover%-", "")] then
+                                convert = value.extConf[k:gsub("hover%-", "")]
+                            end
+                        end
+                    end
+                    if convert == nil then
+                        if k:match("^hover%-") then
+                            local value
+                            if v:find("State([a-zA-Z]+)") then
+                                value = gui:StateStringToTable(v)
+                            else
+                                ---@diagnostic disable-next-line: need-check-nil
+                                value = convert.fromString(v, funcs)
+                            end
+                            resolvedTable.hover = resolvedTable.hover or {}
+                            resolvedTable.hover[k:gsub("hover%-", "")] = value
+                        else
+                            throwErr("Unrecognised inline config name: \"" .. k .. "\".")
+                        end
+                    else
+                        local value
+                        if v:find("State([a-zA-Z]+)") then
+                            value = gui:StateStringToTable(v)
+                        else
+                            ---@diagnostic disable-next-line: need-check-nil
+                            value = convert.fromString(v, funcs)
+                        end
+                        resolvedTable[k] = value
+                    end
+                end
+                if id[1] == "." then
+                    gui:RegisterConfigForClass(id:sub(2), resolvedTable)
+                else
+                    local elem = gui:GetElementById(id:sub(2))
+                    if not elem then
+                        gui:Log("GUSGUI XML: Style element contains config for non-existent element id; config ignored.")
+                        for key, value in pairs(resolvedTable) do
+                            ---@diagnostic disable-next-line: need-check-nil
+                            elem:ApplyConfig(key, value)
+                        end
+                    end
+                end
+            end
+        end
+    end
     return gui
 end
 
