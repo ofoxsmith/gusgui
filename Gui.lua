@@ -379,7 +379,7 @@ function CreateGUIFromXML(filename, funcs, config)
             if convert == nil then
                 if k:match("^hover%-") then
                     convert = BaseValidator[k:gsub("hover%-", "")] or
-                    GuiElements[elem._name].extConf[k:gsub("hover%-", "")]
+                        GuiElements[elem._name].extConf[k:gsub("hover%-", "")]
                     local value
                     if v:find("State([a-zA-Z]+)") then
                         value = gui:StateStringToTable(v)
@@ -478,7 +478,8 @@ function CreateGUIFromXML(filename, funcs, config)
         if value._type == "ELEMENT" then
             if value._name == "Style" then
                 if StyleElem ~= nil then
-                    throwErr("Only one style element is allowed - combine styles into one tag or convert to inline config")
+                    throwErr(
+                    "Only one style element is allowed - combine styles into one tag or convert to inline config")
                 end
                 StyleElem = value
             else
@@ -507,8 +508,8 @@ function CreateGUIFromXML(filename, funcs, config)
         for m in StyleText:gmatch("[.#][a-zA-Z0-9]+ *{[^}]+}") do
             local key = m:match("[.#][a-zA-Z0-9]+")
             local values = splitString(
-            m:match("{([^}]+)}"):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s*[a-zA-Z]+[ :]+",
-                function(s) return s:gsub("^%s*", "") end), ";")
+                m:match("{([^}]+)}"):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s*[a-zA-Z]+[ :]+",
+                    function(s) return s:gsub("^%s*", "") end), ";")
             values[#values] = nil
             local conf = {}
             for _, value in ipairs(values) do
@@ -560,16 +561,16 @@ function CreateGUIFromXML(filename, funcs, config)
                         resolvedTable[k] = value
                     end
                 end
-                if id[1] == "." then
-                    gui:RegisterConfigForClass(id:sub(2), resolvedTable)
-                else
-                    local elem = gui:GetElementById(id:sub(2))
-                    if not elem then
-                        gui:Log("GUSGUI XML: Style element contains config for non-existent element id; config ignored.")
-                        for key, value in pairs(resolvedTable) do
-                            ---@diagnostic disable-next-line: need-check-nil
-                            elem:ApplyConfig(key, value)
-                        end
+            end
+            if id[1] == "." then
+                gui:RegisterConfigForClass(id:sub(2), resolvedTable)
+            else
+                local elem = gui:GetElementById(id:sub(2))
+                if not elem then
+                    gui:Log("GUSGUI XML: Style element contains config for non-existent element id; config ignored.")
+                    for key, value in pairs(resolvedTable) do
+                        ---@diagnostic disable-next-line: need-check-nil
+                        elem:ApplyConfig(key, value)
                     end
                 end
             end
