@@ -566,7 +566,7 @@ function CreateGUIFromXML(filename, funcs, config)
                     end
                 end
             end
-            if id[1] == "." then
+            if id:sub(1,1) == "." then
                 gui:RegisterConfigForClass(id:sub(2), resolvedTable)
             else
                 local elem = gui:GetElementById(id:sub(2))
