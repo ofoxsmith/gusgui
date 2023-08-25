@@ -391,6 +391,8 @@ function CreateGUIFromXML(filename, funcs, config)
                     confTable.hover[k:gsub("hover%-", "")] = value
                 elseif k == "id" then
                     confTable.id = v
+                elseif k == "class" then
+                    confTable.class = v
                 else
                     throwErr("Unrecognised inline config name: \"" .. k .. "\".")
                 end
