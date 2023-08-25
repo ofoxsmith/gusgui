@@ -285,6 +285,9 @@ function GetNextUID()
 end
 
 function GuiElement:Render()
+    if not self._config.visible or self._config.hidden then
+        return
+    end
     if self._config.onBeforeRender then
         self._config.onBeforeRender(self, self.gui.state)
     end
@@ -297,9 +300,6 @@ function GuiElement:Render()
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
-    end
-    if not self._config.visible or self._config.hidden then
-        return
     end
     if self._config.drawBorder then
         self:RenderBorder(x, y, size.paddingW, size.paddingH)
