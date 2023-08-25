@@ -36,6 +36,7 @@ local GuiElement = class(function(Element, config, extended)
     Element.name = config.name or nil
     Element.config = {}
     Element._rawconfig = {}
+    Element._hoverconfig = config.hover or {}
     Element.useHoverConfigForNextFrame = false
     Element._rawchildren = {}
     Element._config = {}
@@ -51,9 +52,11 @@ local GuiElement = class(function(Element, config, extended)
         __index = function(t, k)
             local value = nil
             if Element.useHoverConfigForNextFrame == true then
-                value = Element._rawconfig.hover[k]
-                if value == nil or value.isDF == nil or value.value == nil then
+                value = Element._hoverconfig[k]
+                if value == nil then
                     value = Element._rawconfig[k]
+                else 
+                    value = {value = value}
                 end
             else
                 value = Element._rawconfig[k]
@@ -639,10 +642,6 @@ BaseValidator = {
             return o
         end
         return nil, "GUSGUI: Invalid value for onHover on element \"%s\""
-    end
-}, hover = {
-    validate = function(o)
-        return o
     end
 }, hidden = {
     default = false,

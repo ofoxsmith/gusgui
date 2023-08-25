@@ -43,8 +43,7 @@ local CheckboxConf = {defaultValue = {
 local Checkbox = class(GuiElement, function(o, config)
     config = config or {}
     GuiElement.init(o, config, CheckboxConf)
-    o._rawconfig.hover = o._rawconfig.hover or {}
-    o._rawconfig.hover.colour = o._rawconfig.hover.colour or {240,230,140}
+    o._hoverconfig.colour = o._hoverconfig.colour or {240,230,140}
     o.type = "Checkbox"
     o.allowsChildren = false
     o.value = o._config.defaultValue
