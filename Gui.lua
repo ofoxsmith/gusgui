@@ -115,10 +115,6 @@ function Gui:StateStringToTable(str)
         Divide = Gui.StateDivide,
         Multiply = Gui.StateMultiply,
         Global = Gui.StateGlobal,
-        ParentWidth = Gui.ParentWidth,
-        ParentHeight = Gui.ParentHeight,
-        Width = Gui.ElemWidth,
-        Height = Gui.ElemHeight
     }
     ---@type string[]
     local vals = {}
@@ -682,69 +678,6 @@ function Gui:StateDivide(a, b)
     }
 end
 
---- @param type "inner"|"total"
---- @return State
-function Gui:ParentWidth(type)
-    if type == "inner" then
-        return {
-            _type = "p_innerW",
-            value = ""
-        }
-    else
-        return {
-            _type = "p_totalW",
-            value = ""
-        }
-    end
-end
-
---- @param type "inner"|"total"
---- @return State
-function Gui:ParentHeight(type)
-    if type == "inner" then
-        return {
-            _type = "p_innerH",
-            value = ""
-        }
-    else
-        return {
-            _type = "p_totalH",
-            value = ""
-        }
-    end
-end
-
---- @param type "inner"|"total"
---- @return State
-function Gui:ElemWidth(type)
-    if type == "inner" then
-        return {
-            _type = "innerW",
-            value = ""
-        }
-    else
-        return {
-            _type = "totalW",
-            value = ""
-        }
-    end
-end
-
---- @param type "inner"|"total"
---- @return State
-function Gui:ElemHeight(type)
-    if type == "inner" then
-        return {
-            _type = "innerH",
-            value = ""
-        }
-    else
-        return {
-            _type = "totalH",
-            value = ""
-        }
-    end
-end
 
 return {
     Create = CreateGUI,
