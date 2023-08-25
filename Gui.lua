@@ -114,7 +114,11 @@ function Gui:StateStringToTable(str)
         Subtract = Gui.StateSubtract,
         Divide = Gui.StateDivide,
         Multiply = Gui.StateMultiply,
-        Global = Gui.StateGlobal
+        Global = Gui.StateGlobal,
+        ParentWidth = Gui.ParentWidth,
+        ParentHeight = Gui.ParentHeight,
+        Width = Gui.ElemWidth,
+        Height = Gui.ElemHeight
     }
     ---@type string[]
     local vals = {}
@@ -152,6 +156,8 @@ function Gui:StateStringToTable(str)
             return StateTypes[type](self, res1, res2)
         end
         if type == "Global" or type == "Value" then
+            return StateTypes[type](self, val)
+        else 
             return StateTypes[type](self, val)
         end
         error("GUSGUI: Unknown state type in state string")
