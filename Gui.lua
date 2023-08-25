@@ -512,7 +512,7 @@ function CreateGUIFromXML(filename, funcs, config)
         for m in StyleText:gmatch("[.#][a-zA-Z0-9]+ *{[^}]+}") do
             local key = m:match("[.#][a-zA-Z0-9]+")
             local values = splitString(
-                m:match("{([^}]+)}"):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s*[a-zA-Z]+[ :]+",
+                m:match("{([^}]+)}"):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s*[a-zA-Z%-]+[ :]+",
                     function(s) return s:gsub("^%s*", "") end), ";")
             values[#values] = nil
             local conf = {}
