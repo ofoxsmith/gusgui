@@ -63,7 +63,10 @@ local GuiElement = class(function(Element, config, extended)
             end
             if Element.class ~= "" and value.isDF then
                 for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do
-                    if Element.gui.classOverrides[cls] then
+                    if Element.useHoverConfigForNextFrame and Element.gui.classOverrides[cls].hover[k] then
+                        value = {value = Element.gui.classOverrides[cls].hover[k]}
+                    end
+                    if value.isDF and Element.gui.classOverrides[cls] then
                         value = Element.gui.classOverrides[cls][k]
                     end
                 end
@@ -618,7 +621,7 @@ BaseValidator = {
     default = nil,
     fromString = function (s)
         local v = splitString(s, ",")
-        return {tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3])}
+        return {tonumber(v[1]), tonumber(v[2]), tonumber(v[3])}
     end,
     validate = function(o)
         if type(o) == "table" then

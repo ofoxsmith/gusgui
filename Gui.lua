@@ -180,32 +180,37 @@ end
 --- @param classname string
 ---@param config table
 function Gui:RegisterConfigForClass(classname, config)
-    local configobj = {}
+    self.classOverrides[classname] = {}
     for k, v in pairs(config) do
-        local validator = BaseValidator[k]
-        local t = type(v)
-        if t == "table" and v["_type"] ~= nil and v["value"] then
-            configobj[k] = {
-                value = v,
+        if k:match("^hover%-") then
+            self.classOverrides[classname].hover = self.classOverrides[classname].hover or {}
+            self.classOverrides[classname].hover[k:gsub("hover%-", "")] = v
+        else
+            local validator = BaseValidator[k]
+            local t = type(v)
+            if t == "table" and v["_type"] ~= nil and v["value"] then
+                self.classOverrides[classname][k] = {
+                    value = v,
+                    isDF = false
+                }
+            end
+            if v == nil then
+                self.classOverrides[classname][k] = {
+                    value = validator.default,
+                    isDF = true
+                }
+            end
+            local newValue, err = validator.validate(v)
+            if type(err) == "string" then
+                error(err:format(classname .. " CLASS CONFIG"))
+            end
+            self.classOverrides[classname][k] = {
+                value = newValue,
                 isDF = false
             }
         end
-        if v == nil then
-            configobj[k] = {
-                value = validator.default,
-                isDF = true
-            }
-        end
-        local newValue, err = validator.validate(v)
-        if type(err) == "string" then
-            error(err:format(classname .. " CLASS CONFIG"))
-        end
-        configobj[k] = {
-            value = newValue,
-            isDF = false
-        }
     end
-    self.classOverrides[classname] = configobj
+    return
 end
 
 local function searchTree(element, id)
