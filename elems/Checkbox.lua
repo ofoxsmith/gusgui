@@ -1,47 +1,49 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local CheckboxConf = {defaultValue = {
+    required = true,
+    fromString = function (s)
+        return s == "true"
+    end,
+    validate = function(o)
+        if type(o) == "boolean" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for defaultValue on element \"%s\""
+    end
+}, onToggle = {
+    required = true,
+    fromString = function (s, funcs)
+        if funcs[s] then return funcs[s] end
+        error("GUSGUI: Unknown function name" .. s)
+    end, 
+    validate = function(o)
+        if type(o) == "function" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for onToggle on element \"%s\""
+    end
+}, style = {
+    default = "image",
+    fromString = function (s)
+        return s
+    end,
+    validate = function(o)
+        if type(o) == "string" and o == "image" or o == "text" then
+            return true, nil, nil
+        end
+        return false, nil, "GUSGUI: Invalid value for style on element \"%s\""
+    end
+}}
 --- @class Checkbox: GuiElement
 --- @field imageID number
 --- @field maskID number
 --- @operator call: Checkbox
 local Checkbox = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {defaultValue = {
-        required = true,
-        fromString = function (s)
-            return s == "true"
-        end,
-        validate = function(o)
-            if type(o) == "boolean" then
-                return o
-            end
-            return nil, "GUSGUI: Invalid value for defaultValue on element \"%s\""
-        end
-    }, onToggle = {
-        required = true,
-        fromString = function (s)
-            error("GUSGUI: Can't convert a string value into a function")
-        end,    
-        validate = function(o)
-            if type(o) == "function" then
-                return o
-            end
-            return nil, "GUSGUI: Invalid value for onToggle on element \"%s\""
-        end
-    }, style = {
-        default = "image",
-        fromString = function (s)
-            return s
-        end,
-        validate = function(o)
-            if type(o) == "string" and o == "image" or o == "text" then
-                return true, nil, nil
-            end
-            return false, nil, "GUSGUI: Invalid value for style on element \"%s\""
-        end
-    }})
-    o._rawconfig.hover = o._rawconfig.hover or {}
-    o._rawconfig.hover.colour = o._rawconfig.hover.colour or {240,230,140}
+    config = config or {}
+    GuiElement.init(o, config, CheckboxConf)
+    o._hoverconfig.colour = o._hoverconfig.colour or {240,230,140}
     o.type = "Checkbox"
     o.allowsChildren = false
     o.value = o._config.defaultValue
@@ -122,4 +124,5 @@ function Checkbox:Draw(x, y)
     end
 end
 
+Checkbox.extConf = CheckboxConf
 return Checkbox

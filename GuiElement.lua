@@ -26,6 +26,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field z number
 --- @operator call: GuiElement
 local GuiElement = class(function(Element, config, extended)
+    config = config or {}
     extended = extended or {}
     Element.id = config.id
     Element.uid = GetNextUID()
@@ -35,6 +36,7 @@ local GuiElement = class(function(Element, config, extended)
     Element.name = config.name or nil
     Element.config = {}
     Element._rawconfig = {}
+    Element._hoverconfig = config.hover or {}
     Element.useHoverConfigForNextFrame = false
     Element._rawchildren = {}
     Element._config = {}
@@ -50,16 +52,21 @@ local GuiElement = class(function(Element, config, extended)
         __index = function(t, k)
             local value = nil
             if Element.useHoverConfigForNextFrame == true then
-                value = Element._rawconfig.hover[k]
-                if value == nil or value.isDF == nil or value.value == nil then
+                value = Element._hoverconfig[k]
+                if value == nil then
                     value = Element._rawconfig[k]
+                else 
+                    value = {value = value}
                 end
             else
                 value = Element._rawconfig[k]
             end
             if Element.class ~= "" and value.isDF then
                 for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do
-                    if Element.gui.classOverrides[cls] then
+                    if Element.useHoverConfigForNextFrame and Element.gui.classOverrides[cls].hover[k] then
+                        value = {value = Element.gui.classOverrides[cls].hover[k]}
+                    end
+                    if value.isDF and Element.gui.classOverrides[cls] then
                         value = Element.gui.classOverrides[cls][k]
                     end
                 end
@@ -284,6 +291,9 @@ function GetNextUID()
 end
 
 function GuiElement:Render()
+    if not self._config.visible or self._config.hidden then
+        return
+    end
     if self._config.onBeforeRender then
         self._config.onBeforeRender(self, self.gui.state)
     end
@@ -296,9 +306,6 @@ function GuiElement:Render()
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
-    end
-    if self._config.hidden then
-        return
     end
     if self._config.drawBorder then
         self:RenderBorder(x, y, size.paddingW, size.paddingH)
@@ -334,6 +341,18 @@ function GuiElement:GetElementSize()
     local offsetY = (baseH - iH) * self._config.verticalAlign
     local width = baseW + self._config.padding.left + self._config.padding.right + borderSize
     local height = baseH + self._config.padding.top + self._config.padding.bottom + borderSize
+    if self._config.hidden then
+        return {
+            baseW = 0,
+            baseH = 0,
+            width = 0,
+            height = 0,
+            paddingW = 0,
+            paddingH = 0,
+            offsetX = 0,
+            offsetY = 0
+        }
+    end
     return {
         baseW = baseW,
         baseH = baseH,
@@ -602,7 +621,7 @@ BaseValidator = {
     default = nil,
     fromString = function (s)
         local v = splitString(s, ",")
-        return {tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3])}
+        return {tonumber(v[1]), tonumber(v[2]), tonumber(v[3])}
     end,
     validate = function(o)
         if type(o) == "table" then
@@ -617,8 +636,9 @@ BaseValidator = {
     end
 }, onHover = {
     default = nil,
-    fromString = function (s)
-        error("GUSGUI: Can't convert a string value into a function")
+    fromString = function (s, funcs)
+        if funcs[s] then return funcs[s] end
+        error("GUSGUI: Unknown function name" .. s)
     end,
     validate = function(o)
         if type(o) == "function" then
@@ -626,11 +646,8 @@ BaseValidator = {
         end
         return nil, "GUSGUI: Invalid value for onHover on element \"%s\""
     end
-}, hover = {
-    validate = function(o)
-        return o
-    end
 }, hidden = {
+    default = false,
     fromString = function(s)
         return s == "true"
     end,
@@ -640,7 +657,18 @@ BaseValidator = {
         end
         return nil, "GUSGUI: Invalid value for hidden on element \"%s\""
     end
-}, overrideZ = {
+}, visible = {
+    default = true,
+    fromString = function(s)
+        return s == "true"
+    end,
+    validate = function(o)
+        if type(o) == "boolean" then
+            return o
+        end
+        return nil, "GUSGUI: Invalid value for visible on element \"%s\""
+    end
+ }, overrideZ = {
     default = nil,
     fromString = function(s)
         return tonumber(s)
@@ -654,8 +682,9 @@ BaseValidator = {
     end
 }, onBeforeRender = {
     default = nil,
-    fromString = function (s)
-        error("GUSGUI: Can't convert a string value into a function")
+    fromString = function (s, funcs)
+        if funcs[s] then return funcs[s] end
+        error("GUSGUI: Unknown function name" .. s)
     end,
     validate = function(o)
         local t = type(o)
@@ -666,8 +695,9 @@ BaseValidator = {
     end
 }, onAfterRender = {
     default = nil,
-    fromString = function (s)
-        error("GUSGUI: Can't convert a string value into a function")
+    fromString = function (s, funcs)
+        if funcs[s] then return funcs[s] end
+        error("GUSGUI: Unknown function name" .. s)
     end,
     validate = function(o)
         local t = type(o)

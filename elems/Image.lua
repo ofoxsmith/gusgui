@@ -1,44 +1,46 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local ImageConf = {scaleX = {
+    required = false,
+    default = 1,
+    fromString = function(s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, scaleY = {
+    required = false,
+    default = 1,
+    fromString = function(s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, src = {
+    required = true,
+    fromString = function (s)
+        return s
+    end,
+    validate = function(o)
+        if type(o) == "string" then
+            return o
+        end
+    end
+}}
 --- @class Image: GuiElement
 --- @field maskID number
 --- @field imageID number
 --- @operator call: Image
 local Image = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {scaleX = {
-        required = false,
-        default = 1,
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, scaleY = {
-        required = false,
-        default = 1,
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, src = {
-        required = true,
-        fromString = function (s)
-            return s
-        end,
-        validate = function(o)
-            if type(o) == "string" then
-                return o
-            end
-        end
-    }})
+    config = config or {}
+    GuiElement.init(o, config, ImageConf)
     o.type = "Image"
     o.allowsChildren = false
 end)
@@ -74,4 +76,5 @@ function Image:Draw(x, y)
     end
 end
 
+Image.extConf = ImageConf
 return Image

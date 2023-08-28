@@ -1,6 +1,25 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local HLayoutConf = {
+    alignChildren = {
+        default = 0,
+        fromString = function(s)
+            return tonumber(s)
+        end,
+        validate = function(o)
+            local t = type(o)
+            if t == "number" then
+                if not (0 <= o and o <= 1) then
+                    return nil,
+                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
+                end
+                return o
+            end
+            return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
+        end
+    }
+}
 --- @class HLayout: GuiElement
 --- @field lastUpdate number
 --- @field hasInit boolean
@@ -10,25 +29,8 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field maskID number
 --- @operator call: HLayout
 local HLayout = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {
-        alignChildren = {
-            default = 0,
-            fromString = function(s)
-                return tonumber(s)
-            end,
-            validate = function(o)
-                local t = type(o)
-                if t == "number" then
-                    if not (0 <= o and o <= 1) then
-                        return nil,
-                            "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
-                    end
-                    return o
-                end
-                return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
-            end
-        }
-    })
+    config = config or {}
+    GuiElement.init(o, config, HLayoutConf)
     o.type = "HLayout"
     o.allowsChildren = true
     o.childrenResolved = false
@@ -47,16 +49,19 @@ function HLayout:GetBaseElementSize()
     local totalH = 0
     for i = 1, #self.children do
         local child = self.children[i]
-        local size = child:GetElementSize()
-        local w = math.max(size.width + child._config.margin.left + child._config.margin.right)
-        local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom)
-        totalW = totalW + w
-        totalH = math.max(totalH, h)
+        if not child._config.hidden then
+            local size = child:GetElementSize()
+            local w = math.max(size.width + child._config.margin.left + child._config.margin.right)
+            local h = math.max(size.height + child._config.margin.top + child._config.margin.bottom)
+            totalW = totalW + w
+            totalH = math.max(totalH, h)
+        end
     end
     return totalW, totalH
 end
 
 function HLayout:GetManagedXY(elem)
+    if elem._config.hidden then return 0, 0 end
     local elemsize = elem:GetElementSize()
     local offsets = self:GetElementSize()
     self.nextX = self.nextX or self.baseX + self._config.padding.left + offsets.offsetX
@@ -96,4 +101,5 @@ function HLayout:Draw(x, y)
     end
 end
 
+HLayout.extConf = HLayoutConf
 return HLayout

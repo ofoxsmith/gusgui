@@ -1,67 +1,69 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
+local ProgressBarConf = {width = {
+    default = 50,
+    required = false,
+    fromString = function (s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, height = {
+    required = false,
+    default = 10,
+    fromString = function(s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, value = {
+    default = 100,
+    required = true,
+    fromString = function(s)
+        return tonumber(s)
+    end,
+    validate = function(o)
+        if type(o) == "number" then
+            return o
+        end
+    end
+}, barColour = {
+    default = "green",
+    required = false,
+    fromString = function (s)
+        return s
+    end,
+    validate = function(o)
+        if o == "green" or o == "blue" or o == "yellow" or o == "white" then
+            return o
+        end
+    end
+}, customBarColourPath = {
+    default = nil,
+    required = false,
+    fromString = function (s)
+        return s
+    end,
+    validate = function(o)
+        if type(o) == "string" then
+            return o
+        end
+    end
+}}
 --- @class ProgressBar: GuiElement
 --- @field barID number
 --- @field sbgID number
 --- @operator call: ProgressBar
 local ProgressBar = class(GuiElement, function(o, config)
-    GuiElement.init(o, config, {width = {
-        default = 50,
-        required = false,
-        fromString = function (s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, height = {
-        required = false,
-        default = 10,
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, value = {
-        default = 100,
-        required = true,
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            if type(o) == "number" then
-                return o
-            end
-        end
-    }, barColour = {
-        default = "green",
-        required = false,
-        fromString = function (s)
-            return s
-        end,
-        validate = function(o)
-            if o == "green" or o == "blue" or o == "yellow" or o == "white" then
-                return o
-            end
-        end
-    }, customBarColourPath = {
-        default = nil,
-        required = false,
-        fromString = function (s)
-            return s
-        end,
-        validate = function(o)
-            if type(o) == "string" then
-                return o
-            end
-        end
-    }})
+    config = config or {}
+    GuiElement.init(o, config,  ProgressBarConf)
     o.type = "ProgressBar"
     o.allowsChildren = false
 end)
@@ -103,4 +105,5 @@ function ProgressBar:Draw(x, y)
     end
 end
 
+ProgressBar.extConf = ProgressBarConf
 return ProgressBar
