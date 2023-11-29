@@ -55,7 +55,7 @@ local GuiElement = class(function(Element, config, extended)
                 value = Element._hoverconfig[k]
                 if value == nil then
                     value = Element._rawconfig[k]
-                else 
+                else
                     value = {value = value}
                 end
             else

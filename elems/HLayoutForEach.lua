@@ -43,6 +43,7 @@ local HLayoutForEachConf = {type = {
     end
 }, calculateEveryNFrames = {
     default = 1,
+    required = false,
     fromString = function (s)
         return tonumber(s)
     end,
