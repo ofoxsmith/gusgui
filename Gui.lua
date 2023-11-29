@@ -153,10 +153,9 @@ function Gui:StateStringToTable(str)
         end
         if type == "Global" or type == "Value" then
             return StateTypes[type](self, val)
-        else 
+        else
             return StateTypes[type](self, val)
         end
-        error("GUSGUI: Unknown state type in state string")
     end
     return resolve(str)
 end
@@ -270,6 +269,11 @@ function Gui:Log(message)
     if self.enableLogging then
         print(message)
     end
+end
+
+function Gui:FatalError(message)
+    Gui:Destroy()
+    error(message);
 end
 
 function Gui:Render()
