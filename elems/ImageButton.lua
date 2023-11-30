@@ -43,7 +43,7 @@ local ImageButtonConf = {scaleX = {
         if type(o) == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onHover on element \"%s\""
+        return nil, "Invalid value for onHover on element \"%s\""
     end
 }}
 --- @class ImageButton: GuiElement

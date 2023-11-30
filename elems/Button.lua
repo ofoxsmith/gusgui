@@ -6,13 +6,13 @@ local ButtonConf = {
         required = true,
         fromString = function (s, funcs)
             if funcs[s] then return funcs[s] end
-            error("GUSGUI: Unknown function name" .. s)
+            error("Unknown function name" .. s)
         end,       
         validate = function(o)
             if type(o) == "function" then
                 return o
             end
-            return nil, "GUSGUI: Invalid value for onClick on element \"%s\""
+            return nil, "Invalid value for onClick on element \"%s\""
         end
     },
     text = {
@@ -24,7 +24,7 @@ local ButtonConf = {
             if type(o) == "string" then
                 return o
             end
-            return nil, "GUSGUI: Invalid value for text on element \"%s\""
+            return nil, "Invalid value for text on element \"%s\""
         end
     }
 }
@@ -48,7 +48,7 @@ function Button:Draw(x, y)
     self.buttonID = self.buttonID or self.gui.nextID()
     local parsedText = self:Interp(self._config.text)
     if parsedText == "" then
-        self.gui:Log(("GUSGUI: Rendering an empty buttom element with id %s"):format(self.id or "NO ELEMENT ID"))
+        self.gui:Log(2, ("Rendering an empty buttom element with id %s"):format(self.id or "NO ELEMENT ID"))
     end
     local elementSize = self:GetElementSize()
     local c = self._config.colour

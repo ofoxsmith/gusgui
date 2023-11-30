@@ -51,7 +51,7 @@ local SliderConf = {min = {
         if type(o) == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onChange on element \"%s\""
+        return nil, "Invalid value for onChange on element \"%s\""
     end
 }}
 --- @class Slider: GuiElement

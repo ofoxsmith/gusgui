@@ -23,7 +23,7 @@ local TextConf = {value = {
         if type(o) == "string" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for value on element \"%s\""
+        return nil, "Invalid value for value on element \"%s\""
     end
 }}
 --- @class Text: GuiElement
@@ -53,7 +53,7 @@ function Text:Draw(x, y)
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
     local value = self:Interp(self._config.value)
     if value == "" then
-        self.gui:Log(("GUSGUI: Rendering an empty text element with id %s"):format(self.id or "NO ELEMENT ID"))
+        self.gui:Log(2, ("Rendering an empty text element with id %s"):format(self.id or "NO ELEMENT ID"))
     end
     local lines = splitString(value, "\n")
     local elementSize = self:GetElementSize()

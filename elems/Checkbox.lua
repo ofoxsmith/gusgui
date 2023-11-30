@@ -10,19 +10,19 @@ local CheckboxConf = {defaultValue = {
         if type(o) == "boolean" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for defaultValue on element \"%s\""
+        return nil, "Invalid value for defaultValue on element \"%s\""
     end
 }, onToggle = {
     required = true,
     fromString = function (s, funcs)
         if funcs[s] then return funcs[s] end
-        error("GUSGUI: Unknown function name" .. s)
+        error("Unknown function name" .. s)
     end, 
     validate = function(o)
         if type(o) == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onToggle on element \"%s\""
+        return nil, "Invalid value for onToggle on element \"%s\""
     end
 }, style = {
     default = "image",
@@ -33,7 +33,7 @@ local CheckboxConf = {defaultValue = {
         if type(o) == "string" and o == "image" or o == "text" then
             return true, nil, nil
         end
-        return false, nil, "GUSGUI: Invalid value for style on element \"%s\""
+        return false, nil, "Invalid value for style on element \"%s\""
     end
 }}
 --- @class Checkbox: GuiElement

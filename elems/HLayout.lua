@@ -12,11 +12,11 @@ local HLayoutConf = {
             if t == "number" then
                 if not (0 <= o and o <= 1) then
                     return nil,
-                        "GUSGUI: Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
+                        "Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
                 end
                 return o
             end
-            return nil, "GUSGUI: Invalid value for alignChildren on element \"%s\""
+            return nil, "Invalid value for alignChildren on element \"%s\""
         end
     }
 }

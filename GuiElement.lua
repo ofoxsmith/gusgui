@@ -19,7 +19,7 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field gui Gui|nil
 --- @field _rawchildren GuiElement[]
 --- @field bgID number
---- @field parent GuiElement|nil
+--- @field parent HLayout|VLayout|VLayoutForEach|HLayoutForEach|nil
 --- @field borderID number
 --- @field maskID number
 --- @field children GuiElement[]
@@ -75,9 +75,9 @@ local GuiElement = class(function(Element, config, extended)
                 end
             end
             if value == nil then
-                local s = "GUSGUI Internal Error: %s was nil (_rawconfig[%s] {%s, %s}) on element %s %s %s %s"
+                local s = "%s was nil (_rawconfig[%s] {%s, %s}) on element %s %s %s %s"
                 local e = Element._rawconfig[k] or {}
-                error(s:format(k, k, e.isDF, e.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                Element.gui:Log(0, s:format(k, k, e.isDF, e.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
                 return;
             end
             if k == "margin" or k == "padding" then
@@ -96,8 +96,8 @@ local GuiElement = class(function(Element, config, extended)
             end
             local resolvedValue = Element:ResolveValue(value.value, k)
             if type(resolvedValue) == "table" and resolvedValue._type ~= nil and resolvedValue.value ~= nil then
-                local s = "GUSGUI Internal Error: Element:ResolveValue failed to get value (%s, %s) on element %s %s %s %s"
-                error(s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                local s = "Element:ResolveValue failed to get value (%s, %s) on element %s %s %s %s"
+                Element.gui:Log(0, s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
             end
             return resolvedValue
         end,
@@ -121,7 +121,7 @@ end)
 --- @return string
 function GuiElement:Interp(s)
     if type(s) ~= "string" then
-        self.gui:Log(("GUSGUI: Found a non-string value where a string is usually expected on element with id %s, is this intentional?"):format(self.id or "NO ELEMENT ID"))
+        self.gui:Log(2, ("Found a non-string value where a string is usually expected on element with id %s, is this intentional?"):format(self.id or "NO ELEMENT ID"))
         s = tostring(s)
     end
     return (s:gsub('($%b{})', function(w)
@@ -129,7 +129,7 @@ function GuiElement:Interp(s)
         local v = self.gui:GetState(w)
         local ty = type(v)
         if (ty == "table" or ty == "function" or ty == "thread" or ty == "userdata") then
-            error("GUSGUI: Attempted to interpolate state value " .. w .. " into string, but " .. w .. " was a " .. ty)
+            self.gui:Log(0, ("Failed to interpolate string %s: Cannot convert value %s into string, %s was a %s"):format(s, w, w, ty))
         end
         return tostring(v)
     end))
@@ -146,8 +146,8 @@ function GuiElement:ApplyConfig(k, v)
         return
     end
     if v == nil and validator.required == true then
-        local s = "GUSGUI: Invalid value for %s on element \"%s\" (%s is required)"
-        error(s:format(k, self.id or "NO ELEMENT ID", k))
+        local s = "Invalid value for %s on element \"%s\" (%s is required)"
+        self.gui:Log(0, (s:format(k, self.id or "NO ELEMENT ID", k)))
         return
     elseif v == nil then
         self._rawconfig[k] = {
@@ -158,16 +158,13 @@ function GuiElement:ApplyConfig(k, v)
     end
     local newValue, err = validator.validate(v)
     if type(err) == "string" then
-        error(err:format(self.id))
+        self.gui:Log(0, err:format(self.id))
     end
     self._rawconfig[k] = {
         value = newValue,
         isDF = false
     }
 
-    if (self._rawconfig[k] == nil) then 
-    
-    end
 end
 
 function GuiElement:ResolveValue(a, k)
@@ -225,7 +222,7 @@ function GuiElement:ResolveValue(a, k)
     if a._type == "state" then
         local v = self.gui:GetState(a.value)
         if v == nil then
-            self.gui:Log(("GUSGUI: Attempting to read from the state value %s, but it is nil. Is this intentional?"):format(a.value))
+            self.gui:Log(1, ("Attempting to read from the state value %s, but it is nil. Is this intentional?"):format(a.value))
             return nil
         end
         return v
@@ -260,8 +257,9 @@ end
 --- @return GuiElement child The child added
 function GuiElement:AddChild(child)
     if not self.allowsChildren then
-        error("GUSGUI: " .. self.type .. " cannot have child element", 2)
+        self.gui:Log(0, self.type .. " cannot have child element")
     end
+    ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
     child:OnEnterTree(self, false)
     return child
 end
@@ -387,7 +385,7 @@ function GuiElement:Remove()
     self:OnExitTree()
 end
 
---- @param parent GuiElement|nil
+--- @param parent HLayout|VLayout|HLayoutForEach|VLayoutForEach|nil
 --- @param isroot boolean|nil
 --- @param gui Gui|nil
 function GuiElement:OnEnterTree(parent, isroot, gui)
@@ -396,11 +394,15 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
         if self.id then
             if self.gui.ids[self.id] then
                 self.parent = nil
-                error("GUSGUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
+                self.gui:Log(0, "Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
             end
             self.gui.ids[self.id] = true
         end
         for i = 1, #self._rawchildren do
+            if not self.allowsChildren then
+                self.gui:Log(0, self.type .. " cannot have child element")
+            end
+            ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
             self._rawchildren[i]:OnEnterTree(self)
         end
         return
@@ -410,11 +412,15 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
     if self.id then
         if self.gui.ids[self.id] then
             self.parent = nil
-            error("GUSGUI: Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
+            self.gui:Log(0, "Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
         end
         self.gui.ids[self.id] = true
     end
     for i = 1, #self._rawchildren do
+        if not self.allowsChildren then
+            self.gui:Log(0, self.type .. " cannot have child element")
+        end
+        ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
         self._rawchildren[i]:OnEnterTree(self)
     end
     self._rawchildren = nil
@@ -470,7 +476,7 @@ BaseValidator = {
         if type(o) == "boolean" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for drawBorder on element \"%s\""
+        return nil, "Invalid value for drawBorder on element \"%s\""
     end
 }, drawBackground = {
     default = false,
@@ -481,7 +487,7 @@ BaseValidator = {
         if type(o) == "boolean" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for drawBorder on element \"%s\""
+        return nil, "Invalid value for drawBorder on element \"%s\""
     end
 }, overrideWidth = {
     default = 0,
@@ -491,11 +497,11 @@ BaseValidator = {
     validate = function(o)
         if type(o) == "number" then
             if o <= 0 then
-                return nil, "GUSGUI: Invalid value for overrideWidth on element \"%s\" (must be greater than 0)"
+                return nil, "Invalid value for overrideWidth on element \"%s\" (must be greater than 0)"
             end
             return o
         end
-        return nil, "GUSGUI: Invalid value for overrideWidth on element \"%s\""
+        return nil, "Invalid value for overrideWidth on element \"%s\""
     end
 }, overrideHeight = {
     default = 0,
@@ -505,11 +511,11 @@ BaseValidator = {
     validate = function(o)
         if type(o) == "number" then
             if o <= 0 then
-                return nil, "GUSGUI: Invalid value for overrideHeight on element \"%s\" (must be greater than 0)"
+                return nil, "Invalid value for overrideHeight on element \"%s\" (must be greater than 0)"
             end
             return o
         end
-        return nil, "GUSGUI: Invalid value for overrideHeight on element \"%s\""
+        return nil, "Invalid value for overrideHeight on element \"%s\""
     end
 }, verticalAlign = {
     default = 0,
@@ -519,11 +525,11 @@ BaseValidator = {
     validate = function(o)
         if type(o) == "number" then
             if not (0 <= o and o <= 1) then
-                return nil, "GUSGUI: Invalid value for verticalAlign on element \"%s\" (value must be between 0-1)"
+                return nil, "Invalid value for verticalAlign on element \"%s\" (value must be between 0-1)"
             end
             return o
         end
-        return nil, "GUSGUI: Invalid value for verticalAlign on element \"%s\""
+        return nil, "Invalid value for verticalAlign on element \"%s\""
     end
 }, horizontalAlign = {
     default = 0,
@@ -533,11 +539,11 @@ BaseValidator = {
     validate = function(o)
         if type(o) == "number" then
             if not (0 <= o and o <= 1) then
-                return nil, "GUSGUI: Invalid value for horizontalAlign on element \"%s\" (value must be between 0-1)"
+                return nil, "Invalid value for horizontalAlign on element \"%s\" (value must be between 0-1)"
             end
             return o
         end
-        return nil, "GUSGUI: Invalid value for horizontalAlign on element \"%s\""
+        return nil, "Invalid value for horizontalAlign on element \"%s\""
     end
 }, margin = {
     default = {
@@ -574,12 +580,12 @@ BaseValidator = {
                 elseif ty == "number" then
                 elseif ty == "table" and m[v] ~= nil and m[v] ~= nil then
                 else
-                    return nil, "GUSGUI: Invalid value for margin " .. v .. " on element \"%s\""
+                    return nil, "Invalid value for margin " .. v .. " on element \"%s\""
                 end
             end
             return m;
         end
-        return nil, "GUSGUI: Invalid value for margin on element \"%s\""
+        return nil, "Invalid value for margin on element \"%s\""
     end
 }, padding = {
     default = {
@@ -615,12 +621,12 @@ BaseValidator = {
                 elseif ty == "number" then
                 elseif ty == "table" and m[v] ~= nil and m[v] ~= nil then
                 else
-                    return nil, "GUSGUI: Invalid value for padding " .. v .. " on element \"%s\""
+                    return nil, "Invalid value for padding " .. v .. " on element \"%s\""
                 end
             end
             return m;
         else
-        return nil, "GUSGUI: Invalid value for padding on element \"%s\""
+        return nil, "Invalid value for padding on element \"%s\""
         end
     end
 }, colour = {
@@ -634,11 +640,11 @@ BaseValidator = {
             if not (type(o[1]) == "number" or (type(o[1]) == "table" and o[1]["value"] ~= nil and o[1]["_type"] ~= nil) and
                 type(o[2]) == "number" or (type(o[2]) == "table" and o[2]["value"] ~= nil and o[2]["_type"] ~= nil) and
                 type(o[3]) == "number" or (type(o[3]) == "table" and o[3]["value"] ~= nil and o[3]["_type"] ~= nil)) then
-                return nil, "GUSGUI: Invalid value for colour on element \"%s\""
+                return nil, "Invalid value for colour on element \"%s\""
             end
             return o
         end
-        return nil, "GUSGUI: Invalid value for colour on element \"%s\""
+        return nil, "Invalid value for colour on element \"%s\""
     end
 }, onHover = {
     default = nil,
@@ -650,7 +656,7 @@ BaseValidator = {
         if type(o) == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onHover on element \"%s\""
+        return nil, "Invalid value for onHover on element \"%s\""
     end
 }, hidden = {
     default = false,
@@ -661,7 +667,7 @@ BaseValidator = {
         if type(o) == "boolean" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for hidden on element \"%s\""
+        return nil, "Invalid value for hidden on element \"%s\""
     end
 }, visible = {
     default = true,
@@ -672,7 +678,7 @@ BaseValidator = {
         if type(o) == "boolean" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for visible on element \"%s\""
+        return nil, "Invalid value for visible on element \"%s\""
     end
  }, overrideZ = {
     default = nil,
@@ -684,7 +690,7 @@ BaseValidator = {
         if t == "number" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for overrideZ on element \"%s\""
+        return nil, "Invalid value for overrideZ on element \"%s\""
     end
 }, onBeforeRender = {
     default = nil,
@@ -697,7 +703,7 @@ BaseValidator = {
         if t == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onBeforeRender on element \"%s\""
+        return nil, "Invalid value for onBeforeRender on element \"%s\""
     end
 }, onAfterRender = {
     default = nil,
@@ -710,7 +716,7 @@ BaseValidator = {
         if t == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onAfterRender on element \"%s\""
+        return nil, "Invalid value for onAfterRender on element \"%s\""
     end
 }}
 

@@ -52,8 +52,6 @@ do
     }
 end
 
-
-
 --- @class Gui
 --- @field classOverrides table
 --- @field guiobj userdata
@@ -62,17 +60,21 @@ end
 --- @field baseX integer
 --- @field baseY integer
 --- @field tree GuiElement[]
+--- @field nextID function
+--- @field ec integer
+--- @field ids table
 --- @operator call: Gui
-local Gui = class(function(newGUI, config)
+local Gui = class(function(newGUI, config, debug)
     config = config or {}
     config.state = config.state or {}
     config.gui = config.gui or GuiCreate()
-    config.enableLogging = config.enableLogging or false
+    config.enableLogging = config.enableLogging or true
     config.baseX = config.baseX or 0
     config.baseY = config.baseY or 0
     newGUI.ids = {}
     newGUI.nextID = getIdCounter()
     newGUI.stateID = getIdCounter()
+    newGUI.debugging = debug
     newGUI.guiobj = config.gui
     newGUI.tree = {}
     newGUI.cachedData = {}
@@ -81,9 +83,11 @@ local Gui = class(function(newGUI, config)
     newGUI.baseY = config.baseY
     newGUI.state = config.state
     newGUI._state = {}
+    newGUI.ec = 0
     newGUI.classOverrides = {}
     newGUI.screenW, newGUI.screenH = GuiGetScreenDimensions(newGUI.guiobj)
     newGUI.screenW, newGUI.screenH = math.floor(newGUI.screenW), math.floor(newGUI.screenH)
+    print(("New GUSGUI Instance created (logging = %s, debug = %s)"):format(config.enableLogging, debug))
 end)
 
 --- @param s string
@@ -166,7 +170,7 @@ function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
         if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~=
             "VLayoutForEach" then
-            error("GUSGUI: Gui root nodes must be a Layout element.", 2)
+            self:Log(0, "Gui root nodes must be a Layout element.")
         end
         table.insert(self.tree, data)
         data:OnEnterTree(nil, true, self)
@@ -264,10 +268,29 @@ function Gui:GetElementsByClass(className)
     return elems
 end
 
+---@param level integer
 ---@param message string
-function Gui:Log(message)
-    if self.enableLogging then
-        print(message)
+function Gui:Log(level, message)
+    --ERROR
+    if level == 0 then
+        self.ec = self.ec + 1
+        -- Hard limit for errors to prevent GUI from printing massive amounts of text to console
+        if self.ec > 10 then
+            print("GUSGUI [ERR]: " .. message)
+            self.destroyed = true
+            error("GUSGUI: Stopping execution due to high error count")
+        end
+        error("GUSGUI [ERR]: " .. message, 2)
+    --WARNING
+    elseif level == 1 then
+        if self.enableLogging then
+            print("GUSGUI [WARN]: " .. message)
+        end
+    --INFO
+    else
+        if self.enableLogging then
+            print("GUSGUI [INFO]: " .. message)
+        end
     end
 end
 
@@ -282,12 +305,10 @@ function Gui:Render()
     self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
     self.screenWorldX, self.screenWorldY = GameGetCameraBounds()
     GuiStartFrame(self.guiobj)
-    self:Log(("GUSGUI: Starting to render frame %s"):format(self.framenum))
     for k = 1, #self.tree do
         local v = self.tree[k]
         v:Render()
     end
-    self:Log(("GUSGUI: Finished rendering frame %s"):format(self.framenum))
 end
 
 --- @param elem GuiElement
@@ -331,6 +352,103 @@ function Gui:GetMouseData()
     return math.floor(gmx), math.floor(gmy), ComponentGetValue2(component, "mButtonDownLeftClick")
 end
 
+
+--#region state functions
+--- @class State
+--- @field _type string
+--- @field value any
+
+--- @param s string
+--- @return State
+function Gui:StateValue(s)
+    local o = {
+        _type = "state",
+        value = s
+    }
+    return o
+end
+
+--- @return State
+function Gui:ScreenWidth()
+    local o = {
+        _type = "screenw",
+        value = ""
+    }
+    return o
+end
+
+--- @return State
+function Gui:ScreenHeight()
+    local o = {
+        _type = "screenh",
+        value = ""
+    }
+    return o
+end
+
+--- @param s string
+--- @return State
+function Gui:StateGlobal(s)
+    local o = {
+        _type = "global",
+        value = s,
+    }
+    return o
+end
+
+--- @param a State|number
+--- @param b State|number
+--- @return State
+function Gui:StateAdd(a, b)
+    return {
+        _type = "add",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
+--- @param a State|number
+--- @param b State|number
+--- @return State
+function Gui:StateSubtract(a, b)
+    return {
+        _type = "subtract",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
+--- @param a State|number
+--- @param b State|number
+--- @return State
+function Gui:StateMultiply(a, b)
+    return {
+        _type = "multiply",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+
+--- @param a State|number
+--- @param b State|number
+--- @return State
+function Gui:StateDivide(a, b)
+    return {
+        _type = "divide",
+        value = {
+            a = a,
+            b = b
+        }
+    }
+end
+--#endregion
+
 --- @param config table
 --- @return Gui
 --- @nodiscard
@@ -343,7 +461,7 @@ end
 --- @param config table?
 --- @return Gui
 --- @nodiscard
-function CreateGUIFromXML(filename, funcs, config)
+function CreateGUIFromXML(filename, funcs, config, g)
     funcs = funcs or {}
     config = config or {}
     local function throwErr(err)
@@ -357,7 +475,7 @@ function CreateGUIFromXML(filename, funcs, config)
     if ModTextFileGetContent(filename) == nil then
         throwErr("File does not exist")
     end
-    local gui = Gui(config)
+    local gui = g or Gui(config)
     local StyleElem
     local data
     do
@@ -579,7 +697,7 @@ function CreateGUIFromXML(filename, funcs, config)
                         ---@diagnostic disable-next-line: need-check-nil
                         elem:ApplyConfig(key, value)
                     end
-                else 
+                else
                     gui:Log("GUSGUI XML: Style element contains config for non-existent element id; config ignored.")
                 end
             end
@@ -588,103 +706,47 @@ function CreateGUIFromXML(filename, funcs, config)
     return gui
 end
 
---- @class State
---- @field _type string
---- @field value any
-
---- @param s string
---- @return State
-function Gui:StateValue(s)
-    local o = {
-        _type = "state",
-        value = s
-    }
-    return o
+local function InjectDebugging(gui)
+    if io == nil then
+        error("GUSGUI: Debugging requires unsafe mode enabled for IO")
+    end
+    local file = io.open("log.txt", "w+")
+    if not file then error("Failed to open log file") end
+    gui.Log = function (self, level, message)
+        if level == 0 then
+            self.ec = self.ec + 1
+            if self.ec > 10 then
+                file:write("[ERR]: " .. message)
+                self.destroyed = true
+                file:write("Stopping execution due to high error count")
+                file:close()
+            end
+            file:write("[ERR]: " .. message, 2)
+        elseif level == 1 then
+            print("[WARN]: " .. message)
+        else
+            print("[INFO]: " .. message)
+        end
+    end
+    return gui
 end
 
---- @return State
-function Gui:ScreenWidth()
-    local o = {
-        _type = "screenw",
-        value = ""
-    }
-    return o
+function DebugGUI(config)
+    local gui = Gui(config, true)
+    return InjectDebugging(gui)
 end
 
---- @return State
-function Gui:ScreenHeight()
-    local o = {
-        _type = "screenh",
-        value = ""
-    }
-    return o
+function DebugGUIXML(filename, funcs, config, debugfile)
+    local gui = CreateGUIFromXML(filename, funcs, config, Gui(config, true))
+    return InjectDebugging(gui)
 end
-
---- @param s string
---- @return State
-function Gui:StateGlobal(s)
-    local o = {
-        _type = "global",
-        value = s,
-    }
-    return o
-end
-
---- @param a State|number
---- @param b State|number
---- @return State
-function Gui:StateAdd(a, b)
-    return {
-        _type = "add",
-        value = {
-            a = a,
-            b = b
-        }
-    }
-end
-
---- @param a State|number
---- @param b State|number
---- @return State
-function Gui:StateSubtract(a, b)
-    return {
-        _type = "subtract",
-        value = {
-            a = a,
-            b = b
-        }
-    }
-end
-
---- @param a State|number
---- @param b State|number
---- @return State
-function Gui:StateMultiply(a, b)
-    return {
-        _type = "multiply",
-        value = {
-            a = a,
-            b = b
-        }
-    }
-end
-
---- @param a State|number
---- @param b State|number
---- @return State
-function Gui:StateDivide(a, b)
-    return {
-        _type = "divide",
-        value = {
-            a = a,
-            b = b
-        }
-    }
-end
-
 
 return {
     Create = CreateGUI,
+    Debug = {
+        Create = DebugGUI,
+        CreateGUIFromXML = DebugGUIXML
+    },
     CreateGUIFromXML = CreateGUIFromXML,
     Elements = GuiElements
 }

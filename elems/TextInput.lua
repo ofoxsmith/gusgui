@@ -32,7 +32,7 @@ local TextInputConf = {maxLength = {
         if type(o) == "function" then
             return o
         end
-        return nil, "GUSGUI: Invalid value for onEdit on element \"%s\""
+        return nil, "Invalid value for onEdit on element \"%s\""
     end
 }}
 --- @class TextInput: GuiElement
