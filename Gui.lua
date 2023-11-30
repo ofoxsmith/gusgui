@@ -271,11 +271,6 @@ function Gui:Log(message)
     end
 end
 
-function Gui:FatalError(message)
-    Gui:Destroy()
-    error(message);
-end
-
 function Gui:Render()
     if (self.destroyed == true) then
         return
