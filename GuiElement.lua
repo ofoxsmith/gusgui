@@ -77,7 +77,7 @@ local GuiElement = class(function(Element, config, extended)
             if value == nil then
                 local s = "GUSGUI Internal Error: %s was nil (_rawconfig[%s] {%s, %s}) on element %s %s %s %s"
                 local e = Element._rawconfig[k] or {}
-                Element.gui.FatalError(s:format(k, k, e.isDF, e.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                error(s:format(k, k, e.isDF, e.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
                 return;
             end
             if k == "margin" or k == "padding" then
@@ -97,7 +97,7 @@ local GuiElement = class(function(Element, config, extended)
             local resolvedValue = Element:ResolveValue(value.value, k)
             if type(resolvedValue) == "table" and resolvedValue._type ~= nil and resolvedValue.value ~= nil then
                 local s = "GUSGUI Internal Error: Element:ResolveValue failed to get value (%s, %s) on element %s %s %s %s"
-                Element.gui.FatalError(s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                error(s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
             end
             return resolvedValue
         end,
