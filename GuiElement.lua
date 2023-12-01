@@ -295,7 +295,11 @@ function GetNextUID()
 end
 
 function GuiElement:Render()
-    if not self._config.visible or self._config.hidden then
+    if self._config.hidden then
+        return
+    end
+    if not self._config.visible then
+        self.parent:GetManagedXY(self)
         return
     end
     if self._config.onBeforeRender then
