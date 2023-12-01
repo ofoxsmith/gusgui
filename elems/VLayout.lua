@@ -26,9 +26,11 @@ local VLayoutConf = {alignChildren = {
 --- @field baseY number
 --- @field maskID number
 --- @operator call: VLayout
-local VLayout = class(GuiElement, function(o, config)
+local VLayout = class(GuiElement, function(o, config, ext)
     config = config or {}
-    GuiElement.init(o, config, VLayoutConf)
+    ext = ext or {}
+    ext.alignChildren = VLayoutConf.alignChildren
+    GuiElement.init(o, config, ext)
     o.type = "VLayout"
     o.allowsChildren = true
     o.childrenResolved = false

@@ -28,9 +28,11 @@ local HLayoutConf = {
 --- @field baseY number
 --- @field maskID number
 --- @operator call: HLayout
-local HLayout = class(GuiElement, function(o, config)
+local HLayout = class(GuiElement, function(o, config, ext)
     config = config or {}
-    GuiElement.init(o, config, HLayoutConf)
+    ext = ext or {}
+    ext.alignChildren = HLayoutConf.alignChildren
+    GuiElement.init(o, config, ext)
     o.type = "HLayout"
     o.allowsChildren = true
     o.childrenResolved = false
