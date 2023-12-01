@@ -82,6 +82,7 @@ local HLayoutForEach = class(HLayout, function(o, config)
 end)
 
 function HLayoutForEach:CreateElements()
+    self.children = {}
     if self._config.type == "executeNTimes" then
         local elems = {}
         for i=1, self._config.numTimes do
@@ -96,14 +97,10 @@ function HLayoutForEach:CreateElements()
         local data = (self.gui:GetState(self._config.stateVal))
         for i = 1, #data do
             local c = self._config.func(data[i])
-            c.gui = self.gui
-            c.parent = self
-            table.insert(elems, c)
+            c:OnEnterTree(self, false)
         end
-        self.children = elems
     end
     self.lastUpdate = self.gui.framenum
-    self.hasInit = true
 end
 
 HLayoutForEach.extConf = HLayoutForEachConf

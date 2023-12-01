@@ -39,9 +39,13 @@ end)
 
 function VLayout:GetBaseElementSize()
     if self.type == "VLayoutForEach" then
-        if self.lastUpdate == self.gui.framenum then
-        elseif ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self.hasInit == true then
-        else self:CreateElements() end
+        if not self.hasInit then
+            self:CreateElements()
+            self.hasInit = true;
+        end
+        if self.lastUpdate ~= self.gui.framenum and ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self._config.calculateEveryNFrames ~= -1 then
+            self:CreateElements()
+        end
     end
     local totalW = 0
     local totalH = 0
