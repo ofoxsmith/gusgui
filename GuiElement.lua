@@ -147,7 +147,7 @@ function GuiElement:ApplyConfig(k, v)
     end
     if v == nil and validator.required == true then
         local s = "Invalid value for %s on element \"%s\" (%s is required)"
-        self.gui:Log(0, (s:format(k, self.id or "NO ELEMENT ID", k)))
+        error((s:format(k, self.id or "NO ELEMENT ID", k)))
         return
     elseif v == nil then
         self._rawconfig[k] = {
@@ -158,7 +158,7 @@ function GuiElement:ApplyConfig(k, v)
     end
     local newValue, err = validator.validate(v)
     if type(err) == "string" then
-        self.gui:Log(0, err:format(self.id))
+        error(err:format(self.id))
     end
     self._rawconfig[k] = {
         value = newValue,
