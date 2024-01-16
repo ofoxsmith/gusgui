@@ -33,8 +33,6 @@ local VLayout = class(GuiElement, function(o, config, ext)
     GuiElement.init(o, config, ext)
     o.type = "VLayout"
     o.allowsChildren = true
-    o.childrenResolved = false
-    o._rawchildren = config.children or {}
 end)
 
 function VLayout:GetBaseElementSize()

@@ -17,7 +17,6 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field allowsChildren boolean|nil
 --- @field GetBaseElementSize function
 --- @field gui Gui|nil
---- @field _rawchildren GuiElement[]
 --- @field bgID number
 --- @field parent HLayout|VLayout|nil
 --- @field borderID number
@@ -48,7 +47,6 @@ local GuiElement = class(function(Element, config, extended)
     Element._rawconfig = {}
     Element._hoverconfig = config.hover or {}
     Element.useHoverConfigForNextFrame = false
-    Element._rawchildren = {}
     Element._config = {}
     Element.extendedValidator = extended
     Element.generatorLastUpdate = 0
@@ -125,7 +123,8 @@ local GuiElement = class(function(Element, config, extended)
             Element:ApplyConfig(k, v)
         end
     })
-    Element.children = {}
+    
+    Element.children = config.children
     Element.rootNode = false
 end)
 
@@ -424,24 +423,10 @@ end
 function GuiElement:OnEnterTree(parent, isroot, gui)
     if isroot or parent == nil then
         self.gui = gui
-        if self.id then
-            if self.gui.ids[self.id] then
-                self.parent = nil
-                self.gui:Log(0, "Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
-            end
-            self.gui.ids[self.id] = true
-        end
-        for i = 1, #self._rawchildren do
-            if not self.allowsChildren then
-                self.gui:Log(0, self.type .. " cannot have child element")
-            end
-            ---@cast self HLayout|VLayout
-            self._rawchildren[i]:OnEnterTree(self)
-        end
-        return
+    else 
+        self.parent = parent
+        self.gui = parent.gui
     end
-    self.parent = parent
-    self.gui = parent.gui
     if self.id then
         if self.gui.ids[self.id] then
             self.parent = nil
@@ -449,15 +434,20 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
         end
         self.gui.ids[self.id] = true
     end
-    for i = 1, #self._rawchildren do
+
+    local c = self.children
+    self.children = {}
+    for i = 1, #c do
         if not self.allowsChildren then
             self.gui:Log(0, self.type .. " cannot have child element")
         end
         ---@cast self HLayout|VLayout
-        self._rawchildren[i]:OnEnterTree(self)
+        c[i]:OnEnterTree(self)
     end
-    self._rawchildren = nil
-    table.insert(parent.children, self)
+    
+    if not isroot and parent ~= nil then
+        table.insert(parent.children, self)
+    end
 end
 
 function GuiElement:OnExitTree()

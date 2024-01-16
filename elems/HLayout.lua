@@ -35,8 +35,6 @@ local HLayout = class(GuiElement, function(o, config, ext)
     GuiElement.init(o, config, ext)
     o.type = "HLayout"
     o.allowsChildren = true
-    o.childrenResolved = false
-    o._rawchildren = config.children or {}
 end)
 
 function HLayout:GetBaseElementSize()
