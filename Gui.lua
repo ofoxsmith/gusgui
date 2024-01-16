@@ -307,6 +307,10 @@ function Gui:Render()
     GuiStartFrame(self.guiobj)
     for k = 1, #self.tree do
         local v = self.tree[k]
+        v:PreRender()
+    end
+    for k = 1, #self.tree do
+        local v = self.tree[k]
         v:Render()
     end
 end
@@ -662,20 +666,17 @@ function CreateGUIFromXML(filename, funcs, config, g)
                             end
                         end
                     end
-                    if convert == nil then
-                        if k:match("^hover%-") then
-                            local value
-                            if v:find("State([a-zA-Z]+)") then
-                                value = gui:StateStringToTable(v)
-                            else
-                                ---@diagnostic disable-next-line: need-check-nil
-                                value = convert.fromString(v, funcs)
-                            end
-                            resolvedTable.hover = resolvedTable.hover or {}
-                            resolvedTable.hover[k:gsub("hover%-", "")] = value
+                    if convert == nil then throwErr("Unrecognised inline config name: \"" .. k .. "\".") end
+                    if k:match("^hover%-") then
+                        local value
+                        if v:find("State([a-zA-Z]+)") then
+                            value = gui:StateStringToTable(v)
                         else
-                            throwErr("Unrecognised inline config name: \"" .. k .. "\".")
+                            ---@diagnostic disable-next-line: need-check-nil
+                            value = convert.fromString(v, funcs)
                         end
+                        resolvedTable.hover = resolvedTable.hover or {}
+                        resolvedTable.hover[k:gsub("hover%-", "")] = value
                     else
                         local value
                         if v:find("State([a-zA-Z]+)") then

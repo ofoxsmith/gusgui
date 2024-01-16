@@ -294,6 +294,10 @@ function GetNextUID()
     return _uid_
 end
 
+function GuiElement:PreRender()
+    
+end
+
 function GuiElement:Render()
     if self._config.hidden then
         return
