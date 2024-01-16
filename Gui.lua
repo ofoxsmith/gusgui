@@ -22,10 +22,6 @@ do
     local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
     ---@module "HLayout"
     local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
-    ---@module "HLayoutForEach"
-    local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
-    ---@module "VLayoutForEach"
-    local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
     ---@module "VLayout"
     local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
     ---@module "Slider"
@@ -42,9 +38,7 @@ do
         Image = Image,
         ImageButton = ImageButton,
         HLayout = HLayout,
-        HLayoutForEach = HLayoutForEach,
         VLayout = VLayout,
-        VLayoutForEach = VLayoutForEach,
         Slider = Slider,
         TextInput = TextInput,
         ProgressBar = ProgressBar,
@@ -168,8 +162,7 @@ end
 --- @return GuiElement data The element added.
 function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
-        if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~=
-            "VLayoutForEach" then
+        if data.type ~= "HLayout" and data.type ~= "VLayout" then
             self:Log(0, "Gui root nodes must be a Layout element.")
         end
         table.insert(self.tree, data)
@@ -485,14 +478,18 @@ do
         return ElementGenerator(count, interval, func)
     end
 
+    ---@param elem GuiElement
+    ---@return GuiElement[]|nil
     function ElementGenerator:Process(elem)
         if self.recalcTrigger() or self.neverInit then
             self.neverInit = false
+            elem.generatorLastUpdate = elem.gui.framenum
             return self:Generate(elem)
         end
         return nil
     end
 
+    ---@param elem GuiElement
     function ElementGenerator:Generate(elem)
         local elements = {}
         local meta

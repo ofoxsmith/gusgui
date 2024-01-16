@@ -19,21 +19,31 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field gui Gui|nil
 --- @field _rawchildren GuiElement[]
 --- @field bgID number
---- @field parent HLayout|VLayout|VLayoutForEach|HLayoutForEach|nil
+--- @field parent HLayout|VLayout|nil
 --- @field borderID number
 --- @field maskID number
 --- @field children GuiElement[]
 --- @field z number
+--- @field generator ElementGenerator|nil
+--- @field generatorLastUpdate integer
+--- @field childrenManagedByGenerator boolean
 --- @operator call: GuiElement
 local GuiElement = class(function(Element, config, extended)
     config = config or {}
     extended = extended or {}
+
     Element.id = config.id
     Element.uid = GetNextUID()
     config.id = nil;
     Element.class = config.class or ""
     config.class = nil
-    Element.name = config.name or nil
+
+    if config.useGenerator then
+        Element.generator = config.useGenerator;
+        config.useGenerator = nil
+        Element.childrenManagedByGenerator = true
+    end
+
     Element.config = {}
     Element._rawconfig = {}
     Element._hoverconfig = config.hover or {}
@@ -41,6 +51,8 @@ local GuiElement = class(function(Element, config, extended)
     Element._rawchildren = {}
     Element._config = {}
     Element.extendedValidator = extended
+    Element.generatorLastUpdate = 0
+
     for k, _ in pairs(BaseValidator) do
         Element:ApplyConfig(k, config[k])
     end
@@ -256,10 +268,11 @@ end
 --- @param child GuiElement
 --- @return GuiElement child The child added
 function GuiElement:AddChild(child)
+    if self.childrenManagedByGenerator then self.gui:Log(0, "Cannot add a child element to an element managed by a ChildElementGenerator") end
     if not self.allowsChildren then
         self.gui:Log(0, self.type .. " cannot have child element")
     end
-    ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
+    ---@cast self HLayout|VLayout
     child:OnEnterTree(self, false)
     return child
 end
@@ -267,6 +280,7 @@ end
 --- @param childID string
 --- @return GuiElement self Returns self
 function GuiElement:RemoveChild(childID)
+    if self.childrenManagedByGenerator then self.gui:Log(0, "Cannot remove a child element from an element managed by a ChildElementGenerator") end
     if childID == nil then
         error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
     end
@@ -281,6 +295,7 @@ end
 
 --- @return GuiElement self Returns self
 function GuiElement:RemoveAllChildren()
+    if self.childrenManagedByGenerator then self.gui:Log(0, "Cannot remove a child element from an element managed by a ChildElementGenerator") end
     for i, v in ipairs(self.children) do
         v:OnExitTree()
     end
@@ -295,7 +310,17 @@ function GetNextUID()
 end
 
 function GuiElement:PreRender()
-    
+    if self.childrenManagedByGenerator then
+        local children = self.generator:Process(self)
+        if children then
+            self.children = {}
+            for index, value in ipairs(children) do
+                ---@cast self HLayout|VLayout
+                value:OnEnterTree(self, false)
+            end
+        end
+    end
+  
 end
 
 function GuiElement:Render()
@@ -393,7 +418,7 @@ function GuiElement:Remove()
     self:OnExitTree()
 end
 
---- @param parent HLayout|VLayout|HLayoutForEach|VLayoutForEach|nil
+--- @param parent HLayout|VLayout|nil
 --- @param isroot boolean|nil
 --- @param gui Gui|nil
 function GuiElement:OnEnterTree(parent, isroot, gui)
@@ -410,7 +435,7 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
             if not self.allowsChildren then
                 self.gui:Log(0, self.type .. " cannot have child element")
             end
-            ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
+            ---@cast self HLayout|VLayout
             self._rawchildren[i]:OnEnterTree(self)
         end
         return
@@ -428,7 +453,7 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
         if not self.allowsChildren then
             self.gui:Log(0, self.type .. " cannot have child element")
         end
-        ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
+        ---@cast self HLayout|VLayout
         self._rawchildren[i]:OnEnterTree(self)
     end
     self._rawchildren = nil
@@ -452,13 +477,6 @@ function GuiElement:OnExitTree()
         self.gui.ids[self.id] = nil
     end
     self.gui = nil
-end
-
-function GuiElement:PropagateInteractableBounds(x, y, w, h)
-    if not self.parent then
-        return
-    end
-    self.parent:PropagateInteractableBounds(x, y, w, h)
 end
 
 local function splitString(s, delimiter)
