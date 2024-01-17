@@ -26,7 +26,7 @@ local Text = class(GuiElement, function(o, config)
 end)
 
 function Text:GetBaseElementSize()
-    local lines = splitString(self:Interp(self._config.value), "\n")
+    local lines = splitString(self:Interp(self._config.text), "\n")
     local w, h = 0, 0
     for _, value in ipairs(lines) do
         local lw, lh = GuiGetTextDimensions(self.gui.guiobj, value)
@@ -39,7 +39,7 @@ end
 function Text:Draw(x, y)
     self.maskID = self.maskID or self.gui.nextID()
     self.hoverMaskID = self.hoverMaskID or self.gui.nextID()
-    local value = self:Interp(self._config.value)
+    local value = self:Interp(self._config.text)
     if value == "" then
         self.gui:Log(2, ("Rendering an empty text element with id %s"):format(self.id or "NO ELEMENT ID"))
     end

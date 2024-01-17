@@ -179,26 +179,19 @@ end
 ---@param config table
 function Gui:RegisterConfigForClass(classname, config)
     self.classOverrides[classname] = {}
+    if config.hover then 
+        self.classOverrides[classname].hover = config.hover
+        config.hover = nil
+    end
     for k, v in pairs(config) do
-        if k:match("^hover%-") then
-            self.classOverrides[classname].hover = self.classOverrides[classname].hover or {}
-            self.classOverrides[classname].hover[k:gsub("hover%-", "")] = v
-        end
-        local validator = ElementProps.BaseElement[k:gsub("hover%-", "")]
+        local validator = ElementProps.BaseElement[k]
         local t = type(v)
         if t == "table" and v["_type"] ~= nil and v["value"] then
-            if k:match("^hover%-") then
-                self.classOverrides[classname].hover[k:gsub("hover%-", "")] = {
-                    value = v,
-                    isDF = false,
-                }
-            else
-                self.classOverrides[classname][k] = {
-                    value = v,
-                    isDF = false
-                }
-            end
-            end
+            self.classOverrides[classname][k] = {
+                value = v,
+                isDF = false
+            }
+        end
 
         local value = v
         local err
@@ -222,17 +215,10 @@ function Gui:RegisterConfigForClass(classname, config)
             end
         end
 
-        if k:match("^hover%-") then
-            self.classOverrides[classname].hover[k:gsub("hover%-", "")] = {
-                value = value,
-                isDF = false,
-            }
-        else
-            self.classOverrides[classname][k] = {
-                value = value,
-                isDF = false
-            }
-        end
+        self.classOverrides[classname][k] = {
+            value = value,
+            isDF = false
+        }
     end
     return
 end

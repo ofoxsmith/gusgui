@@ -15,6 +15,10 @@ local function isStateTbl(v)
     return type(v) == "table" and v["_type"] ~= nil and v["value"] ~= nil
 end
 
+local function toNum(string, _)
+    return tonumber(string)
+end
+
 ---@class ElementProperty
 ---@field default any
 ---@field fromString function
@@ -39,25 +43,25 @@ local BaseElementProperties = {
     },
     overrideWidth = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return (o > 0), "overrideWidth > 0" end
     },
     overrideHeight = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return (o > 0), "overrideHeight > 0" end
     },
     verticalAlign = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return (0 <= o and o <= 1), "0 <= verticalAlign <= 1" end
     },
     horizontalAlign = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return (0 <= o and o <= 1), "0 <= horizontalAlign <= 1" end
     },
@@ -69,8 +73,8 @@ local BaseElementProperties = {
             right = 0
         },
         fromString = function(s)
-            if (tonumber(s)) then
-                local o = tonumber(s)
+            if (toNum(s)) then
+                local o = toNum(s)
                 return {
                     top = o,
                     bottom = o,
@@ -79,7 +83,7 @@ local BaseElementProperties = {
                 }
             end
             local v = splitString(s, ",")
-            return { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
+            return { top = toNum(v[1]), left = toNum(v[2]), bottom = toNum(v[3]), right = toNum(v[4]) }
         end,
         parser = function(o)
             local t = type(o)
@@ -99,8 +103,8 @@ local BaseElementProperties = {
                     right = o["right"] or o[4]
                 }
                 for key, value in pairs(m) do
-                    if type(value) ~= "string" and not isStateTbl(value) then return nil, (key .. "has invalid value") end
-                    m[key] = (type(value) == "string") and tonumber(value) or value
+                    if type(value) ~= "number" and not isStateTbl(value) then return nil, (key .. " has invalid value") end
+                    m[key] = value
                 end
                 return m;
             end
@@ -114,8 +118,8 @@ local BaseElementProperties = {
             right = 0
         },
         fromString = function(s)
-            if (tonumber(s)) then
-                local o = tonumber(s)
+            if (toNum(s)) then
+                local o = toNum(s)
                 return {
                     top = o,
                     bottom = o,
@@ -124,7 +128,7 @@ local BaseElementProperties = {
                 }
             end
             local v = splitString(s, ",")
-            return { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
+            return { top = toNum(v[1]), left = toNum(v[2]), bottom = toNum(v[3]), right = toNum(v[4]) }
         end,
         parser = function(o)
             local t = type(o)
@@ -144,8 +148,8 @@ local BaseElementProperties = {
                     right = o["right"] or o[4]
                 }
                 for key, value in pairs(m) do
-                    if type(value) ~= "string" and not isStateTbl(value) then return nil, (key .. "has invalid value") end
-                    m[key] = (type(value) == "string") and tonumber(value) or value
+                    if type(value) ~= "number" and not isStateTbl(value) then return nil, (key .. " has invalid value") end
+                    m[key] = value
                 end
                 return m;
             end
@@ -155,7 +159,7 @@ local BaseElementProperties = {
         default = nil,
         fromString = function(s)
             local v = splitString(s, ",")
-            return { tonumber(v[1]), tonumber(v[2]), tonumber(v[3]) }
+            return { toNum(v[1]), toNum(v[2]), toNum(v[3]) }
         end,
         parser = function(o)
             if type(o) == "table" then
@@ -185,7 +189,7 @@ local BaseElementProperties = {
     },
     overrideZ = {
         default = nil,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     onHover = {
@@ -271,7 +275,7 @@ local CheckboxElementProperties = {
 local HLayoutElementProperties = {
     alignChildren = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return (0 <= o and o <= 1), "0 <= alignChildren <= 1" end
     },
@@ -280,7 +284,7 @@ local HLayoutElementProperties = {
 local VLayoutElementProperties = {
     alignChildren = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return (0 <= o and o <= 1), "0 <= alignChildren <= 1" end
     },
@@ -290,13 +294,13 @@ local VLayoutElementProperties = {
 local ImageElementProperties = {
     scaleX = {
         default = 1,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return o > 0, "scaleX must be > 0" end
     },
     scaleY = {
         default = 1,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return o > 0, "scaleY must be > 0" end
     },
@@ -313,13 +317,13 @@ local ImageElementProperties = {
 local ImageButtonElementProperties = {
     scaleX = {
         default = 1,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return o > 0, "scaleX must be > 0" end
     },
     scaleY = {
         default = 1,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number",
         validate = function(o) return o > 0, "scaleY must be > 0" end
     },
@@ -343,17 +347,17 @@ local ImageButtonElementProperties = {
 local ProgressBarElementProperties = {
     width = {
         default = 50,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     height = {
         default = 10,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     value = {
         default = 100,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     barColour = {
@@ -379,22 +383,22 @@ local ProgressBarElementProperties = {
 local SliderElementProperties = {
     min = {
         default = 0,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     max = {
         default = 100,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     width = {
         default = 25,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     defaultValue = {
         default = 1,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     onChange = {
@@ -410,12 +414,12 @@ local SliderElementProperties = {
 local TextInputElementProperties = {
     maxLength = {
         default = 50,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     width = {
         default = 25,
-        fromString = tonumber,
+        fromString = toNum,
         type = "number"
     },
     onEdit = {
@@ -441,13 +445,14 @@ local Elements = {
     Checkbox = CheckboxElementProperties,
 }
 
-for k, v in pairs(Elements) do
-    setmetatable(Elements[k], {
-        __index = BaseElementProperties
-    })
+for key, value in pairs(BaseElementProperties) do
+    for k, _ in pairs(Elements) do
+        Elements[k][key] = value
+    end
 end
 
 Elements.BaseElement = BaseElementProperties
+
 local all = {}
 for key, value in pairs(Elements) do
     for k, v in pairs(value) do
