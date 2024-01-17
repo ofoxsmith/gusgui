@@ -1,51 +1,6 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-local ImageButtonConf = {scaleX = {
-    required = false,
-    default = 1,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            return o
-        end
-    end
-}, scaleY = {
-    required = false,
-    default = 1,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            return o
-        end
-    end
-}, src = {
-    required = true,
-    fromString = function (s)
-        return s
-    end,
-    validate = function(o)
-        if type(o) == "string" then
-            return o
-        end
-    end
-}, onClick = {
-    required = true,
-    fromString = function (s, funcs)
-        if funcs[s] then return funcs[s] end
-        error("GUSGUI: Unknown function name" .. s)
-        end,
-    validate = function(o)
-        if type(o) == "function" then
-            return o
-        end
-        return nil, "Invalid value for onHover on element \"%s\""
-    end
-}}
 --- @class ImageButton: GuiElement
 --- @field maskID number
 --- @field imageID number
@@ -53,8 +8,8 @@ local ImageButtonConf = {scaleX = {
 --- @operator call: ImageButton
 local ImageButton = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, ImageButtonConf)
-    o.type = "ImageButton"
+    config._type = "ImageButton"
+    GuiElement.init(o, config)
     o.allowsChildren = false
 end)
 
@@ -88,5 +43,4 @@ function ImageButton:Draw(x, y)
     else self.useHoverConfigForNextFrame = false end
 end
 
-ImageButton.extConf = ImageButtonConf
 return ImageButton
