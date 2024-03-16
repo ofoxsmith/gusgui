@@ -1,3 +1,4 @@
+---@diagnostic disable: lowercase-global
 -- http://lua-users.org/wiki/SimpleLuaClasses
 -- class.lua
 -- Compatible with Lua 5.1 (not 5.0).

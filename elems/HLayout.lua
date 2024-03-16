@@ -1,25 +1,6 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-local HLayoutConf = {
-    alignChildren = {
-        default = 0,
-        fromString = function(s)
-            return tonumber(s)
-        end,
-        validate = function(o)
-            local t = type(o)
-            if t == "number" then
-                if not (0 <= o and o <= 1) then
-                    return nil,
-                        "Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
-                end
-                return o
-            end
-            return nil, "Invalid value for alignChildren on element \"%s\""
-        end
-    }
-}
 --- @class HLayout: GuiElement
 --- @field lastUpdate number
 --- @field hasInit boolean
@@ -28,27 +9,14 @@ local HLayoutConf = {
 --- @field baseY number
 --- @field maskID number
 --- @operator call: HLayout
-local HLayout = class(GuiElement, function(o, config, ext)
+local HLayout = class(GuiElement, function(o, config)
     config = config or {}
-    ext = ext or {}
-    ext.alignChildren = HLayoutConf.alignChildren
-    GuiElement.init(o, config, ext)
-    o.type = "HLayout"
+    config._type = "HLayout"
+    GuiElement.init(o, config)
     o.allowsChildren = true
-    o.childrenResolved = false
-    o._rawchildren = config.children or {}
 end)
 
 function HLayout:GetBaseElementSize()
-    if self.type == "HLayoutForEach" then
-        if not self.hasInit then
-            self:CreateElements()
-            self.hasInit = true;
-        end
-        if self.lastUpdate ~= self.gui.framenum and ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self._config.calculateEveryNFrames ~= -1 then
-            self:CreateElements()
-        end
-    end
     local totalW = 0
     local totalH = 0
     for i = 1, #self.children do
@@ -105,5 +73,4 @@ function HLayout:Draw(x, y)
     end
 end
 
-HLayout.extConf = HLayoutConf
 return HLayout

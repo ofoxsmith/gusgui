@@ -1,42 +1,16 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-local ButtonConf = {
-    onClick = {
-        required = true,
-        fromString = function (s, funcs)
-            if funcs[s] then return funcs[s] end
-            error("Unknown function name" .. s)
-        end,       
-        validate = function(o)
-            if type(o) == "function" then
-                return o
-            end
-            return nil, "Invalid value for onClick on element \"%s\""
-        end
-    },
-    text = {
-        required = true,
-        fromString = function (s)
-            return s 
-        end,
-        validate = function(o)
-            if type(o) == "string" then
-                return o
-            end
-            return nil, "Invalid value for text on element \"%s\""
-        end
-    }
-}
+
 --- @class Button: GuiElement
 --- @field buttonID number
 --- @field maskID number
 --- @operator call: Button
 local Button = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, ButtonConf)
+    config._type = "Button"
+    GuiElement.init(o, config)
     o.allowsChildren = false
-    o.type = "Button"
 end)
 
 function Button:GetBaseElementSize()
@@ -82,5 +56,4 @@ function Button:Draw(x, y)
 
 end
 
-Button.extConf = ButtonConf
 return Button

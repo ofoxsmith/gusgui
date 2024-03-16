@@ -1,8 +1,10 @@
 dofile_once("GUSGUI_PATHclass.lua")
--- Gui element parent class that is inherited by all elements   
--- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions   
--- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config   
--- and a Draw method, which draws the element using the Gui API   
+---@module "ElementProps"
+local ElementProps = dofile_once("GUSGUI_PATHElementProps.lua")
+-- Gui element parent class that is inherited by all elements
+-- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
+-- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
+-- and a Draw method, which draws the element using the Gui API
 --- @class GuiElement
 --- @field init function
 --- @field is_a function
@@ -13,40 +15,46 @@ dofile_once("GUSGUI_PATHclass.lua")
 --- @field id string
 --- @field class string
 --- @field uid number|nil
---- @field extendedValidator table
 --- @field allowsChildren boolean|nil
 --- @field GetBaseElementSize function
 --- @field gui Gui|nil
---- @field _rawchildren GuiElement[]
 --- @field bgID number
---- @field parent HLayout|VLayout|VLayoutForEach|HLayoutForEach|nil
+--- @field parent HLayout|VLayout|nil
 --- @field borderID number
 --- @field maskID number
 --- @field children GuiElement[]
 --- @field z number
+--- @field generator ElementGenerator|nil
+--- @field generatorLastUpdate integer
+--- @field childrenManagedByGenerator boolean
 --- @operator call: GuiElement
-local GuiElement = class(function(Element, config, extended)
+local GuiElement = class(function(Element, config)
     config = config or {}
-    extended = extended or {}
+
     Element.id = config.id
     Element.uid = GetNextUID()
     config.id = nil;
     Element.class = config.class or ""
     config.class = nil
-    Element.name = config.name or nil
+
+    if config.useGenerator then
+        Element.generator = config.useGenerator;
+        config.useGenerator = nil
+        Element.childrenManagedByGenerator = true
+    end
+
     Element.config = {}
     Element._rawconfig = {}
     Element._hoverconfig = config.hover or {}
     Element.useHoverConfigForNextFrame = false
-    Element._rawchildren = {}
     Element._config = {}
-    Element.extendedValidator = extended
-    for k, _ in pairs(BaseValidator) do
+    Element.generatorLastUpdate = 0
+    Element.type = config._type
+
+    for k, _ in pairs(ElementProps[config._type]) do
         Element:ApplyConfig(k, config[k])
     end
-    for k, _ in pairs(Element.extendedValidator) do
-        Element:ApplyConfig(k, config[k])
-    end
+
     Element.gui = nil
     setmetatable(Element._config, {
         __index = function(t, k)
@@ -56,7 +64,7 @@ local GuiElement = class(function(Element, config, extended)
                 if value == nil then
                     value = Element._rawconfig[k]
                 else
-                    value = {value = value}
+                    value = { value = value }
                 end
             else
                 value = Element._rawconfig[k]
@@ -64,7 +72,7 @@ local GuiElement = class(function(Element, config, extended)
             if Element.class ~= "" and value.isDF then
                 for cls in Element.class:gmatch("[a-z0-9A-Z_-]+") do
                     if Element.useHoverConfigForNextFrame and Element.gui.classOverrides[cls].hover[k] then
-                        value = {value = Element.gui.classOverrides[cls].hover[k]}
+                        value = { value = Element.gui.classOverrides[cls].hover[k] }
                     end
                     if value.isDF and Element.gui.classOverrides[cls] then
                         value = Element.gui.classOverrides[cls][k]
@@ -77,7 +85,8 @@ local GuiElement = class(function(Element, config, extended)
             if value == nil then
                 local s = "%s was nil (_rawconfig[%s] {%s, %s}) on element %s %s %s %s"
                 local e = Element._rawconfig[k] or {}
-                Element.gui:Log(0, s:format(k, k, e.isDF, e.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                Element.gui:Log(0,
+                    s:format(k, k, e.isDF, e.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
                 return;
             end
             if k == "margin" or k == "padding" then
@@ -90,14 +99,16 @@ local GuiElement = class(function(Element, config, extended)
             end
             if k == "colour" then
                 if value.value ~= nil then
-                    return {Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
-                            Element:ResolveValue(value.value[3], k)}
+                    return { Element:ResolveValue(value.value[1], k), Element:ResolveValue(value.value[2], k),
+                        Element:ResolveValue(value.value[3], k) }
                 end
             end
             local resolvedValue = Element:ResolveValue(value.value, k)
             if type(resolvedValue) == "table" and resolvedValue._type ~= nil and resolvedValue.value ~= nil then
                 local s = "Element:ResolveValue failed to get value (%s, %s) on element %s %s %s %s"
-                Element.gui:Log(0, s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID", Element.class))
+                Element.gui:Log(0,
+                    s:format(resolvedValue._type, resolvedValue.value, Element.uid, Element.type, Element.id or "NO ID",
+                        Element.class))
             end
             return resolvedValue
         end,
@@ -113,7 +124,8 @@ local GuiElement = class(function(Element, config, extended)
             Element:ApplyConfig(k, v)
         end
     })
-    Element.children = {}
+
+    Element.children = config.children or {}
     Element.rootNode = false
 end)
 
@@ -121,7 +133,9 @@ end)
 --- @return string
 function GuiElement:Interp(s)
     if type(s) ~= "string" then
-        self.gui:Log(2, ("Found a non-string value where a string is usually expected on element with id %s, is this intentional?"):format(self.id or "NO ELEMENT ID"))
+        self.gui:Log(2,
+            ("Found a non-string value where a string is usually expected on element with id %s, is this intentional?")
+            :format(self.id or "NO ELEMENT ID"))
         s = tostring(s)
     end
     return (s:gsub('($%b{})', function(w)
@@ -129,14 +143,15 @@ function GuiElement:Interp(s)
         local v = self.gui:GetState(w)
         local ty = type(v)
         if (ty == "table" or ty == "function" or ty == "thread" or ty == "userdata") then
-            self.gui:Log(0, ("Failed to interpolate string %s: Cannot convert value %s into string, %s was a %s"):format(s, w, w, ty))
+            self.gui:Log(0,
+                ("Failed to interpolate string %s: Cannot convert value %s into string, %s was a %s"):format(s, w, w, ty))
         end
         return tostring(v)
     end))
 end
 
 function GuiElement:ApplyConfig(k, v)
-    local validator = self.extendedValidator[k] or BaseValidator[k]
+    local validator = ElementProps[self.type][k]
     local t = type(v)
     if t == "table" and v["_type"] ~= nil and v["value"] then
         self._rawconfig[k] = {
@@ -156,15 +171,32 @@ function GuiElement:ApplyConfig(k, v)
         }
         return
     end
-    local newValue, err = validator.validate(v)
-    if type(err) == "string" then
-        error(err:format(self.id))
+    local value = v
+    local err
+
+    if validator.parser then
+        value, err = validator.parser(value)
+        if err then
+            error((("Invalid value for %s on element \"%s\" (%s)"):format(k, self.id or "NO ELEMENT ID", err)))
+        end
+    else
+        if validator.type then
+            if type(value) ~= validator.type then
+                error((("Invalid value for %s on element \"%s\" (Expected %s got %s)"):format(k, self.id or "NO ELEMENT ID", validator.type, type(value))))
+            end
+        end
+        if validator.validate then
+            local a, b = validator.validate(value)
+            if not a then
+                error((("Invalid value for %s on element \"%s\" (%s)"):format(k, self.id or "NO ELEMENT ID", b)))
+            end
+        end
     end
+
     self._rawconfig[k] = {
-        value = newValue,
+        value = value,
         isDF = false
     }
-
 end
 
 function GuiElement:ResolveValue(a, k)
@@ -222,7 +254,8 @@ function GuiElement:ResolveValue(a, k)
     if a._type == "state" then
         local v = self.gui:GetState(a.value)
         if v == nil then
-            self.gui:Log(1, ("Attempting to read from the state value %s, but it is nil. Is this intentional?"):format(a.value))
+            self.gui:Log(1,
+                ("Attempting to read from the state value %s, but it is nil. Is this intentional?"):format(a.value))
             return nil
         end
         return v
@@ -234,7 +267,7 @@ function GuiElement:ResolveValue(a, k)
         return self.gui.screenH
     end
     if a._type == "global" then
-        local t = BaseValidator[k] or self.extendedValidator[k]
+        local t = ElementProps[self.type][k]
         return t.fromString(GlobalsGetValue(a.value))
     end
     return a
@@ -256,10 +289,12 @@ end
 --- @param child GuiElement
 --- @return GuiElement child The child added
 function GuiElement:AddChild(child)
+    if self.childrenManagedByGenerator then self.gui:Log(0,
+            "Cannot add a child element to an element managed by a ChildElementGenerator") end
     if not self.allowsChildren then
         self.gui:Log(0, self.type .. " cannot have child element")
     end
-    ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
+    ---@cast self HLayout|VLayout
     child:OnEnterTree(self, false)
     return child
 end
@@ -267,6 +302,8 @@ end
 --- @param childID string
 --- @return GuiElement self Returns self
 function GuiElement:RemoveChild(childID)
+    if self.childrenManagedByGenerator then self.gui:Log(0,
+            "Cannot remove a child element from an element managed by a ChildElementGenerator") end
     if childID == nil then
         error("bad argument #1 to RemoveChild (string expected, got no value)", 2)
     end
@@ -281,6 +318,8 @@ end
 
 --- @return GuiElement self Returns self
 function GuiElement:RemoveAllChildren()
+    if self.childrenManagedByGenerator then self.gui:Log(0,
+            "Cannot remove a child element from an element managed by a ChildElementGenerator") end
     for i, v in ipairs(self.children) do
         v:OnExitTree()
     end
@@ -292,6 +331,19 @@ local _uid_ = 1
 function GetNextUID()
     _uid_ = _uid_ + 1
     return _uid_
+end
+
+function GuiElement:PreRender()
+    if self.childrenManagedByGenerator then
+        local children = self.generator:Process(self)
+        if children then
+            self.children = {}
+            for index, value in ipairs(children) do
+                ---@cast self HLayout|VLayout
+                value:OnEnterTree(self, false)
+            end
+        end
+    end
 end
 
 function GuiElement:Render()
@@ -310,7 +362,7 @@ function GuiElement:Render()
         x, y = self.gui:GetRootElemXY(self)
     end
     self.z = (self._config.overrideZ ~= nil and (1000000 - self._config.overrideZ) or
-                 (1000000 - self:GetDepthInTree() * 10))
+        (1000000 - self:GetDepthInTree() * 10))
     local size = self:GetElementSize()
     if self.parent then
         x, y = self.parent:GetManagedXY(self)
@@ -389,30 +441,16 @@ function GuiElement:Remove()
     self:OnExitTree()
 end
 
---- @param parent HLayout|VLayout|HLayoutForEach|VLayoutForEach|nil
+--- @param parent HLayout|VLayout|nil
 --- @param isroot boolean|nil
 --- @param gui Gui|nil
 function GuiElement:OnEnterTree(parent, isroot, gui)
     if isroot or parent == nil then
         self.gui = gui
-        if self.id then
-            if self.gui.ids[self.id] then
-                self.parent = nil
-                self.gui:Log(0, "Element ID value must be unique (\"" .. self.id .. "\" is a duplicate)")
-            end
-            self.gui.ids[self.id] = true
-        end
-        for i = 1, #self._rawchildren do
-            if not self.allowsChildren then
-                self.gui:Log(0, self.type .. " cannot have child element")
-            end
-            ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
-            self._rawchildren[i]:OnEnterTree(self)
-        end
-        return
+    else
+        self.parent = parent
+        self.gui = parent.gui
     end
-    self.parent = parent
-    self.gui = parent.gui
     if self.id then
         if self.gui.ids[self.id] then
             self.parent = nil
@@ -420,15 +458,20 @@ function GuiElement:OnEnterTree(parent, isroot, gui)
         end
         self.gui.ids[self.id] = true
     end
-    for i = 1, #self._rawchildren do
+
+    local c = self.children
+    self.children = {}
+    for i = 1, #c do
         if not self.allowsChildren then
             self.gui:Log(0, self.type .. " cannot have child element")
         end
-        ---@cast self HLayout|HLayoutForEach|VLayout|VLayoutForEach
-        self._rawchildren[i]:OnEnterTree(self)
+        ---@cast self HLayout|VLayout
+        c[i]:OnEnterTree(self)
     end
-    self._rawchildren = nil
-    table.insert(parent.children, self)
+
+    if not isroot and parent ~= nil then
+        table.insert(parent.children, self)
+    end
 end
 
 function GuiElement:OnExitTree()
@@ -449,280 +492,6 @@ function GuiElement:OnExitTree()
     end
     self.gui = nil
 end
-
-function GuiElement:PropagateInteractableBounds(x, y, w, h)
-    if not self.parent then
-        return
-    end
-    self.parent:PropagateInteractableBounds(x, y, w, h)
-end
-
-local function splitString(s, delimiter)
-    local result = {}
-    local from = 1
-    local delim_from, delim_to = string.find(s, delimiter, from)
-    while delim_from do
-        table.insert(result, string.sub(s, from, delim_from - 1))
-        from = delim_to + 1
-        delim_from, delim_to = string.find(s, delimiter, from)
-    end
-    table.insert(result, string.sub(s, from))
-    return result
-end
-
-BaseValidator = {
-    drawBorder = {
-    default = false,
-    fromString = function(s)
-        return s == "true"
-    end,
-    validate = function(o)
-        if type(o) == "boolean" then
-            return o
-        end
-        return nil, "Invalid value for drawBorder on element \"%s\""
-    end
-}, drawBackground = {
-    default = false,
-    fromString = function(s)
-        return s == "true"
-    end,
-    validate = function(o)
-        if type(o) == "boolean" then
-            return o
-        end
-        return nil, "Invalid value for drawBorder on element \"%s\""
-    end
-}, overrideWidth = {
-    default = 0,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            if o <= 0 then
-                return nil, "Invalid value for overrideWidth on element \"%s\" (must be greater than 0)"
-            end
-            return o
-        end
-        return nil, "Invalid value for overrideWidth on element \"%s\""
-    end
-}, overrideHeight = {
-    default = 0,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            if o <= 0 then
-                return nil, "Invalid value for overrideHeight on element \"%s\" (must be greater than 0)"
-            end
-            return o
-        end
-        return nil, "Invalid value for overrideHeight on element \"%s\""
-    end
-}, verticalAlign = {
-    default = 0,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            if not (0 <= o and o <= 1) then
-                return nil, "Invalid value for verticalAlign on element \"%s\" (value must be between 0-1)"
-            end
-            return o
-        end
-        return nil, "Invalid value for verticalAlign on element \"%s\""
-    end
-}, horizontalAlign = {
-    default = 0,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            if not (0 <= o and o <= 1) then
-                return nil, "Invalid value for horizontalAlign on element \"%s\" (value must be between 0-1)"
-            end
-            return o
-        end
-        return nil, "Invalid value for horizontalAlign on element \"%s\""
-    end
-}, margin = {
-    default = {
-        top = 0,
-        bottom = 0,
-        left = 0,
-        right = 0
-    },
-    fromString = function (s)
-        local v = splitString(s, ",")
-        return { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
-    end,
-    validate = function(o)
-        local t = type(o)
-        if t == "number" then
-            return {
-                top = o,
-                bottom = o,
-                left = o,
-                right = o
-            }
-        end
-        if t == "table" then
-            local m = {
-                top = o["top"],
-                bottom = o["bottom"],
-                left = o["left"],
-                right = o["right"]
-            }
-            for _, v in ipairs({"top", "bottom", "left", "right"}) do
-                local ty = type(m[v])
-                if ty == "nil" then
-                    m[v] = 0
-                elseif ty == "number" then
-                elseif ty == "table" and m[v] ~= nil and m[v] ~= nil then
-                else
-                    return nil, "Invalid value for margin " .. v .. " on element \"%s\""
-                end
-            end
-            return m;
-        end
-        return nil, "Invalid value for margin on element \"%s\""
-    end
-}, padding = {
-    default = {
-        top = 0,
-        bottom = 0,
-        left = 0,
-        right = 0
-    },
-    fromString = function (s)
-        local v = splitString(s, ",")
-        return { top = tonumber(v[1]), left = tonumber(v[2]), bottom = tonumber(v[3]), right = tonumber(v[4]) }
-    end,
-    validate = function(o)
-        local t = type(o)
-        if t == "number" then
-            return {
-                top = o,
-                bottom = o,
-                left = o,
-                right = o
-            }
-        elseif t == "table" then
-            local m = {
-                top = o["top"],
-                bottom = o["bottom"],
-                left = o["left"],
-                right = o["right"]
-            }
-            for _, v in ipairs({"top", "bottom", "left", "right"}) do
-                local ty = type(m[v])
-                if ty == "nil" then
-                    m[v] = 0
-                elseif ty == "number" then
-                elseif ty == "table" and m[v] ~= nil and m[v] ~= nil then
-                else
-                    return nil, "Invalid value for padding " .. v .. " on element \"%s\""
-                end
-            end
-            return m;
-        else
-        return nil, "Invalid value for padding on element \"%s\""
-        end
-    end
-}, colour = {
-    default = nil,
-    fromString = function (s)
-        local v = splitString(s, ",")
-        return {tonumber(v[1]), tonumber(v[2]), tonumber(v[3])}
-    end,
-    validate = function(o)
-        if type(o) == "table" then
-            if not (type(o[1]) == "number" or (type(o[1]) == "table" and o[1]["value"] ~= nil and o[1]["_type"] ~= nil) and
-                type(o[2]) == "number" or (type(o[2]) == "table" and o[2]["value"] ~= nil and o[2]["_type"] ~= nil) and
-                type(o[3]) == "number" or (type(o[3]) == "table" and o[3]["value"] ~= nil and o[3]["_type"] ~= nil)) then
-                return nil, "Invalid value for colour on element \"%s\""
-            end
-            return o
-        end
-        return nil, "Invalid value for colour on element \"%s\""
-    end
-}, onHover = {
-    default = nil,
-    fromString = function (s, funcs)
-        if funcs[s] then return funcs[s] end
-        error("GUSGUI: Unknown function name" .. s)
-    end,
-    validate = function(o)
-        if type(o) == "function" then
-            return o
-        end
-        return nil, "Invalid value for onHover on element \"%s\""
-    end
-}, hidden = {
-    default = false,
-    fromString = function(s)
-        return s == "true"
-    end,
-    validate = function(o)
-        if type(o) == "boolean" then
-            return o
-        end
-        return nil, "Invalid value for hidden on element \"%s\""
-    end
-}, visible = {
-    default = true,
-    fromString = function(s)
-        return s == "true"
-    end,
-    validate = function(o)
-        if type(o) == "boolean" then
-            return o
-        end
-        return nil, "Invalid value for visible on element \"%s\""
-    end
- }, overrideZ = {
-    default = nil,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        local t = type(o)
-        if t == "number" then
-            return o
-        end
-        return nil, "Invalid value for overrideZ on element \"%s\""
-    end
-}, onBeforeRender = {
-    default = nil,
-    fromString = function (s, funcs)
-        if funcs[s] then return funcs[s] end
-        error("GUSGUI: Unknown function name" .. s)
-    end,
-    validate = function(o)
-        local t = type(o)
-        if t == "function" then
-            return o
-        end
-        return nil, "Invalid value for onBeforeRender on element \"%s\""
-    end
-}, onAfterRender = {
-    default = nil,
-    fromString = function (s, funcs)
-        if funcs[s] then return funcs[s] end
-        error("GUSGUI: Unknown function name" .. s)
-    end,
-    validate = function(o)
-        local t = type(o)
-        if t == "function" then
-            return o
-        end
-        return nil, "Invalid value for onAfterRender on element \"%s\""
-    end
-}}
 
 --- @return GuiElement
 return GuiElement

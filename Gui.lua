@@ -1,5 +1,7 @@
 dofile_once("GUSGUI_PATHclass.lua")
 dofile_once("GUSGUI_PATHGuiElement.lua")
+---@module "ElementProps"
+local ElementProps = dofile_once("GUSGUI_PATHElementProps.lua")
 --- @return function
 local function getIdCounter()
     local id = 1
@@ -22,10 +24,6 @@ do
     local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
     ---@module "HLayout"
     local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
-    ---@module "HLayoutForEach"
-    local HLayoutForEach = dofile_once("GUSGUI_PATHelems/HLayoutForEach.lua")
-    ---@module "VLayoutForEach"
-    local VLayoutForEach = dofile_once("GUSGUI_PATHelems/VLayoutForEach.lua")
     ---@module "VLayout"
     local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
     ---@module "Slider"
@@ -42,9 +40,7 @@ do
         Image = Image,
         ImageButton = ImageButton,
         HLayout = HLayout,
-        HLayoutForEach = HLayoutForEach,
         VLayout = VLayout,
-        VLayoutForEach = VLayoutForEach,
         Slider = Slider,
         TextInput = TextInput,
         ProgressBar = ProgressBar,
@@ -168,8 +164,7 @@ end
 --- @return GuiElement data The element added.
 function Gui:AddElement(data)
     if data["is_a"] and data["Draw"] and data["GetBaseElementSize"] then
-        if data.type ~= "HLayout" and data.type ~= "HLayoutForEach" and data.type ~= "VLayout" and data.type ~=
-            "VLayoutForEach" then
+        if data.type ~= "HLayout" and data.type ~= "VLayout" then
             self:Log(0, "Gui root nodes must be a Layout element.")
         end
         table.insert(self.tree, data)
@@ -184,62 +179,76 @@ end
 ---@param config table
 function Gui:RegisterConfigForClass(classname, config)
     self.classOverrides[classname] = {}
+    if config.hover then 
+        self.classOverrides[classname].hover = config.hover
+        config.hover = nil
+    end
     for k, v in pairs(config) do
-        if k:match("^hover%-") then
-            self.classOverrides[classname].hover = self.classOverrides[classname].hover or {}
-            self.classOverrides[classname].hover[k:gsub("hover%-", "")] = v
-        else
-            local validator = BaseValidator[k]
-            local t = type(v)
-            if t == "table" and v["_type"] ~= nil and v["value"] then
-                self.classOverrides[classname][k] = {
-                    value = v,
-                    isDF = false
-                }
-            end
-            if v == nil then
-                self.classOverrides[classname][k] = {
-                    value = validator.default,
-                    isDF = true
-                }
-            end
-            local newValue, err = validator.validate(v)
-            if type(err) == "string" then
-                error(err:format(classname .. " CLASS CONFIG"))
-            end
+        local validator = ElementProps.BaseElement[k]
+        local t = type(v)
+        if t == "table" and v["_type"] ~= nil and v["value"] then
             self.classOverrides[classname][k] = {
-                value = newValue,
+                value = v,
                 isDF = false
             }
         end
+
+        local value = v
+        local err
+
+        if validator.parser then
+            value, err = validator.parser(value)
+            if err then
+                error((("Invalid value for %s on element \"%s\" (%s)"):format(k, classname .. " CLASS CONFIG", err)))
+            end
+        else
+            if validator.type then
+                if type(value) ~= validator.type then
+                    error((("Invalid value for %s on element \"%s\" (Expected %s got %s)"):format(k, classname .. " CLASS CONFIG", validator.type, type(value))))
+                end
+            end
+            if validator.validate then
+                local a, b = validator.validate(value)
+                if not a then
+                    error((("Invalid value for %s on element \"%s\" (%s)"):format(k, classname .. " CLASS CONFIG", b)))
+                end
+            end
+        end
+
+        self.classOverrides[classname][k] = {
+            value = value,
+            isDF = false
+        }
     end
     return
 end
 
-local function searchTree(element, id)
-    for k = 1, #element.children do
-        local v = element.children[k]
-        if id and v.id == id then
-            return v
-        else
-            local search = searchTree(v, id)
-            if search ~= nil then
-                return search
-            end
-        end
-    end
-    return nil
-end
+--#region GetElementBy search functions
 
 --- @param id string
 --- @return GuiElement|nil
 function Gui:GetElementById(id)
+    local function searchTree(element)
+        for k = 1, #element.children do
+            local v = element.children[k]
+            if id and v.id == id then
+                return v
+            else
+                local search = searchTree(v)
+                if search ~= nil then
+                    return search
+                end
+            end
+        end
+        return nil
+    end
+
     for k = 1, #self.tree do
         local v = self.tree[k]
         if v.id == id then
             return v
         else
-            local search = searchTree(v, id)
+            local search = searchTree(v)
             if search ~= nil then
                 return search
             end
@@ -268,6 +277,8 @@ function Gui:GetElementsByClass(className)
     return elems
 end
 
+--#endregion
+
 ---@param level integer
 ---@param message string
 function Gui:Log(level, message)
@@ -281,15 +292,10 @@ function Gui:Log(level, message)
             error("GUSGUI: Stopping execution due to high error count")
         end
         error("GUSGUI [ERR]: " .. message, 2)
-    --WARNING
+        --WARNING
     elseif level == 1 then
         if self.enableLogging then
             print("GUSGUI [WARN]: " .. message)
-        end
-    --INFO
-    else
-        if self.enableLogging then
-            print("GUSGUI [INFO]: " .. message)
         end
     end
 end
@@ -303,8 +309,12 @@ function Gui:Render()
     self.framenum = GameGetFrameNum()
     self.screenW, self.screenH = GuiGetScreenDimensions(self.guiobj)
     self.screenW, self.screenH = math.floor(self.screenW), math.floor(self.screenH)
-    self.screenWorldX, self.screenWorldY = GameGetCameraBounds()
+    self.screenWorldX, self.screenWorldY = GameGetCameraPos()
     GuiStartFrame(self.guiobj)
+    for k = 1, #self.tree do
+        local v = self.tree[k]
+        v:PreRender()
+    end
     for k = 1, #self.tree do
         local v = self.tree[k]
         v:Render()
@@ -338,20 +348,6 @@ function Gui:Destroy()
     self._state = nil
     GuiDestroy(self.guiobj)
 end
-
---- @return number, number, boolean
-function Gui:GetMouseData()
-    local component = EntityGetComponent(EntityGetWithTag("player_unit")[1], "ControlsComponent")[1]
-    local mx, my = ComponentGetValue2(component, "mMousePosition")
-    local screen_w, screen_h = GuiGetScreenDimensions(self.guiobj)
-    local cx, cy = GameGetCameraPos()
-    local vx = MagicNumbersGetValue("VIRTUAL_RESOLUTION_X")
-    local vy = MagicNumbersGetValue("VIRTUAL_RESOLUTION_Y")
-    local gmx = ((mx - cx) * screen_w / vx + screen_w / 2)
-    local gmy = ((my - cy) * screen_h / vy + screen_h / 2)
-    return math.floor(gmx), math.floor(gmy), ComponentGetValue2(component, "mButtonDownLeftClick")
-end
-
 
 --#region state functions
 --- @class State
@@ -447,7 +443,89 @@ function Gui:StateDivide(a, b)
         }
     }
 end
+
 --#endregion
+
+--#region ElementGenerator class
+local Generator = {}
+do
+    ---@class ElementGenerator
+    ---@field iterator function
+    ---@field recalcTrigger function
+    ---@field func function
+    ---@field neverInit boolean
+    ---@operator call: ElementGenerator
+    local ElementGenerator = class(function(newGen, iter, recalc, func)
+        newGen.iterator = iter
+        newGen.recalcTrigger = recalc
+        newGen.func = func
+        newGen.neverInit = true
+    end)
+
+    function Generator.GenerateEveryNFrames(num)
+        ---@param elem GuiElement
+        return function(elem)
+            return elem.gui.framenum % num == 0
+        end
+    end
+
+    function Generator.OnlyGenerateOnInit()
+        return function()
+            return false
+        end
+    end
+
+    function Generator.GenerateNElements(num)
+        return function(iter, _, _)
+            return (iter) == num and nil or (iter + 1)
+        end
+    end
+
+    function Generator.GenerateElementsForEach(stateTable)
+        return function(iter, elem, meta)
+            meta = meta or (elem.gui:GetState(stateTable))
+            return meta[iter + 1], meta
+        end
+    end
+
+    function Generator.New(interval, count, func)
+        assert(type(interval) == "function" and type(count) == "function" and type(func) == "function",
+            "Generator.New params must have 3 functions")
+        return ElementGenerator(count, interval, func)
+    end
+
+    ---@param elem GuiElement
+    ---@return GuiElement[]|nil
+    function ElementGenerator:Process(elem)
+        if self.recalcTrigger() or self.neverInit then
+            self.neverInit = false
+            elem.generatorLastUpdate = elem.gui.framenum
+            return self:Generate(elem)
+        end
+        return nil
+    end
+
+    ---@param elem GuiElement
+    function ElementGenerator:Generate(elem)
+        local elements = {}
+        local meta
+        local iter = 0
+        while true do
+            local v
+            v, meta = self.iterator(iter, elem, meta);
+            if v == nil then
+                break
+            else
+                table.insert(elements, v)
+            end
+        end
+    end
+
+    Generator.ElementGenerator = ElementGenerator
+end
+--#endregion
+
+--#region exposed API functions
 
 --- @param config table
 --- @return Gui
@@ -499,11 +577,10 @@ function CreateGUIFromXML(filename, funcs, config, g)
         for k, v in pairs(elem._attr) do
             ---@cast k string
             ---@cast v unknown
-            local convert = BaseValidator[k] or GuiElements[elem._name].extConf[k]
+            local convert = ElementProps[elem._name][k]
             if convert == nil then
                 if k:match("^hover%-") then
-                    convert = BaseValidator[k:gsub("hover%-", "")] or
-                        GuiElements[elem._name].extConf[k:gsub("hover%-", "")]
+                    convert = ElementProps[elem._name][k:gsub("hover%-", "")]
                     local value
                     if v:find("State([a-zA-Z]+)") then
                         value = gui:StateStringToTable(v)
@@ -540,10 +617,9 @@ function CreateGUIFromXML(filename, funcs, config, g)
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else
-                    ---@diagnostic disable-next-line: need-check-nil
-                    value = GuiElements[elem._name].extConf["value"].fromString(v)
+                    value = v
                 end
-                confTable.value = value
+                confTable.text = value
             end
             if elem._name == "Button" then
                 local v = elem._children[1]._text
@@ -551,8 +627,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else
-                    ---@diagnostic disable-next-line: need-check-nil
-                    value = GuiElements[elem._name].extConf["text"].fromString(v)
+                    value = v
                 end
                 confTable.text = value
             end
@@ -562,8 +637,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else
-                    ---@diagnostic disable-next-line: need-check-nil
-                    value = GuiElements[elem._name].extConf["src"].fromString(v)
+                    value = v
                 end
                 confTable.src = value
             end
@@ -573,8 +647,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
                 if v:find("State([a-zA-Z]+)") then
                     value = gui:StateStringToTable(v)
                 else
-                    ---@diagnostic disable-next-line: need-check-nil
-                    value = GuiElements[elem._name].extConf["src"].fromString(v)
+                    value = v
                 end
                 confTable.src = value
             end
@@ -605,7 +678,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
             if value._name == "Style" then
                 if StyleElem ~= nil then
                     throwErr(
-                    "Only one style element is allowed - combine styles into one tag or convert to inline config")
+                        "Only one style element is allowed - combine styles into one tag or convert to inline config")
                 end
                 StyleElem = value
             else
@@ -627,6 +700,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
         return result
     end
 
+    --#region "CSS" parser
     if StyleElem then
         local StyleText = StyleElem._children[1]._text
         if not StyleText then throwErr("Failed to find text in Style element") end
@@ -654,28 +728,18 @@ function CreateGUIFromXML(filename, funcs, config, g)
                 ---@cast v unknown
                 local convert
                 do
-                    convert = BaseValidator[k:gsub("hover%-", "")]
-                    if convert == nil then
-                        for index, value in ipairs(GuiElements) do
-                            if value.extConf[k:gsub("hover%-", "")] then
-                                convert = value.extConf[k:gsub("hover%-", "")]
-                            end
-                        end
-                    end
-                    if convert == nil then
-                        if k:match("^hover%-") then
-                            local value
-                            if v:find("State([a-zA-Z]+)") then
-                                value = gui:StateStringToTable(v)
-                            else
-                                ---@diagnostic disable-next-line: need-check-nil
-                                value = convert.fromString(v, funcs)
-                            end
-                            resolvedTable.hover = resolvedTable.hover or {}
-                            resolvedTable.hover[k:gsub("hover%-", "")] = value
+                    convert = ElementProps.AllProperties[k:gsub("hover%-", "")]
+                    if convert == nil then throwErr("Unrecognised inline config name: \"" .. k .. "\".") end
+                    if k:match("^hover%-") then
+                        local value
+                        if v:find("State([a-zA-Z]+)") then
+                            value = gui:StateStringToTable(v)
                         else
-                            throwErr("Unrecognised inline config name: \"" .. k .. "\".")
+                            ---@diagnostic disable-next-line: need-check-nil
+                            value = convert.fromString(v, funcs)
                         end
+                        resolvedTable.hover = resolvedTable.hover or {}
+                        resolvedTable.hover[k:gsub("hover%-", "")] = value
                     else
                         local value
                         if v:find("State([a-zA-Z]+)") then
@@ -688,7 +752,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
                     end
                 end
             end
-            if id:sub(1,1) == "." then
+            if id:sub(1, 1) == "." then
                 gui:RegisterConfigForClass(id:sub(2), resolvedTable)
             else
                 local elem = gui:GetElementById(id:sub(2))
@@ -703,6 +767,8 @@ function CreateGUIFromXML(filename, funcs, config, g)
             end
         end
     end
+    --#endregion
+
     return gui
 end
 
@@ -712,7 +778,7 @@ local function InjectDebugging(gui)
     end
     local file = io.open("log.txt", "w+")
     if not file then error("Failed to open log file") end
-    gui.Log = function (self, level, message)
+    gui.Log = function(self, level, message)
         if level == 0 then
             self.ec = self.ec + 1
             if self.ec > 10 then
@@ -736,10 +802,12 @@ function DebugGUI(config)
     return InjectDebugging(gui)
 end
 
-function DebugGUIXML(filename, funcs, config, debugfile)
+function DebugGUIXML(filename, funcs, config)
     local gui = CreateGUIFromXML(filename, funcs, config, Gui(config, true))
     return InjectDebugging(gui)
 end
+
+--#endregion
 
 return {
     Create = CreateGUI,
@@ -748,5 +816,6 @@ return {
         CreateGUIFromXML = DebugGUIXML
     },
     CreateGUIFromXML = CreateGUIFromXML,
-    Elements = GuiElements
+    Elements = GuiElements,
+    ElementGenerator = Generator
 }

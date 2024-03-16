@@ -1,23 +1,6 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-local VLayoutConf = {alignChildren = {
-    default = 0,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        local t = type(o)
-        if t == "number" then
-            if not (0 <= o and o <= 1) then
-                return nil,
-                    "Invalid value for alignChildren on element \"%s\" (value must be between 0-1)"
-            end
-            return o
-        end
-        return nil, "Invalid value for alignChildren on element \"%s\""
-    end
-}}
 --- @class VLayout: GuiElement
 --- @field lastUpdate number
 --- @field hasInit boolean
@@ -26,27 +9,14 @@ local VLayoutConf = {alignChildren = {
 --- @field baseY number
 --- @field maskID number
 --- @operator call: VLayout
-local VLayout = class(GuiElement, function(o, config, ext)
+local VLayout = class(GuiElement, function(o, config)
     config = config or {}
-    ext = ext or {}
-    ext.alignChildren = VLayoutConf.alignChildren
-    GuiElement.init(o, config, ext)
-    o.type = "VLayout"
+    config._type = "VLayout"
+    GuiElement.init(o, config)
     o.allowsChildren = true
-    o.childrenResolved = false
-    o._rawchildren = config.children or {}
 end)
 
 function VLayout:GetBaseElementSize()
-    if self.type == "VLayoutForEach" then
-        if not self.hasInit then
-            self:CreateElements()
-            self.hasInit = true;
-        end
-        if self.lastUpdate ~= self.gui.framenum and ((self.gui.framenum % self._config.calculateEveryNFrames) ~= 0) and self._config.calculateEveryNFrames ~= -1 then
-            self:CreateElements()
-        end
-    end
     local totalW = 0
     local totalH = 0
     for i = 1, #self.children do
@@ -102,5 +72,4 @@ function VLayout:Draw(x, y)
     else self.useHoverConfigForNextFrame = false end 
 end
 
-VLayout.extConf = VLayoutConf
 return VLayout

@@ -1,50 +1,16 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-local CheckboxConf = {defaultValue = {
-    required = true,
-    fromString = function (s)
-        return s == "true"
-    end,
-    validate = function(o)
-        if type(o) == "boolean" then
-            return o
-        end
-        return nil, "Invalid value for defaultValue on element \"%s\""
-    end
-}, onToggle = {
-    required = true,
-    fromString = function (s, funcs)
-        if funcs[s] then return funcs[s] end
-        error("Unknown function name" .. s)
-    end, 
-    validate = function(o)
-        if type(o) == "function" then
-            return o
-        end
-        return nil, "Invalid value for onToggle on element \"%s\""
-    end
-}, style = {
-    default = "image",
-    fromString = function (s)
-        return s
-    end,
-    validate = function(o)
-        if type(o) == "string" and o == "image" or o == "text" then
-            return true, nil, nil
-        end
-        return false, nil, "Invalid value for style on element \"%s\""
-    end
-}}
+
 --- @class Checkbox: GuiElement
 --- @field imageID number
 --- @field maskID number
 --- @operator call: Checkbox
 local Checkbox = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, CheckboxConf)
+    config._type = "Checkbox"
+    GuiElement.init(o, config)
     o._hoverconfig.colour = o._hoverconfig.colour or {240,230,140}
-    o.type = "Checkbox"
     o.allowsChildren = false
     o.value = o._config.defaultValue
 end)
@@ -124,5 +90,4 @@ function Checkbox:Draw(x, y)
     end
 end
 
-Checkbox.extConf = CheckboxConf
 return Checkbox

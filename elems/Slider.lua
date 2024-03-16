@@ -1,67 +1,15 @@
 --- @module "GuiElement"
 local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
 dofile_once("GUSGUI_PATHclass.lua")
-local SliderConf = {min = {
-    default = 0,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            return o
-        end
-    end
-}, max = {
-    default = 100,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            return o
-        end
-    end
-}, width = {
-    default = 25,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            return o
-        end
-    end
-}, defaultValue = {
-    default = 1,
-    fromString = function(s)
-        return tonumber(s)
-    end,
-    validate = function(o)
-        if type(o) == "number" then
-            return o
-        end
-    end
-}, onChange = {
-    required = true,
-    fromString = function (s, funcs)
-        if funcs[s] then return funcs[s] end
-        error("GUSGUI: Unknown function name" .. s)
-        end,
-    validate = function(o)
-        if type(o) == "function" then
-            return o
-        end
-        return nil, "Invalid value for onChange on element \"%s\""
-    end
-}}
 --- @class Slider: GuiElement
 --- @field maskID number
 --- @field renderID number
 --- @operator call: Slider
 local Slider = class(GuiElement, function(o, config)
     config = config or {}
-    GuiElement.init(o, config, SliderConf)
-    o.type = "Slider"
+    config._type = "Slider"
+    GuiElement.init(o, config)
+
     o.allowsChildren = false
     o.value = o._config.defaultValue
 end)
@@ -95,5 +43,4 @@ function Slider:Draw(x, y)
     else self.useHoverConfigForNextFrame = false end
 end
 
-Slider.extConf = SliderConf
 return Slider
