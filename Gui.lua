@@ -450,13 +450,11 @@ end
 local Generator = {}
 do
     ---@class ElementGenerator
-    ---@field iterator function
     ---@field recalcTrigger function
     ---@field func function
     ---@field neverInit boolean
     ---@operator call: ElementGenerator
-    local ElementGenerator = class(function(newGen, iter, recalc, func)
-        newGen.iterator = iter
+    local ElementGenerator = class(function(newGen,  recalc, func)
         newGen.recalcTrigger = recalc
         newGen.func = func
         newGen.neverInit = true
@@ -475,23 +473,10 @@ do
         end
     end
 
-    function Generator.GenerateNElements(num)
-        return function(iter, _, _)
-            return (iter) == num and nil or (iter + 1)
-        end
-    end
-
-    function Generator.GenerateElementsForEach(stateTable)
-        return function(iter, elem, meta)
-            meta = meta or (elem.gui:GetState(stateTable))
-            return meta[iter + 1], meta
-        end
-    end
-
-    function Generator.New(interval, count, func)
-        assert(type(interval) == "function" and type(count) == "function" and type(func) == "function",
-            "Generator.New params must have 3 functions")
-        return ElementGenerator(count, interval, func)
+    function Generator.New(reclac, func)
+        assert(type(reclac) == "function" and type(func) == "function",
+            "Generator.New params must have 2 functions")
+        return ElementGenerator(reclac, func)
     end
 
     ---@param elem GuiElement
@@ -500,25 +485,9 @@ do
         if self.recalcTrigger() or self.neverInit then
             self.neverInit = false
             elem.generatorLastUpdate = elem.gui.framenum
-            return self:Generate(elem)
+            return self.func(elem)
         end
         return nil
-    end
-
-    ---@param elem GuiElement
-    function ElementGenerator:Generate(elem)
-        local elements = {}
-        local meta
-        local iter = 0
-        while true do
-            local v
-            v, meta = self.iterator(iter, elem, meta);
-            if v == nil then
-                break
-            else
-                table.insert(elements, v)
-            end
-        end
     end
 
     Generator.ElementGenerator = ElementGenerator
