@@ -493,7 +493,267 @@ do
     Generator.ElementGenerator = ElementGenerator
 end
 --#endregion
+--#region xml parser
 
+---@param filedata string
+---@return table DOM
+---@nodiscard
+local function ParseXML(filedata)
+    -- This is a version of https://github.com/manoelcampos/xml2lua combined into one file with unused components removed
+    -- Copyright (c) 2016 Manoel Campos da Silva Filho
+    -- Licence (MIT) https://github.com/manoelcampos/xml2lua/blob/master/LICENSE
+    --@author Paul Chakravarti (paulc@passtheaardvark.com)
+    --@author Manoel Campos da Silva Filho
+    local function getTree()
+        local dom = {
+            current = { _children = {}, _type = "ROOT" },
+            _stack = {}
+        }
+        function dom:starttag(tag)
+            local node = {
+                _type = 'ELEMENT',
+                _name = tag.name,
+                _attr = tag.attrs,
+                _children = {}
+            }
+            if not self.root then
+                self.root = node
+            end
+            table.insert(self._stack, node)
+            table.insert(self.current._children, node)
+            self.current = node
+        end
+
+        function dom:endtag(tag)
+            local prev = self._stack[#self._stack]
+            if tag.name ~= prev._name then
+                ---@diagnostic disable-next-line: undefined-global
+                error("XML Error - Unmatched Tag [" .. s .. ":" .. tag.name .. "]\n")
+            end
+            table.remove(self._stack)
+            self.current = self._stack[#self._stack]
+            if not self.current then
+                local node = { _children = {}, _type = "ROOT" }
+                if self.root then
+                    table.insert(node._children, self.root)
+                    self.root = node
+                end
+                self.current = node
+            end
+        end
+        function dom:text(text)
+            local node = {
+                _type = "TEXT",
+                _text = text
+            }
+            table.insert(self.current._children, node)
+        end
+        dom.cdata = dom.text
+        dom.__index = dom
+        return dom
+    end
+    local function decimalToHtmlChar(code)
+        local num = tonumber(code)
+        if num >= 0 and num < 256 then
+            ---@diagnostic disable-next-line: param-type-mismatch
+            return string.char(num)
+        end
+        return "&#" .. code .. ";"
+    end
+    local function hexadecimalToHtmlChar(code)
+        local num = tonumber(code, 16)
+        if num >= 0 and num < 256 then
+            return string.char(num)
+        end
+        return "&#x" .. code .. ";"
+    end
+    local XmlParser = {
+        _XML        = '^([^<]*)<(%/?)([^>]-)(%/?)>',
+        _ATTR1      = '([%w-:_]+)%s*=%s*"(.-)"',
+        _ATTR2      = '([%w-:_]+)%s*=%s*\'(.-)\'',
+        _CDATA      = '<%!%[CDATA%[(.-)%]%]>',
+        _COMMENT    = '<!%-%-(.-)%-%->',
+        _TAG        = '^(.-)%s.*',
+        _LEADINGWS  = '^%s+',
+        _TRAILINGWS = '%s+$',
+        _WS         = '^%s*$',
+        _ATTRERR1   = '=+?%s*"[^"]*$',
+        _ATTRERR2   = '=+?%s*\'[^\']*$',
+        _TAGEXT     = '(%/?)>',
+        _errstr     = {
+            xmlErr = "Error Parsing XML",
+            cdataErr = "Error Parsing CDATA",
+            endTagErr = "End Tag Attributes Invalid",
+            unmatchedTagErr = "Unbalanced Tag",
+            incompleteXmlErr = "Incomplete XML Document",
+        },
+        _ENTITIES   = {
+            ["&lt;"] = "<",
+            ["&gt;"] = ">",
+            ["&amp;"] = "&",
+            ["&quot;"] = '"',
+            ["&apos;"] = "'",
+            ["&#(%d+);"] = decimalToHtmlChar,
+            ["&#x(%x+);"] = hexadecimalToHtmlChar,
+        },
+    }
+
+    function XmlParser.new()
+        local _handler = getTree()
+        local obj = {
+            handler = _handler,
+            _stack  = {}
+        }
+        setmetatable(obj, XmlParser)
+        obj.__index = XmlParser
+        return obj;
+    end
+    local function fexists(table, elementName)
+        if table == nil then
+            return false
+        end
+        if table[elementName] == nil then
+            return fexists(getmetatable(table), elementName)
+        else
+            return true
+        end
+    end
+    local function err(self, errMsg, pos)
+        error(string.format("%s [char=%d]\n", errMsg or "Parse Error", pos))
+    end
+    local function stripWS(self, s)
+        s = string.gsub(s, '^%s+', '')
+        s = string.gsub(s, '%s+$', '')
+        return s
+    end
+    local function parseEntities(self, s)
+        for k, v in pairs(self._ENTITIES) do
+            s = string.gsub(s, k, v)
+        end
+        return s
+    end
+    local function parseTag(self, s)
+        local tag = {
+            name = string.gsub(s, self._TAG, '%1'),
+            attrs = {}
+        }
+        local parseFunction = function(k, v)
+            tag.attrs[k] = parseEntities(self, v)
+            tag.attrs._ = 1
+        end
+        _ = string.gsub(s, self._ATTR1, parseFunction)
+        _ = string.gsub(s, self._ATTR2, parseFunction)
+        if tag.attrs._ then
+            tag.attrs._ = nil
+        else
+            tag.attrs = nil
+        end
+        return tag
+    end
+
+    local function parseNormalTag(self, xml, f)
+        while 1 do
+            f.errStart, f.errEnd = string.find(f.tagstr, self._ATTRERR1)
+            if f.errEnd == nil then
+                f.errStart, f.errEnd = string.find(f.tagstr, self._ATTRERR2)
+                if f.errEnd == nil then
+                    break
+                end
+            end
+            f.extStart, f.extEnd, f.endt2 = string.find(xml, self._TAGEXT, f.endMatch + 1)
+            f.tagstr = f.tagstr .. string.sub(xml, f.endMatch, f.extEnd - 1)
+            if not f.match then
+                err(self, self._errstr.xmlErr, f.pos)
+            end
+            f.endMatch = f.extEnd
+        end
+        local tag = parseTag(self, f.tagstr)
+        if (f.endt1 == "/") then
+            if fexists(self.handler, 'endtag') then
+                if tag.attrs then
+                    err(self, string.format("%s (/%s)", self._errstr.endTagErr, tag.name), f.pos)
+                end
+                if table.remove(self._stack) ~= tag.name then
+                    err(self, string.format("%s (/%s)", self._errstr.unmatchedTagErr, tag.name), f.pos)
+                end
+                self.handler:endtag(tag, f.match, f.endMatch)
+            end
+        else
+            table.insert(self._stack, tag.name)
+            if fexists(self.handler, 'starttag') then
+                self.handler:starttag(tag, f.match, f.endMatch)
+            end
+            if (f.endt2 == "/") then
+                table.remove(self._stack)
+                if fexists(self.handler, 'endtag') then
+                    self.handler:endtag(tag, f.match, f.endMatch)
+                end
+            end
+        end
+        return tag
+    end
+
+    local function getNextTag(self, xml, f)
+        f.match, f.endMatch, f.text, f.endt1, f.tagstr, f.endt2 = string.find(xml, self._XML, f.pos)
+        if not f.match then
+            if string.find(xml, self._WS, f.pos) then
+                if #self._stack ~= 0 then
+                    err(self, self._errstr.incompleteXmlErr, f.pos)
+                else
+                    return false
+                end
+            else
+                err(self, self._errstr.xmlErr, f.pos)
+            end
+        end
+        f.text = f.text or ''
+        f.tagstr = f.tagstr or ''
+        f.match = f.match or 0
+        return f.endMatch ~= nil
+    end
+
+    function XmlParser:parse(xml)
+        local f = {
+            match = 0,
+            endMatch = 0,
+            pos = 1,
+        }
+        while f.match do
+            if not getNextTag(self, xml, f) then
+                break
+            end
+            f.startText = f.match
+            f.endText = f.match + string.len(f.text) - 1
+            f.match = f.match + string.len(f.text)
+            f.text = parseEntities(self, stripWS(self, f.text))
+            if f.text ~= "" and fexists(self.handler, 'text') then
+                self.handler:text(f.text, nil, f.match, f.endText)
+            end
+            if string.sub(f.tagstr, 1, 3) == "!--" then
+                f.match, f.endMatch, f.text = string.find(xml, self._COMMENT, f.pos)
+                if not f.match then
+                    err(self, self._errstr.commentErr, f.pos)
+                end
+            elseif string.sub(f.tagstr, 1, 8) == "![CDATA[" then
+                f.match, f.endMatch, f.text = string.find(xml, self._CDATA, f.pos)
+                if not f.match then
+                    err(self, self._errstr.cdataErr, f.pos)
+                end
+                if fexists(self.handler, 'cdata') then
+                    self.handler:cdata(f.text, nil, f.match, f.endMatch)
+                end
+            else
+                parseNormalTag(self, xml, f)
+            end
+            f.pos = f.endMatch + 1
+        end
+        return self.handler
+    end
+    XmlParser.__index = XmlParser
+    local parser = XmlParser.new()
+    return parser:parse(filedata).root
+end
+--#endregion
 --#region exposed API functions
 
 --- @param config table
@@ -524,15 +784,7 @@ function CreateGUIFromXML(filename, funcs, config, g)
     end
     local gui = g or Gui(config)
     local StyleElem
-    local data
-    do
-        local xml2lua = dofile_once("GUSGUI_PATHxml2lua.lua")
-        local dom = xml2lua.getTree():new()
-        local parser = xml2lua.parser(dom)
-        parser:parse(ModTextFileGetContent(filename))
-        data = dom.root._children
-    end
-
+    local data = ParseXML(ModTextFileGetContent(filename))
     --Main parsing function
     ---@param elem table
     ---@param parent GuiElement?
@@ -737,7 +989,6 @@ function CreateGUIFromXML(filename, funcs, config, g)
         end
     end
     --#endregion
-
     return gui
 end
 
@@ -777,7 +1028,6 @@ function DebugGUIXML(filename, funcs, config)
 end
 
 --#endregion
-
 return {
     Create = CreateGUI,
     Debug = {
