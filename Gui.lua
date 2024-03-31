@@ -1,6 +1,6 @@
 local function gusgui(gusgui_path)
 GUSGUI_FILEPATH = function (path)
-    return gusgui_path .. path
+    return gusgui_path:gsub("/$", "") .. "/" .. path
 end
 dofile_once(GUSGUI_FILEPATH("class.lua"))
 dofile_once(GUSGUI_FILEPATH("GuiElement.lua"))
