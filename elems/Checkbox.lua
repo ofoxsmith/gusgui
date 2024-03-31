@@ -1,6 +1,6 @@
 --- @module "GuiElement"
-local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
-dofile_once("GUSGUI_PATHclass.lua")
+local GuiElement = dofile_once(GUSGUI_FILEPATH("GuiElement.lua"))
+dofile_once(GUSGUI_FILEPATH("class.lua"))
 
 --- @class Checkbox: GuiElement
 --- @field imageID number
@@ -75,10 +75,10 @@ function Checkbox:Draw(x, y)
         end
         GuiZSetForNextWidget(self.gui.guiobj, self.z)
         local path = nil
-        if self.value == true then 
-            path = "GUSGUI_PATHimg/checkbox_t.png"
+        if self.value == true then
+            path = GUSGUI_FILEPATH("img/checkbox_t.png")
         else 
-            path = "GUSGUI_PATHimg/checkbox_f.png"
+            path = GUSGUI_FILEPATH("img/checkbox_f.png")
         end
         GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + self._config.padding.left,
             y + elementSize.offsetY + self._config.padding.top, path, 1, 1, 1)

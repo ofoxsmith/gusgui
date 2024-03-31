@@ -5,11 +5,8 @@ A GUI framework for Noita, with properties and behaviors somewhat similar to HTM
 Download the [latest release](https://github.com/ofoxsmith/gusgui/releases), and extract it into your mod folder. 
 Updating must be done manually by downloading the newest release.
 
-At the top of `init.lua`, call the initialisation function:
 ```lua
-dofile_once("mods/YOUR-MOD-ID/PATH-TO-GUSGUI/gusgui.lua").init("mods/YOUR-MOD-ID/PATH-TO-GUSGUI")
-
-local gusgui = dofile_once("mods/YOUR-MOD-ID/PATH-TO-GUSGUI/Gui.lua")
+local gusgui = dofile_once("mods/YOUR-MOD-ID/PATH-TO-GUSGUI/Gui.lua").gusgui("PATH-TO-GUSGUI")
 local Gui = gusgui.Create()
 ```
 

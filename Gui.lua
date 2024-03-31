@@ -1,7 +1,11 @@
-dofile_once("GUSGUI_PATHclass.lua")
-dofile_once("GUSGUI_PATHGuiElement.lua")
+local function gusgui(gusgui_path)
+GUSGUI_FILEPATH = function (path)
+    return gusgui_path .. path
+end
+dofile_once(GUSGUI_FILEPATH("class.lua"))
+dofile_once(GUSGUI_FILEPATH("GuiElement.lua"))
 ---@module "ElementProps"
-local ElementProps = dofile_once("GUSGUI_PATHElementProps.lua")
+local ElementProps = dofile_once(GUSGUI_FILEPATH("ElementProps.lua"))
 --- @return function
 local function getIdCounter()
     local id = 1
@@ -13,16 +17,16 @@ local function getIdCounter()
 end
 
 local GuiElements = {
-    Text = dofile_once("GUSGUI_PATHelems/Text.lua"),
-    Button = dofile_once("GUSGUI_PATHelems/Button.lua"),
-    Image = dofile_once("GUSGUI_PATHelems/Image.lua"),
-    ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua"),
-    HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua"),
-    VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua"),
-    Slider = dofile_once("GUSGUI_PATHelems/Slider.lua"),
-    TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua"),
-    ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua"),
-    Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua"),
+    Text = dofile_once(GUSGUI_FILEPATH("elems/Text.lua")),
+    Button = dofile_once(GUSGUI_FILEPATH("elems/Button.lua")),
+    Image = dofile_once(GUSGUI_FILEPATH("elems/Image.lua")),
+    ImageButton = dofile_once(GUSGUI_FILEPATH("elems/ImageButton.lua")),
+    HLayout = dofile_once(GUSGUI_FILEPATH("elems/HLayout.lua")),
+    VLayout = dofile_once(GUSGUI_FILEPATH("elems/VLayout.lua")),
+    Slider = dofile_once(GUSGUI_FILEPATH("elems/Slider.lua")),
+    TextInput = dofile_once(GUSGUI_FILEPATH("elems/TextInput.lua")),
+    ProgressBar = dofile_once(GUSGUI_FILEPATH("elems/ProgressBar.lua")),
+    Checkbox = dofile_once(GUSGUI_FILEPATH("elems/Checkbox.lua")),
 }
 
 --- @class Gui
@@ -969,4 +973,9 @@ return {
     CreateGUIFromXML = CreateGUIFromXML,
     Elements = GuiElements,
     ElementGenerator = Generator
+}
+end
+
+return {
+    gusgui = gusgui
 }

@@ -12,8 +12,8 @@ local function splitString(s, delimiter)
 end
 
 --- @module "GuiElement"
-local GuiElement = dofile_once("GUSGUI_PATHGuiElement.lua")
-dofile_once("GUSGUI_PATHclass.lua")
+local GuiElement = dofile_once(GUSGUI_FILEPATH("GuiElement.lua"))
+dofile_once(GUSGUI_FILEPATH("class.lua"))
 --- @class Text: GuiElement
 --- @field maskID number
 --- @field hoverMaskID number

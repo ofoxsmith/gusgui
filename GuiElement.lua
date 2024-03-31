@@ -1,6 +1,6 @@
-dofile_once("GUSGUI_PATHclass.lua")
+dofile_once(GUSGUI_FILEPATH("class.lua"))
 ---@module "ElementProps"
-local ElementProps = dofile_once("GUSGUI_PATHElementProps.lua")
+local ElementProps = dofile_once(GUSGUI_FILEPATH("ElementProps.lua"))
 -- Gui element parent class that is inherited by all elements
 -- All elements define a GetBaseElementSize method, which gets the raw size of the gui element without margins, borders and etc using the Gui API functions
 -- Elements that manage other child elements implement a GetManagedXY function, which allows children to get x, y relative to parent position and config
@@ -428,13 +428,13 @@ end
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w, h, 1, "GUSGUI_PATHimg/border.png")
+    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w, h, 1, GUSGUI_FILEPATH("img/border.png"))
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w, h, 1, "GUSGUI_PATHimg/bg.png")
+    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w, h, 1, GUSGUI_FILEPATH("img/bg.png"))
 end
 
 function GuiElement:Remove()
