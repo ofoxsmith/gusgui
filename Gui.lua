@@ -12,41 +12,18 @@ local function getIdCounter()
     end
 end
 
-local GuiElements = {}
-do
-    ---@module "Text"
-    local Text = dofile_once("GUSGUI_PATHelems/Text.lua")
-    ---@module "Button"
-    local Button = dofile_once("GUSGUI_PATHelems/Button.lua")
-    ---@module "Image"
-    local Image = dofile_once("GUSGUI_PATHelems/Image.lua")
-    ---@module "ImageButton"
-    local ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua")
-    ---@module "HLayout"
-    local HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua")
-    ---@module "VLayout"
-    local VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua")
-    ---@module "Slider"
-    local Slider = dofile_once("GUSGUI_PATHelems/Slider.lua")
-    ---@module "TextInput"
-    local TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua")
-    ---@module "ProgressBar"
-    local ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua")
-    ---@module "Checkbox"
-    local Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua")
-    GuiElements = {
-        Text = Text,
-        Button = Button,
-        Image = Image,
-        ImageButton = ImageButton,
-        HLayout = HLayout,
-        VLayout = VLayout,
-        Slider = Slider,
-        TextInput = TextInput,
-        ProgressBar = ProgressBar,
-        Checkbox = Checkbox,
-    }
-end
+local GuiElements = {
+    Text = dofile_once("GUSGUI_PATHelems/Text.lua"),
+    Button = dofile_once("GUSGUI_PATHelems/Button.lua"),
+    Image = dofile_once("GUSGUI_PATHelems/Image.lua"),
+    ImageButton = dofile_once("GUSGUI_PATHelems/ImageButton.lua"),
+    HLayout = dofile_once("GUSGUI_PATHelems/HLayout.lua"),
+    VLayout = dofile_once("GUSGUI_PATHelems/VLayout.lua"),
+    Slider = dofile_once("GUSGUI_PATHelems/Slider.lua"),
+    TextInput = dofile_once("GUSGUI_PATHelems/TextInput.lua"),
+    ProgressBar = dofile_once("GUSGUI_PATHelems/ProgressBar.lua"),
+    Checkbox = dofile_once("GUSGUI_PATHelems/Checkbox.lua"),
+}
 
 --- @class Gui
 --- @field classOverrides table
@@ -60,7 +37,7 @@ end
 --- @field ec integer
 --- @field ids table
 --- @operator call: Gui
-local Gui = class(function(newGUI, config, debug)
+local Gui = class(function(newGUI, config)
     config = config or {}
     config.state = config.state or {}
     config.gui = config.gui or GuiCreate()
@@ -70,20 +47,17 @@ local Gui = class(function(newGUI, config, debug)
     newGUI.ids = {}
     newGUI.nextID = getIdCounter()
     newGUI.stateID = getIdCounter()
-    newGUI.debugging = debug
     newGUI.guiobj = config.gui
     newGUI.tree = {}
-    newGUI.cachedData = {}
     newGUI.enableLogging = config.enableLogging
     newGUI.baseX = config.baseX
     newGUI.baseY = config.baseY
     newGUI.state = config.state
-    newGUI._state = {}
     newGUI.ec = 0
     newGUI.classOverrides = {}
     newGUI.screenW, newGUI.screenH = GuiGetScreenDimensions(newGUI.guiobj)
     newGUI.screenW, newGUI.screenH = math.floor(newGUI.screenW), math.floor(newGUI.screenH)
-    print(("New GUSGUI Instance created (logging = %s, debug = %s)"):format(config.enableLogging, debug))
+    print(("New GUSGUI Instance created (logging = %s)"):format(config.enableLogging))
 end)
 
 --- @param s string
@@ -195,7 +169,6 @@ function Gui:RegisterConfigForClass(classname, config)
 
         local value = v
         local err
-
         if validator.parser then
             value, err = validator.parser(value)
             if err then
@@ -304,7 +277,6 @@ function Gui:Render()
     if (self.destroyed == true) then
         return
     end
-    self.cachedData = {}
     self._state = self.state
     self.framenum = GameGetFrameNum()
     self.screenW, self.screenH = GuiGetScreenDimensions(self.guiobj)
@@ -884,7 +856,6 @@ function CreateGUIFromXML(filename, funcs, config, g)
             end
         end
 
-
         ---Add element to gui tree
         if not parent then
             gui:AddElement(newElement)
@@ -992,48 +963,9 @@ function CreateGUIFromXML(filename, funcs, config, g)
     return gui
 end
 
-local function InjectDebugging(gui)
-    if io == nil then
-        error("GUSGUI: Debugging requires unsafe mode enabled for IO")
-    end
-    local file = io.open("log.txt", "w+")
-    if not file then error("Failed to open log file") end
-    gui.Log = function(self, level, message)
-        if level == 0 then
-            self.ec = self.ec + 1
-            if self.ec > 10 then
-                file:write("[ERR]: " .. message)
-                self.destroyed = true
-                file:write("Stopping execution due to high error count")
-                file:close()
-            end
-            file:write("[ERR]: " .. message, 2)
-        elseif level == 1 then
-            print("[WARN]: " .. message)
-        else
-            print("[INFO]: " .. message)
-        end
-    end
-    return gui
-end
-
-function DebugGUI(config)
-    local gui = Gui(config, true)
-    return InjectDebugging(gui)
-end
-
-function DebugGUIXML(filename, funcs, config)
-    local gui = CreateGUIFromXML(filename, funcs, config, Gui(config, true))
-    return InjectDebugging(gui)
-end
-
 --#endregion
 return {
     Create = CreateGUI,
-    Debug = {
-        Create = DebugGUI,
-        CreateGUIFromXML = DebugGUIXML
-    },
     CreateGUIFromXML = CreateGUIFromXML,
     Elements = GuiElements,
     ElementGenerator = Generator

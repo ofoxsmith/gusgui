@@ -24,7 +24,7 @@ function ProgressBar:Draw(x, y)
     if self._config.customBarColourPath ~= nil then
         barPath = self._config.customBarColourPath
     else 
-        barPath = "GUSGUI_PATHpbar_" .. self._config.barColour .. ".png"
+        barPath = "GUSGUI_PATHimg/pbar_" .. self._config.barColour .. ".png"
     end
     local value = self._config.value
     if value < 0 or value > 100 then 
@@ -37,7 +37,7 @@ function ProgressBar:Draw(x, y)
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 2)
     GuiImageNinePiece(self.gui.guiobj, self.sbgID, x + elementSize.offsetX + self._config.padding.left,
         y + elementSize.offsetY + self._config.padding.top, math.max(15, self._config.width),
-        math.max(2, self._config.height), 1, "GUSGUI_PATHpbarbg.png")
+        math.max(2, self._config.height), 1, "GUSGUI_PATHimg/pbarbg.png")
     local clicked, right_clicked, hovered = GuiGetPreviousWidgetInfo(self.gui.guiobj)
     if hovered then
         if self._config.onHover then

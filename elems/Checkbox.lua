@@ -76,9 +76,9 @@ function Checkbox:Draw(x, y)
         GuiZSetForNextWidget(self.gui.guiobj, self.z)
         local path = nil
         if self.value == true then 
-            path = "GUSGUI_PATHcheckbox_t.png"
+            path = "GUSGUI_PATHimg/checkbox_t.png"
         else 
-            path = "GUSGUI_PATHcheckbox_f.png"
+            path = "GUSGUI_PATHimg/checkbox_f.png"
         end
         GuiImage(self.gui.guiobj, self.imageID, x + elementSize.offsetX + self._config.padding.left,
             y + elementSize.offsetY + self._config.padding.top, path, 1, 1, 1)

@@ -428,13 +428,13 @@ end
 function GuiElement:RenderBorder(x, y, w, h)
     self.borderID = self.borderID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w, h, 1, "GUSGUI_PATHborder.png")
+    GuiImageNinePiece(self.gui.guiobj, self.borderID, x, y, w, h, 1, "GUSGUI_PATHimg/border.png")
 end
 
 function GuiElement:RenderBackground(x, y, w, h)
     self.bgID = self.bgID or self.gui.nextID()
     GuiZSetForNextWidget(self.gui.guiobj, self.z + 1)
-    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w, h, 1, "GUSGUI_PATHbg.png")
+    GuiImageNinePiece(self.gui.guiobj, self.bgID, x, y, w, h, 1, "GUSGUI_PATHimg/bg.png")
 end
 
 function GuiElement:Remove()
