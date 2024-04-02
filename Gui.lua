@@ -458,7 +458,7 @@ do
     ---@param elem GuiElement
     ---@return GuiElement[]|nil
     function ElementGenerator:Process(elem)
-        if self.recalcTrigger() or self.neverInit then
+        if self.recalcTrigger(elem) or self.neverInit then
             self.neverInit = false
             elem.generatorLastUpdate = elem.gui.framenum
             return self.func(elem)
