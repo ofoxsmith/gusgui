@@ -436,23 +436,46 @@ do
         newGen.neverInit = true
     end)
 
-    function Generator.GenerateEveryNFrames(num)
+    function ElementGenerator:GenerateEveryNFrames(num)
         ---@param elem GuiElement
-        return function(elem)
+        self.recalcTrigger = function(elem)
             return elem.gui.framenum % num == 0
         end
+        return self
     end
 
-    function Generator.OnlyGenerateOnInit()
-        return function()
+    function ElementGenerator:OnlyGenerateOnInit()
+        self.recalcTrigger = function()
             return false
+        end
+        return self
+    end
+
+    function ElementGenerator:ForEach(state, func)
+        self.func = function (elem)
+            local elems = {}
+            local data = (elem.gui:GetState(state))
+            for i = 1, #data do
+                local c = func(data[i])
+                table.insert(elems, c)
+            end
+            return elems
+        end
+        return self
+    end
+
+    function ElementGenerator:GenerateNTimes(times, func)
+        self.func = function (elem)
+            local tbl = {}
+            for index=1,times do
+                table.insert(tbl, func(index, elem))
+            end
+            return tbl
         end
     end
 
-    function Generator.New(reclac, func)
-        assert(type(reclac) == "function" and type(func) == "function",
-            "Generator.New params must have 2 functions")
-        return ElementGenerator(reclac, func)
+    function Generator.New()
+        return ElementGenerator()
     end
 
     ---@param elem GuiElement
