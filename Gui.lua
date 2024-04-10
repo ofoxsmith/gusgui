@@ -87,55 +87,45 @@ end
 ---@return State
 function Gui:StateStringToTable(str)
     local StateTypes = {
-        Value = Gui.StateValue,
+        StateValue = Gui.StateValue,
         Add = Gui.StateAdd,
         Subtract = Gui.StateSubtract,
         Divide = Gui.StateDivide,
         Multiply = Gui.StateMultiply,
         Global = Gui.StateGlobal,
+        ScreenWidth = Gui.ScreenWidth,
+        ScreenHeight = Gui.ScreenHeight
     }
-    ---@type string[]
-    local vals = {}
-    if str:find("State[a-zA-Z]+") == 1 then
-        while true do
-            local c = false
-            str = str:gsub("%([a-zA-Z0-9,%% ]+%)", function(s)
-                c = true
-                ---@cast s string
-                table.insert(vals, s:sub(2, -2))
-                return "%%" .. #vals
-            end)
-            if c == false then break end
-        end
-    end
-    ---@param a string
-    ---@return State
-    local function resolve(a)
-        local type = a:match("State([a-zA-Z]+)")
-        if StateTypes[type] == nil then error(("GUSGUI: Failed to read state value string")) end
-        local val = vals[tonumber(a:match("([0-9]+)"))]
-        if type == "Add" or type == "Subtract" or type == "Divide" or type == "Multiply" then
-            local val1 = val:match("^[^,]+")
-            local val2 = val:match("[^,]+$")
-            local res1, res2
-            if val1:match("State([a-zA-Z]+)") then
-                res1 = resolve(val1)
+    ---@param s string
+    local function parse(s)
+        local ts, te = s:find("^%$[a-zA-Z]+")
+        local type = s:sub(ts + 1, te)
+        s = s:sub(te + 1)
+        if s:match("^%b()") then
+            s = s:sub(2,-2):gsub("^%s*", "")
+            local args = {}
+            while true do
+                if s == "" or s:match("^%s+$") then break end
+                s = s:gsub("^,%s*", "")
+                local start, e = s:find("^%$[a-zA-Z]+%b()")
+                if start and e then
+                    local arg = s:sub(start, e)
+                    s = s:sub(e+1)
+                    table.insert(args, parse(arg))
+                else
+                    start, e = s:find("^[^,()]+")
+                    local arg = s:sub(start, e)
+                    s = s:sub(e+1)
+                    table.insert(args, arg)
+                end
             end
-            if val2:match("State([a-zA-Z]+)") then
-                res2 = resolve(val2)
-            end
-            if tonumber(val1) ~= nil then res1 = tonumber(val1) end
-            if tonumber(val2) ~= nil then res2 = tonumber(val2) end
-            if res1 == nil or res2 == nil then error("GUSGUI: Failed to parse param to State" .. type) end
-            return StateTypes[type](self, res1, res2)
-        end
-        if type == "Global" or type == "Value" then
-            return StateTypes[type](self, val)
+            return StateTypes[type](self, table.unpack(args))
         else
-            return StateTypes[type](self, val)
+            ---@diagnostic disable-next-line: missing-parameter
+            return StateTypes[type](self)
         end
     end
-    return resolve(str)
+    return parse(str)
 end
 
 --- @param data GuiElement
@@ -333,39 +323,33 @@ end
 --- @param s string
 --- @return State
 function Gui:StateValue(s)
-    local o = {
+    return {
         _type = "state",
         value = s
     }
-    return o
 end
 
 --- @return State
 function Gui:ScreenWidth()
-    local o = {
+    return {
         _type = "screenw",
-        value = ""
     }
-    return o
 end
 
 --- @return State
 function Gui:ScreenHeight()
-    local o = {
+    return {
         _type = "screenh",
-        value = ""
     }
-    return o
 end
 
 --- @param s string
 --- @return State
 function Gui:StateGlobal(s)
-    local o = {
+    return {
         _type = "global",
         value = s,
     }
-    return o
 end
 
 --- @param a State|number
@@ -781,9 +765,11 @@ function CreateGUIFromXML(filename, funcs, config, g)
     if ModTextFileGetContent(filename) == nil then
         throwErr("File does not exist")
     end
+
     local gui = g or Gui(config)
     local StyleElem
     local data = ParseXML(ModTextFileGetContent(filename))
+
     --Main parsing function
     ---@param elem table
     ---@param parent GuiElement?
@@ -793,83 +779,55 @@ function CreateGUIFromXML(filename, funcs, config, g)
         end
         elem._attr = elem._attr or {}
         local confTable = {}
-        --Read config options and apply them to table
+
+        --Read element attributes
         for k, v in pairs(elem._attr) do
-            ---@cast k string
-            ---@cast v unknown
-            local convert = ElementProps[elem._name][k]
-            if convert == nil then
-                if k:match("^hover%-") then
-                    convert = ElementProps[elem._name][k:gsub("hover%-", "")]
-                    local value
-                    if v:find("State([a-zA-Z]+)") then
-                        value = gui:StateStringToTable(v)
-                    else
-                        ---@diagnostic disable-next-line: need-check-nil
-                        value = convert.fromString(v, funcs)
-                    end
-                    confTable.hover = confTable.hover or {}
-                    confTable.hover[k:gsub("hover%-", "")] = value
-                elseif k == "id" then
-                    confTable.id = v
-                elseif k == "class" then
-                    confTable.class = v
-                else
-                    throwErr("Unrecognised inline config name: \"" .. k .. "\".")
-                end
+            if k == "id" then
+                confTable.id = v
+            elseif k == "class" then
+                confTable.class = v
             else
+                local hover = false
+                if k:match("^hover%-") then
+                    hover = true
+                    k = k:gsub("^hover%-", "")
+                end
+                local convert = ElementProps[elem._name][k]
+                if convert == nil then throwErr("Unrecognised inline config name: \"" .. k .. "\".") end
+                ---@cast convert ElementProperty
                 local value
-                if v:find("State([a-zA-Z]+)") then
+                if v:find("^%$[a-zA-Z]%(?") then
                     value = gui:StateStringToTable(v)
                 else
-                    ---@diagnostic disable-next-line: need-check-nil
                     value = convert.fromString(v, funcs)
                 end
-                confTable[k] = value
+
+                if hover then
+                    confTable.hover = confTable.hover or {}
+                    confTable.hover[k] = value
+                else
+                    confTable[k] = value
+                end
             end
         end
 
         --If element contains a text body, read it
         if #(elem._children) == 1 and elem._children[1]._type == "TEXT" then
-            if elem._name == "Text" then
+            if elem._name == "Text" or elem._name == "Button" then
                 local v = elem._children[1]._text
-                local value
-                if v:find("State([a-zA-Z]+)") then
-                    value = gui:StateStringToTable(v)
+                if v:find("^%$[a-zA-Z]%(?") then
+                    confTable.text = gui:StateStringToTable(v)
                 else
-                    value = v
+                    confTable.text = v
                 end
-                confTable.text = value
             end
-            if elem._name == "Button" then
+            if elem._name == "Image" or elem._name == "ImageButton" then
                 local v = elem._children[1]._text
-                local value
-                if v:find("State([a-zA-Z]+)") then
-                    value = gui:StateStringToTable(v)
+                if v:find("^%$[a-zA-Z]%(?") then
+                    confTable.src = gui:StateStringToTable(v)
                 else
-                    value = v
+                    confTable.src = v
                 end
-                confTable.text = value
-            end
-            if elem._name == "Image" then
-                local v = elem._children[1]._text
-                local value
-                if v:find("State([a-zA-Z]+)") then
-                    value = gui:StateStringToTable(v)
-                else
-                    value = v
-                end
-                confTable.src = value
-            end
-            if elem._name == "ImageButton" then
-                local v = elem._children[1]._text
-                local value
-                if v:find("State([a-zA-Z]+)") then
-                    value = gui:StateStringToTable(v)
-                else
-                    value = v
-                end
-                confTable.src = value
             end
         end
 
@@ -905,72 +863,42 @@ function CreateGUIFromXML(filename, funcs, config, g)
             end
         end
     end
-
-    local function splitString(s, delimiter)
-        local result = {}
-        local from = 1
-        local delim_from, delim_to = string.find(s, delimiter, from)
-        while delim_from do
-            table.insert(result, string.sub(s, from, delim_from - 1))
-            from = delim_to + 1
-            delim_from, delim_to = string.find(s, delimiter, from)
-        end
-        table.insert(result, string.sub(s, from))
-        return result
-    end
-
     --#region "CSS" parser
     if StyleElem then
-        local StyleText = StyleElem._children[1]._text
-        if not StyleText then throwErr("Failed to find text in Style element") end
+        if not StyleElem._children[1]._text then throwErr("Failed to find text in Style element") end
         local Styles = {}
-        for m in StyleText:gmatch("[.#][a-zA-Z0-9]+ *{[^}]+}") do
+        for m in StyleElem._children[1]._text:gmatch("[.#][a-zA-Z0-9_]+%s*%b{}") do
             local key = m:match("[.#][a-zA-Z0-9]+")
-            local values = splitString(
-                m:match("{([^}]+)}"):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s*[a-zA-Z%-]+[ :]+",
-                    function(s) return s:gsub("^%s*", "") end), ";")
-            values[#values] = nil
-            local conf = {}
-            for _, value in ipairs(values) do
-                local t = value:match("^[^:]*")
-                local k = value:match("%s+([^:]*)$")
-                conf[t] = k
+            local values = m:match("%b{}")
+            local entries = {}
+            for ln in values:gmatch("[a-zA-Z-]+:[^;{}]*") do
+                entries[ln:match("^[a-zA-Z-]+")] = ln:match("[a-zA-Z-]+:([^;{}]*)"):gsub("^%s*", "")
             end
-            Styles[key] = conf
+            Styles[key] = entries
         end
 
         for id, conf in pairs(Styles) do
-            ---@cast id string
             local resolvedTable = {}
             for k, v in pairs(conf) do
-                ---@cast k string
-                ---@cast v unknown
-                local convert
-                do
-                    convert = ElementProps.AllProperties[k:gsub("hover%-", "")]
-                    if convert == nil then throwErr("Unrecognised inline config name: \"" .. k .. "\".") end
-                    if k:match("^hover%-") then
-                        local value
-                        if v:find("State([a-zA-Z]+)") then
-                            value = gui:StateStringToTable(v)
-                        else
-                            ---@diagnostic disable-next-line: need-check-nil
-                            value = convert.fromString(v, funcs)
-                        end
-                        resolvedTable.hover = resolvedTable.hover or {}
-                        resolvedTable.hover[k:gsub("hover%-", "")] = value
-                    else
-                        local value
-                        if v:find("State([a-zA-Z]+)") then
-                            value = gui:StateStringToTable(v)
-                        else
-                            ---@diagnostic disable-next-line: need-check-nil
-                            value = convert.fromString(v, funcs)
-                        end
-                        resolvedTable[k] = value
-                    end
+                local hover = k:match("^hover%-") ~= nil
+                k = k:gsub("^hover%-", "")
+                local convert = ElementProps.AllProperties[k]
+                if convert == nil then throwErr("Unrecognised inline config name: \"" .. k .. "\".") end
+                local value
+                if v:find("^%$[a-zA-Z]%(?") then
+                    value = gui:StateStringToTable(v)
+                else
+                    ---@diagnostic disable-next-line: need-check-nil
+                    value = convert.fromString(v, funcs)
+                end
+                if not hover then 
+                    resolvedTable[k] = value
+                else
+                    resolvedTable.hover = resolvedTable.hover or {}
+                    resolvedTable.hover[k] = value
                 end
             end
+
             if id:sub(1, 1) == "." then
                 gui:RegisterConfigForClass(id:sub(2), resolvedTable)
             else
